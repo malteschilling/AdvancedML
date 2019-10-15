@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<!-- This is the pandoc 2.7.3 template for reveal.js output modified for decker. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Malte Schilling">
+  <title>02 Representation Learning</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="../../support/vendor/reveal/css/reset.css">
+  <link rel="stylesheet" href="../../support/vendor/reveal/css/reveal.css">
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="../../support/css/decker.css">
+  <link rel="stylesheet" href="../mschilling.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? '../../support/vendor/reveal/css/print/pdf.css' : '../../support/vendor/reveal/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+  <h1 class="title">02 Representation Learning</h1>
+  <p class="subtitle">Advanced Machine Learning</p>
+  <p class="author">Malte Schilling</p>
+</section>
+
+<section class="slide level1">
+<h1>Overview today</h1>
+<ol type="1">
+<li>Representation Learning</li>
+<li>Classification of Features – using Support Vector Machines</li>
+<li>Dynamic Features – Echo State Networks</li>
+</ol>
+</section>
+<section class="slide level1">
+<h1>Recap - A spectrum of intelligence</h1>
+<p><img data-src="data/01/intelligence_spectrum.svg" id="svg"></p>
+<p>Spectrum of different “levels” of intelligence – for Machine Learning (following <span class="citation" data-cites="cs221_2018">(Liang 2018)</span>).</p>
+</section>
+<section class="slide level1 sub">
+<h1>Overview common ML algorithms</h1>
+<div>
+<figure><img data-src="https://miro.medium.com/max/1600/1*dYgEs2roROf3j2ANzkDHMA.png" style="height:600px;width:auto;" alt="How to decide which machine learning algorithm to choose for a problem [@cheatsheet2018]." title="fig:"><figcaption>How to decide which machine learning algorithm to choose for a problem <span class="citation" data-cites="cheatsheet2018">(“Choosing the Right Estimator” 2018)</span>.</figcaption></figure>
+</div>
+</section>
+<section class="slide level1 sub">
+<h1>Slide on Gradient Boosting - place in overview</h1>
+</section>
+<section class="slide level1">
+<h1>Goals for Today</h1>
+<div>
+<ul>
+<li class="fragment">Introduce general, advanced Machine Learning techniques and their application.</li>
+<li class="fragment">Explain and give a thorough understanding in particular of Unsupervised Learning approaches.</li>
+<li class="fragment">Provide an overview of different types of current Machine Learning methods and their characteristics.</li>
+<li class="fragment">Give a basic introduction into (Deep) Reinforcement Learning and underlying theoretical foundation as well as current limitations.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Representation Learning</h1>
+</section>
+<section class="slide level1">
+<h1>Features</h1>
+<ul>
+<li>autoencoder as an example</li>
+<li>learning for multiple tasks, away from end-to-end</li>
+</ul>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Support Vector Machines</h1>
+</section>
+<section class="slide level1">
+<h1>Kernel Trick</h1>
+</section>
+<section class="slide level1">
+<h1>SVM</h1>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Reservoir Computing</h1>
+</section>
+<section class="slide level1 sub">
+<h1>Reservoir computing</h1>
+</section>
+<section class="slide level1">
+<h1>“Homework” Question</h1>
+<div class="col30">
+<p><img data-src="data/Discussion.png" style="height:auto;width:300;"></p>
+</div>
+<div class="col70">
+<p>Want to take some time in lecture to discuss questions relating to artificial intelligence and machine learning.<br />
+<br />
+</p>
+<p>For next week: Looking at the spectrum of intelligence</p>
+<ul>
+<li>What are (in your opinion) the next breakthroughs?</li>
+<li>What are implications for society?</li>
+</ul>
+</div>
+<p><img data-src="data/01/intelligence_spectrum.svg"></p>
+</section>
+<section class="slide level1">
+<h1>Further announcements</h1>
+<div>
+<ul>
+<li class="fragment">Remember, there is no exercise tomorrow.</li>
+<li class="fragment">There is a seminar on Deep Learning and its application in Artificial Intelligence (Dr. Andrew Melnik) - will work on current literature: 392115 Deep Learning for AI.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1 unnumbered biblio">
+<h1>References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-cheatsheet2018">
+<p>“Choosing the Right Estimator.” 2018. 2018. <a href="https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html">https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html</a>.</p>
+</div>
+<div id="ref-cs221_2018">
+<p>Liang, Percy. 2018. “Artificial Intelligence: Principles and Techniques.” Course CS221, Stanford University, Lecture Notes.</p>
+</div>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="../../support/vendor/reveal/js/reveal.js"></script>
+  <script src="../../support/vendor/jquery.js"></script>
+  <script src="../../support/vendor/piklor.js"></script>
+
+  <script>
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        pdfMaxPagesPerSlide: 1,
+        pdfSeparateFragments: false,
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Display the page number of the current slide
+        slideNumber: false,
+        // Push each slide change to the browser history
+        history: false,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: true,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Loop the presentation
+        loop: false,
+        // Change the presentation direction to be RTL
+        rtl: false,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: false,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: false,
+        mouseWheel: false,
+        hideAddressBar: false,
+        previewLinks: false,
+        // Transition style
+        transition: 'none', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'none', // none/fade/slide/convex/concave/zoom
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+        height: 800,
+        menu: {
+          side: 'left',
+          // 'normal', 'wide', 'third', 'half', 'full', or
+          width: 'wide',
+          numbers: false,
+          titleSelector: 'h1',
+          useTextContentForMissingTitles: false,
+          hideMissingTitles: false,
+          markers: true,
+          // Specify custom panels to be included in the menu, by
+          // providing an array of objects with 'title', 'icon'
+          // properties, and either a 'src' or 'content' property.
+          custom: false,  
+          themes: false,
+          transitions: false,
+          openButton: true,
+          openSlideNumber: true,
+          keyboard: true,
+          sticky: false,
+          autoOpen: true,
+          delayInit: false,
+          openOnInit: false,
+          loadIcons: false
+	    },
+        math: {
+          mathjax: "../../support/vendor/mathjax/MathJax.js",
+          TeX: {
+              Macros: {
+              R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+              laplace: "{\\Delta}",
+              grad: "{\\nabla}",
+              T: "^{\\mathsf{T}}",
+  
+              norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+              iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+              vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              set: ['\\mathcal{#1}', 1],
+              func: ['\\mathrm{#1}', 1],
+              trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+              matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+              vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+              of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+              diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+              pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+  
+              vc: ['\\mathbf{#1}', 1],
+              abs: ['\\lvert#1\\rvert', 1],
+              norm: ['\\lVert#1\\rVert', 1],
+              det: ['\\lvert#1\\rvert', 1],
+              qt: ['\\hat{\\vc {#1}}', 1],
+              mt: ['\\boldsymbol{#1}', 1],
+              pt: ['\\boldsymbol{#1}', 1],
+              textcolor: ['\\color{#1}', 1]
+              }
+          },
+        },
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '../../support/vendor/reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: '../../support/vendor/reveal/plugin/zoom-js/zoom.js', async: true },
+          { src: '../../support/vendor/reveal.js-menu/menu.js', async: true },
+          //{ src: '../../support/vendor/reveal/plugin/math/math.js', async: true },
+          { src: '../../support/vendor/math/math.js' },
+          { src: '../../support/vendor/reveal/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    <script src="../../support/js/quiz.js" type="text/javascript"></script>
+    <script src="../../support/js/decker.js" type="text/javascript"></script>
+    <!-- Reload on change machinery -->
+            <script>makeVertical();</script>
+        <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+      window.location.reload(true);
+      };
+    </script>
+    </body>
+</html>
