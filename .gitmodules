@@ -1,3 +1,6 @@
 [submodule "revealSlides"]
 	path = revealSlides
 	url = https://github.com/mbotsch/revealSlides.git
+[submodule "01_Introduction/revealSlides"]
+	path = 01_Introduction/revealSlides
+	url = https://github.com/mbotsch/revealSlides.git
