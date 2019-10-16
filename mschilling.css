@@ -159,12 +159,13 @@ body {
   letter-spacing: normal;
   text-shadow: none;
   word-wrap: break-word;
-  text-align: center;
+  text-align: left;
 }
 
 .reveal h1 {
     margin: 20px 0 40px 0;
     font-size: 1.50em;
+    text-align: center;
 }
 
 .reveal h2 {
@@ -336,7 +337,7 @@ body {
   position: relative;
   width: 100%;
   margin: 10px auto;
-  text-align: center;
+  text-align: left;
 }
 
 /* inline code */
