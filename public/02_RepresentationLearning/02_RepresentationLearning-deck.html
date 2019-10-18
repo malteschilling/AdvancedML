@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="pandoc">
-  <meta name="author" content="Malte Schilling">
+  <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">
   <title>02 Representation Learning</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -126,12 +126,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="title-slide">
   <h1 class="title">02 Representation Learning</h1>
   <p class="subtitle">Advanced Machine Learning</p>
-  <p class="author">Malte Schilling</p>
+  <p class="author">Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
 </section>
 
 <section class="slide level1">
 <h1>Recap - A spectrum of intelligence</h1>
-<p><img data-src="data/01/intelligence_spectrum.svg" id="svg"></p>
+<p><img data-src="../data/01/intelligence_spectrum.svg" id="svg"></p>
 <div class="biblio">
 <p>Spectrum of different “levels” of intelligence – for Machine Learning (following <span class="citation" data-cites="cs221_2018">(Liang 2018)</span>).</p>
 </div>
@@ -175,7 +175,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section class="slide level1">
 <h1>Machine Learning Pipeline</h1>
-<p><img data-src="data/02/boedecker_MLpipeline.svg" style="height:auto;width:1200px;"></p>
+<p><img data-src="../data/02/boedecker_MLpipeline.svg" style="height:auto;width:1200px;"></p>
 <div class="biblio">
 <p><span class="citation" data-cites="boedeckerLecture">(Boedecker, Hutter, and Tangermann 2016)</span></p>
 </div>
@@ -211,12 +211,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="multi-column-row multi-column-row-3">
 <div class="grow-1 column column-1" data-align="center">
 <div class="left" data-align="center">
-<p>Current ML Pipeline <img data-src="data/02/goodfellow_learningMultiple.svg" style="height:540px;width:auto;"></p>
+<p>Current ML Pipeline <img data-src="../data/02/goodfellow_learningMultiple.svg" style="height:540px;width:auto;"></p>
 </div>
 </div>
 <div class="grow-1 column column-3" data-align="center">
 <div class="right" data-align="center">
-<p>End-to-End Learning in Deep NN <img data-src="data/02/deep_nn_layers.svg" style="height:540px;width:auto;"></p>
+<p>End-to-End Learning in Deep NN <img data-src="../data/02/deep_nn_layers.svg" style="height:540px;width:auto;"></p>
 </div>
 </div>
 </div>
@@ -231,7 +231,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section class="slide level1 sub">
 <h1>Features: Transfer Learning</h1>
 <div>
-<figure><img data-src="data/02/transfer-learning-768x431.jpg" style="height:auto;width:1000px;" alt="Learning for multiple tasks – building a common representation." title="fig:"><figcaption>Learning for multiple tasks – building a common representation.</figcaption></figure>
+<figure><img data-src="../data/02/transfer-learning-768x431.jpg" style="height:auto;width:1000px;" alt="Learning for multiple tasks – building a common representation." title="fig:"><figcaption>Learning for multiple tasks – building a common representation.</figcaption></figure>
 </div>
 <div class="biblio">
 <p><span class="citation" data-cites="learnopencv2019">(Nayak 2019)</span></p>
@@ -245,7 +245,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </iframe>
 </div>
 </section>
-<section class="slide level1" style="overflow: scroll; max-height: 400px;">
+<section class="slide level1">
 <h1>What is a Knowledge Representation</h1>
 <p>Roles of knowledge representation in AI following <span class="citation" data-cites="davis93what">(Davis, Shrobe, and Szolovits 1993)</span>.</p>
 <p>A knowledge representation is …</p>
@@ -264,13 +264,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div>
 <ul>
 <li class="fragment">From raw visual input: pretrained convolutional networks</li>
-<li class="fragment">Principal Component Analysis <span><figure><img data-src="data/02/goodfellow_5_8_pca.svg" style="height:auto;width:540px;" alt="PCA learns a linear projection that aligns the direction of greatest variance with the axes of the new space. [@goodfellow2016]"><figcaption>PCA learns a linear projection that aligns the direction of greatest variance with the axes of the new space. <span class="citation" data-cites="goodfellow2016">(Goodfellow, Bengio, and Courville 2016)</span></figcaption></figure></span></li>
+<li class="fragment">Principal Component Analysis <span><figure><img data-src="../data/02/goodfellow_5_8_pca.svg" style="height:auto;width:540px;" alt="PCA learns a linear projection that aligns the direction of greatest variance with the axes of the new space. [@goodfellow2016]"><figcaption>PCA learns a linear projection that aligns the direction of greatest variance with the axes of the new space. <span class="citation" data-cites="goodfellow2016">(Goodfellow, Bengio, and Courville 2016)</span></figcaption></figure></span></li>
 <li class="fragment">Autoencoder (and variations)</li>
 </ul>
 <p>Goal is usually to reduce dimensionality and to come up with meaningful features.</p>
 </div>
 </section>
-<section class="slide level1" style="overflow: scroll; max-height: 400px;">
+<section class="slide level1" style="overflow: scroll;">
 <h1>Example for PCA: Python Environment</h1>
 <div class="box">
 <h2>Initialize and load python environment.</h2>
@@ -370,7 +370,7 @@ for i in range(3 * 4):
 <section class="slide level1">
 <h1>Example: Transfer Learning – early visual features</h1>
 <div>
-<figure><img data-src="data/02/hinton_nips_hierarchy.svg" alt="Learning a hierarchy of visual features on a large database, using imagenet." title="fig:"><figcaption>Learning a hierarchy of visual features on a large database, using imagenet.</figcaption></figure>
+<figure><img data-src="../data/02/hinton_nips_hierarchy.svg" alt="Learning a hierarchy of visual features on a large database, using imagenet." title="fig:"><figcaption>Learning a hierarchy of visual features on a large database, using imagenet.</figcaption></figure>
 </div>
 <div class="biblio">
 <p><span class="citation" data-cites="hinton2015nips">(Hinton, Bengio, and LeCun 2015)</span></p>
@@ -378,7 +378,7 @@ for i in range(3 * 4):
 </section>
 <section class="slide level1">
 <h1>Autoencoder <span class="citation" data-cites="weng2018ae">(Weng 2018)</span></h1>
-<p><img data-src="data/02/autoencoder-architecture.png" style="height:480px;width:auto;"></p>
+<p><img data-src="../data/02/autoencoder-architecture.png" style="height:480px;width:auto;"></p>
 <ul>
 <li>Encoder translates high-dimension input into latent low-dimensional code.</li>
 <li>Decoder recovers data from the code.</li>
@@ -390,14 +390,14 @@ for i in range(3 * 4):
 <div class="grow-1 column column-1">
 <div class="box left">
 <h2 class="left">Denoising AE</h2>
-<p><img data-src="data/02/denoising-autoencoder-architecture.png"></p>
+<p><img data-src="../data/02/denoising-autoencoder-architecture.png"></p>
 <p>… use partially corrupted input to avoid overfitting.</p>
 </div>
 </div>
 <div class="grow-1 column column-3">
 <div class="box right">
 <h2 class="right">Variational AE</h2>
-<p><img data-src="data/02/vae-gaussian.png"></p>
+<p><img data-src="../data/02/vae-gaussian.png"></p>
 <p>Input: mapped on pregiven distribution – uses priors for latent space.</p>
 </div>
 </div>
@@ -415,7 +415,7 @@ for i in range(3 * 4):
 <section class="slide level1">
 <h1>“The robots are rising …”</h1>
 <div class="col30">
-<p><img data-src="data/Discussion.png" style="height:auto;width:300;"></p>
+<p><img data-src="../data/Discussion.png" style="height:auto;width:300;"></p>
 </div>
 <div class="col70">
 <p>Looking at the spectrum of intelligence</p>
@@ -425,7 +425,7 @@ for i in range(3 * 4):
 <li>What are implications for society?</li>
 </ul>
 </div>
-<p><img data-src="data/01/intelligence_spectrum.svg"></p>
+<p><img data-src="../data/01/intelligence_spectrum.svg"></p>
 </section>
 <section class="slide level1 section" data-background-color="#2CA02C">
 <h1>Support Vector Machines</h1>
@@ -441,12 +441,12 @@ for i in range(3 * 4):
 </div>
 </div>
 <div class="col70">
-<p><img data-src="data/02/two_classes_1.svg"></p>
+<p><img data-src="../data/02/two_classes_1.svg"></p>
 </div>
 </section>
 <section class="slide level1 sub">
 <h1>Separation Plane</h1>
-<p><img data-src="data/02/two_classes_3.svg" style="height:600px;width:auto;"></p>
+<p><img data-src="../data/02/two_classes_3.svg" style="height:600px;width:auto;"></p>
 </section>
 <section class="slide level1 sub">
 <h1>Maximum Margin of Separation</h1>
@@ -461,7 +461,7 @@ f( \vec{x}) = sgn(\sum_{i=1}^m \alpha_i y_i \langle \vec{x}, \vec{x_i} \rangle +
 </div>
 </div>
 <div class="col70">
-<p><img data-src="data/02/two_classes_2.svg" style="height:480px;width:auto;"></p>
+<p><img data-src="../data/02/two_classes_2.svg" style="height:480px;width:auto;"></p>
 <p><span class="math display">\[ \max_{\vec{w}, b} \min \{ \norm{\vec{x} - \vec{x_i}} \} \\
 with \langle \vec{w}, \vec{x} \rangle + b = 0 \text{ defining the hyperplane}
 \]</span></p>
@@ -474,7 +474,7 @@ with \langle \vec{w}, \vec{x} \rangle + b = 0 \text{ defining the hyperplane}
 L_i = \sum_{j \neq y^{(i)}} \max (0, f(\vec{x}^{(i)}, W)_j - f(\vec{x}^{(i)}, W)_{y^{(i)}} + \Delta) \\
 \text{with } y^{(i)} \text{ the correct class assignment}
 \]</span></p>
-<p><img data-src="data/02/CS_231_margin.jpg" style="height:auto;width:1200px;"></p>
+<p><img data-src="../data/02/CS_231_margin.jpg" style="height:auto;width:1200px;"></p>
 <p>A good initial choice for the hyperparameter is <span class="math display">\[\Delta=1.0\]</span>.</p>
 </section>
 <section class="slide level1">
@@ -486,17 +486,17 @@ L_i = \sum_{j \neq y^{(i)}} \max (0, f(\vec{x}^{(i)}, W)_j - f(\vec{x}^{(i)}, W)
 <p>The idea is to map the data into a higher dimensional space in which a separation is possible.</p>
 </div>
 <div class="col60">
-<p><video data-src="data/02/bending_line.mp4" style="height:480;width:auto;" autoplay="1">Browser does not support video.</video></p>
+<p><video data-src="../data/02/bending_line.mp4" style="height:480;width:auto;" autoplay="1">Browser does not support video.</video></p>
 </div>
 </section>
 <section class="slide level1 sub">
 <h1>Application of Kernel</h1>
 <div>
-<figure><img data-src="data/02/kernel.png" style="height:auto;width:1200px;" alt="Example of a labeled data inseparable in 2-Dimension is separable in 3-Dimension." title="fig:"><figcaption>Example of a labeled data inseparable in 2-Dimension is separable in 3-Dimension.</figcaption></figure>
+<figure><img data-src="../data/02/kernel.png" style="height:auto;width:1200px;" alt="Example of a labeled data inseparable in 2-Dimension is separable in 3-Dimension." title="fig:"><figcaption>Example of a labeled data inseparable in 2-Dimension is separable in 3-Dimension.</figcaption></figure>
 </div>
 </section>
-<section class="slide level1 sub">
-<h1>Application of Kernel 2</h1>
+<section class="slide level1">
+<h1>Kernel trick</h1>
 <div class="col30">
 <p>Kernel functions provide mappings that allow for separability:</p>
 <p><span class="math display">\[ \phi (\vec{x}) \rightarrow   x_1^2, x_2^2, \sqrt 2 x_1x_2
@@ -506,8 +506,20 @@ L_i = \sum_{j \neq y^{(i)}} \max (0, f(\vec{x}^{(i)}, W)_j - f(\vec{x}^{(i)}, W)
 </div>
 </div>
 <div class="col70">
-<p><img data-src="data/02/kernel_berkeley_course.jpeg"></p>
+<p><img data-src="../data/02/kernel_berkeley_course.jpeg"></p>
 </div>
+</section>
+<section class="slide level1 sub">
+<h1>Derivation for an example kernel function</h1>
+<p><span class="math display">\[\begin{align*}
+\phi (\vec{x}) &amp;\rightarrow x_1^2, x_2^2, \sqrt{2} x_1 x_2 \\
+\\
+\langle \phi (\vec{x}), \phi (\vec{x}&#39;) \rangle &amp;= \langle (x_1^2, x_2^2, \sqrt{2} x_1 x_2), ({x&#39;}_1^2, {x&#39;}_2^2, \sqrt{2} {x&#39;}_1 {x&#39;}_2) \rangle \\
+&amp;= \underbrace{x_1^2 {x&#39;}_1^2}_{a^2} + \underbrace{x_2^2 {x&#39;}_2^2}_{b^2} + \underbrace{2 x_1 x_2 {x&#39;}_1 {x&#39;}_2}_{2ab} \\
+&amp;= (\underbrace{x_1 {x&#39;}_1}_{a} + \underbrace{x_2 {x&#39;}_2}_{b})^2 \\
+&amp;= \langle \vec{x}, \vec{x}&#39; \rangle ^2 = k(\vec{x}, \vec{x}&#39;)
+\end{align*}\]</span></p>
+<p>The complete calculation (transformation into feature space and scalar product in order to determine similarity) can be reduced to a simpler kernel function <span class="math inline">\(k\)</span> that does not involve the costly transformation to the high dimensional space.</p>
 </section>
 <section class="slide level1">
 <h1>Kernel Trick</h1>
@@ -539,7 +551,7 @@ L_i = \sum_{j \neq y^{(i)}} \max (0, f(\vec{x}^{(i)}, W)_j - f(\vec{x}^{(i)}, W)
 <li>They apply non-linear mappings.</li>
 <li>Importantly, the scalar product is not computed explicitly in the feature space. using the Kerne Trick. This is much more efficient.</li>
 </ul>
-<p><img data-src="data/02/Kernel_Machine.png" style="height:360px;width:auto;"></p>
+<p><img data-src="../data/02/Kernel_Machine.png" style="height:360px;width:auto;"></p>
 <div class="biblio">
 <p>SVMs go back to <span class="citation" data-cites="Vapnik1998">(Vapnik 1998)</span> , and a good tutorial can be found in <span class="citation" data-cites="Burges98atutorial">(Burges 1998)</span>.</p>
 </div>
@@ -555,7 +567,7 @@ L_i = \sum_{j \neq y^{(i)}} \max (0, f(\vec{x}^{(i)}, W)_j - f(\vec{x}^{(i)}, W)
 <li>gamma: kernel coefficient for ‘rbf’, ‘poly’, and ‘sigmoid’</li>
 </ul>
 </section>
-<section class="slide level1" style="overflow: scroll; max-height: 400px;">
+<section class="slide level1" style="overflow: scroll;">
 <h1>Example: SVM Face Detection</h1>
 <div class="box">
 <h2>Check if environment is still running.</h2>
@@ -576,7 +588,7 @@ L_i = \sum_{j \neq y^{(i)}} \max (0, f(\vec{x}^{(i)}, W)_j - f(\vec{x}^{(i)}, W)
 <span id="cb10-4"><a href="#cb10-4"></a><span class="bu">print</span>(classification_report(y_test, y_pred, target_names<span class="op">=</span>target_names))</span></code></pre></div>
 </div>
 </section>
-<section class="slide level1 sub" style="overflow: scroll; max-height: 400px;">
+<section class="slide level1 sub" style="overflow: scroll;">
 <h1>RELOAD Python Environment</h1>
 <div class="box">
 <h2>Initialize and load python environment.</h2>
@@ -668,130 +680,6 @@ L_i = \sum_{j \neq y^{(i)}} \max (0, f(\vec{x}^{(i)}, W)_j - f(\vec{x}^{(i)}, W)
 </ul>
 </div>
 </section>
-<section class="slide level1 section" data-background-color="#2CA02C">
-<h1>Reservoir Computing</h1>
-</section>
-<section class="slide level1">
-<h1>From Dynamical Features …</h1>
-<p>Temporal Filters can be seen as dynamical systems that compute at each time step a state that is some function of previous states and the current input:</p>
-<p><span class="math display">\[ s_t = F(s_{t-1}, s_{t-2}, ... s_{t-k}, x_t, x_{t-1}, ..., x_{t-l} )\]</span></p>
-<p>In the simplest case, the function is linear in its arguments, leading to the well-known recursive filters</p>
-<p><span class="math display">\[ s_t = \sum_{i=1}^K a_i s_{t-1} + \sum_{j=0}^L b_j x_{t-j}\]</span></p>
-<p>that allow, e.g., to selectively damp/enhance specifiable frequency bands of the input time sequence. For example a smoothing filter:</p>
-<p><span class="math display">\[ s_t = (1 - \gamma) s_{t-1} + \gamma x_{t} \]</span></p>
-</section>
-<section class="slide level1 sub">
-<h1>… to Dynamical Systems</h1>
-<p>Yet, combining linear filters always leads back to a linear filter.</p>
-<p>Richer processing can only occur when non-linearities are included.</p>
-<p>For example, we can consider non-linear filters arising from recurrent neural networks as in reservoir computing.</p>
-</section>
-<section class="slide level1">
-<h1>Learning from Random Features</h1>
-<p>Simple learning approach in a feedforward neural network:</p>
-<div>
-<ul>
-<li class="fragment">using randomly initialized early layers and keep them fixed (comparable to expansion in SVMs) – use large input layers that provide diversity</li>
-<li class="fragment">During learning: only adapt output weights – linear transformation of the (random) features.</li>
-<li class="fragment">Such an expansion of the input space can facilitate learning and allow for better separability.</li>
-</ul>
-</div>
-</section>
-<section class="slide level1">
-<h1>Random Features in a Recurrent Neural Net</h1>
-<p>Echo state networks apply the same idea in a recurrent neural network:</p>
-<div>
-<ul>
-<li class="fragment">Initialize the recurrent neural network randomly and keep it fixed.</li>
-<li class="fragment">The same holds true for the projection of the input onto the recurrent layers.</li>
-<li class="fragment">Only train the connections towards the output layer which makes learning very simple.</li>
-<li class="fragment">The recurrent part is called a reservoir – it should cover a diversity of dynamics that can be recruited.</li>
-</ul>
-</div>
-<div class="biblio">
-<p>Following <span class="citation" data-cites="hinton2013esn">(Hinton 2013)</span> in his Advanced Machine Learning Course.</p>
-</div>
-</section>
-<section class="slide level1">
-<h1>Setting the Connections inside the Reservoir</h1>
-<p>Crucial for Echo State Networks is the setup of the random recurrent connections:</p>
-<ul>
-<li>They have to kept bound and fulfill the echo state property to prevent dying or exploding activations.</li>
-<li>Still, activities may decay too fast or too slowly. Therefore, the reservoir has to be tuned in a way that the dynamics of the features match the time scales of the application task.</li>
-</ul>
-<div class="box definition">
-<h2 class="definition">Echo Property</h2>
-<p>Without external excitation all activities of the reservoir will decay slowly to zero. A criterion for this is that the spectral radius (the largest eigenvalue of <span class="math inline">\(A^TA\)</span>) is less than 1 (or set to 1).</p>
-<aside class="notes">
-<ul>
-<li>hidden to hidden weights set so that activity in net stays the same</li>
-<li>use sparse connectivity (creates many oscillators)</li>
-<li>fast learning.</li>
-</ul>
-</aside>
-</div>
-</section>
-<section class="slide level1">
-<h1>Echo State Network</h1>
-<div class="col30">
-<ul>
-<li>Input projects onto reservoir, here a real value.</li>
-<li>Target output: is a sine wave with the frequency given by the input.</li>
-</ul>
-</div>
-<div class="col70">
-<p><img data-src="data/02/esn_wikipedia.png"></p>
-<div class="biblio">
-<p><span class="citation" data-cites="jaeger2007esn">(Jaeger 2007)</span></p>
-</div>
-</div>
-</section>
-<section class="slide level1 sub">
-<h1>Echo State Network Example Results</h1>
-<p><img data-src="data/02/esn_frequency.png" style="height:auto;width:1200px;"></p>
-<p>A test run of the frequency generator from the previous slide.</p>
-<p>In the back, the input step function is shown.</p>
-<p>The black sinewaves is the target output (unknown to the network).</p>
-<p>The gray sinewaves is the network output – which ends up in a phase shift but maintaining the correct frequency.</p>
-</section>
-<section class="slide level1 sub" style="overflow: scroll; max-height: 400px;">
-<h1>Echo State Network Example</h1>
-<div class="box">
-<h2>Initialize, load python environment.</h2>
-<div class="sourceCode" id="cb12" data-executable="true" data-language="python"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb12-2"><a href="#cb12-2"></a><span class="im">from</span> pyESN.pyESN <span class="im">import</span> ESN</span>
-<span id="cb12-3"><a href="#cb12-3"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
-<span id="cb12-4"><a href="#cb12-4"></a><span class="op">%</span>matplotlib inline</span>
-<span id="cb12-5"><a href="#cb12-5"></a></span>
-<span id="cb12-6"><a href="#cb12-6"></a>data <span class="op">=</span> np.load(<span class="st">&#39;pyESN/mackey_glass_t17.npy&#39;</span>) <span class="co">#  http://minds.jacobs-university.de/mantas/code</span></span></code></pre></div>
-</div>
-<div class="box">
-<h2>Training the echo state network and showing test results (use larger net = 500 for good results).</h2>
-<div class="sourceCode" id="cb13" data-executable="true" data-language="python"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1"></a>esn <span class="op">=</span> ESN(n_inputs <span class="op">=</span> <span class="dv">1</span>,</span>
-<span id="cb13-2"><a href="#cb13-2"></a>          n_outputs <span class="op">=</span> <span class="dv">1</span>,</span>
-<span id="cb13-3"><a href="#cb13-3"></a>          n_reservoir <span class="op">=</span> <span class="dv">100</span>,</span>
-<span id="cb13-4"><a href="#cb13-4"></a>          spectral_radius <span class="op">=</span> <span class="fl">1.5</span>,</span>
-<span id="cb13-5"><a href="#cb13-5"></a>          random_state<span class="op">=</span><span class="dv">42</span>)</span>
-<span id="cb13-6"><a href="#cb13-6"></a></span>
-<span id="cb13-7"><a href="#cb13-7"></a>trainlen <span class="op">=</span> <span class="dv">500</span></span>
-<span id="cb13-8"><a href="#cb13-8"></a>future <span class="op">=</span> <span class="dv">500</span></span>
-<span id="cb13-9"><a href="#cb13-9"></a>pred_training <span class="op">=</span> esn.fit(np.ones(trainlen),data[:trainlen])</span>
-<span id="cb13-10"><a href="#cb13-10"></a></span>
-<span id="cb13-11"><a href="#cb13-11"></a>prediction <span class="op">=</span> esn.predict(np.ones(future))</span>
-<span id="cb13-12"><a href="#cb13-12"></a><span class="bu">print</span>(<span class="st">&quot;test error: </span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">+</span><span class="bu">str</span>(np.sqrt(np.mean((prediction.flatten() <span class="op">-</span> data[trainlen:trainlen<span class="op">+</span>future])<span class="op">**</span><span class="dv">2</span>))))</span>
-<span id="cb13-13"><a href="#cb13-13"></a></span>
-<span id="cb13-14"><a href="#cb13-14"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">11</span>,<span class="fl">1.5</span>))</span>
-<span id="cb13-15"><a href="#cb13-15"></a>plt.plot(<span class="bu">range</span>(<span class="dv">0</span>,trainlen<span class="op">+</span>future),data[<span class="dv">0</span>:trainlen<span class="op">+</span>future],<span class="st">&#39;k&#39;</span>,label<span class="op">=</span><span class="st">&quot;target system&quot;</span>)</span>
-<span id="cb13-16"><a href="#cb13-16"></a>plt.plot(<span class="bu">range</span>(trainlen,trainlen<span class="op">+</span>future),prediction,<span class="st">&#39;r&#39;</span>, label<span class="op">=</span><span class="st">&quot;free running ESN&quot;</span>)</span>
-<span id="cb13-17"><a href="#cb13-17"></a>lo,hi <span class="op">=</span> plt.ylim()</span>
-<span id="cb13-18"><a href="#cb13-18"></a>plt.plot([trainlen,trainlen],[lo<span class="op">+</span>np.spacing(<span class="dv">1</span>),hi<span class="op">-</span>np.spacing(<span class="dv">1</span>)],<span class="st">&#39;k:&#39;</span>)</span>
-<span id="cb13-19"><a href="#cb13-19"></a>plt.legend(loc<span class="op">=</span>(<span class="fl">0.61</span>,<span class="fl">1.1</span>),fontsize<span class="op">=</span><span class="st">&#39;x-small&#39;</span>)</span></code></pre></div>
-<p>The results show first part and then the prediction in the future without further input.</p>
-<div class="biblio">
-<p>Example code from [https://github.com/cknd/pyESN].</p>
-</div>
-</div>
-</section>
 <section class="slide level1">
 <h1>Further announcements</h1>
 <div>
@@ -827,12 +715,6 @@ L_i = \sum_{j \neq y^{(i)}} \max (0, f(\vec{x}^{(i)}, W)_j - f(\vec{x}^{(i)}, W)
 </div>
 <div id="ref-hinton2015nips">
 <p>Hinton, Geoff, Yoshua Bengio, and Yann LeCun. 2015. “Deep Learning.” NIPS 2015 Tutorial.</p>
-</div>
-<div id="ref-hinton2013esn">
-<p>Hinton, Geoffrey E. 2013. “Recurrent Neural Networks.” CSC 2535: Advanced Machine Learning Course.</p>
-</div>
-<div id="ref-jaeger2007esn">
-<p>Jaeger, Herbert. 2007. “Echo State Network.” <em>Scholarpedia</em> 2 (9): 2330. <a href="https://doi.org/10.4249/scholarpedia.2330">https://doi.org/10.4249/scholarpedia.2330</a>.</p>
 </div>
 <div id="ref-cs231_2015">
 <p>Karpathy, Andrej. 2015. “Convolutional Neural Networks for Visual Recognition.” Course CS231, Stanford University, Lecture Notes.</p>
@@ -877,7 +759,7 @@ L_i = \sum_{j \neq y^{(i)}} \max (0, f(\vec{x}^{(i)}, W)_j - f(\vec{x}^{(i)}, W)
         // Enable the slide overview mode
         overview: true,
         // Vertical centering of slides
-        center: false,
+        center: true,
         // Enables touch navigation on devices with touch input
         touch: true,
         // Loop the presentation

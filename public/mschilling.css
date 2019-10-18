@@ -26,7 +26,7 @@ body {
   color: #222; }
 
 
-::selection {
+/*::selection {
   color: #fff;
   background: #98bdef;
   text-shadow: none; }
@@ -39,43 +39,6 @@ body {
   font-weight: inherit;
   padding: 0; /* MARIO: prevent 20px at top/bottom by reveal.css */
   min-height: 100%; /* MARIO: slides should be full height for footer to be positioned correctly */
-}
-
-
-/*********************************************
- * MARIO: ALIGNMENT & COLUMNS
- *********************************************/
-
-.reveal .top {
-    vertical-align: top;
-}
-
-.reveal .middle {
-    vertical-align: middle;
-}
-
-.reveal .bottom {
-    vertical-align: bottom;
-}
-
-.reveal .float-left {
-    float: left;
-}
-
-.reveal .float-right {
-    float: right;
-}
-
-.reveal .left {
-    text-align: left;
-}
-
-.reveal .center {
-    text-align: center;
-}
-
-.reveal .right {
-    text-align: right;
 }
 
 .reveal .biblio {
@@ -92,33 +55,6 @@ body {
     margin: auto;
     border-radius:10px;
     box-shadow: 0px 0px 10px 0px rgba(0,0,0,0);
-}
-
-.reveal .small {
-    font-size: 0.7em;
-}
-
-.reveal .tiny {
-    font-size: 0.6em;
-}
-
-.reveal .large {
-    font-size: 1.2em;
-}
-
-.reveal .tt {
-    font-family: monospace;
-}
-
-.reveal .boxed {
-    border: 1px solid black;
-    border-radius: 5px;
-    padding: 10px;
-}
-.reveal .boxed ol,
-.reveal .boxed dl,
-.reveal .boxed ul {
-  margin-bottom: 0em;
 }
 
 .reveal .w10 { margin-left: auto; margin-right: auto; width:10%; }
@@ -177,16 +113,6 @@ body {
 .reveal h4 {
   font-size: 1em; }
 
-.reveal h1 {
-  text-shadow: none; }
-
-/*********************************************
- * OTHER
- *********************************************/
-.reveal p {
-  margin: 10px 0;
-  line-height: 1.3; }
-
 /* Ensure certain elements are never larger than the slide itself */
 .reveal img,
 .reveal video {
@@ -204,25 +130,6 @@ body {
     max-width:  100%;
     max-height: 100%;
     vertical-align: middle;
-}
-
-.reveal strong {
-    font-weight: bold;
-}
-
-.reveal .boldblue {
-    font-weight: bold;
-	color: #2a9ddf;
-}
-
-.reveal b {
-    font-weight: bold; }
-
-.reveal em {
-  font-style: italic; }
-
-.reveal del {
-	color: red;
 }
 
 .reveal ol,
@@ -297,7 +204,7 @@ body {
     margin-left: 10px;
 }
 
-.reveal dt {
+/*.reveal dt {
   font-weight: bold; }
 
 .reveal dd {
@@ -325,66 +232,13 @@ body {
 
 .reveal q {
   font-style: italic; }
-
-
-/*********************************************
- * CODE
- *********************************************/
-
-/* box around block of code */
-.reveal pre {
-  display: block;
-  position: relative;
-  width: 100%;
-  margin: 10px auto;
-  text-align: left;
-}
-
-/* inline code */
-.reveal code {
-    display: inline;
-    padding: 0.2em;
-    text-align: left;
-    /*font-size: 85%;*/
-    font-family: monospace;
-    word-wrap: normal;
-    /*background-color: #f7f7f7;*/
-}
-
-/* block of code (has to override above inline code)*/
-.reveal pre code {
-    display: block;
-    margin: 10px;
-    text-align: left;
-    font-size: 0.5em;
-    font-family: monospace;
-    line-height: 1.45em;
-    padding:  16px;
-    overflow: auto;
-    max-height: 100%;
-    word-wrap: normal;
-    background-color: #f7f7f7;
-}
-
-.reveal pre code.small {
-    font-size: 0.4em;
-}
-
-/*.reveal pre:after {*/
-  /*content: attr(caption);*/
-  /*margin: 0px;*/
-  /*line-height: 1;*/
-  /*font-style: italic; */
-  /*font-size: 0.6em;*/
-  /*text-align: center;*/
-/*}*/
-
+*/
 
 /*********************************************
  * TABLES
  *********************************************/
 
-.reveal table {
+/*.reveal table {
     margin: auto;
     border-collapse: collapse;
     border-spacing: 2px;
@@ -440,11 +294,11 @@ body {
 .reveal small * {
   vertical-align: top;
 }
-
+*/
 /*********************************************
  * LINKS
  *********************************************/
-.reveal a {
+/*.reveal a {
   color: #2a76dd;
   text-decoration: none;
   -webkit-transition: color .15s ease;
@@ -458,7 +312,7 @@ body {
 
 .reveal .roll span:after {
   color: #fff;
-  background: #1a53a1; }
+  background: #1a53a1; }*/
 
 /*********************************************
  * IMAGES
@@ -471,8 +325,7 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); }
 */
 
-.reveal section img {
-  /*margin: 15px 0px;*/
+/*.reveal section img {
   margin-bottom: 15px;
   border: 0;
   box-shadow: none; }
@@ -494,7 +347,6 @@ body {
 
 .reveal figure {
     display: inline-block;
-    /*vertical-align: middle;*/
 }
 
 .reveal figure img {
@@ -510,7 +362,7 @@ body {
   font-size: 0.6em;
   text-align: center;
 }
-
+*/
 /*********************************************
  * NAVIGATION CONTROLS
  *********************************************/
@@ -524,68 +376,51 @@ body {
   background: rgba(0, 0, 0, 0.2);
   color: #2CA02C; }
 
-.reveal .progress span {
+/*.reveal .progress span {
   -webkit-transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985);
   -moz-transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985);
   transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985); }
-
+*/
 
 
 /*********************************************
  * MARIO: TITLE SLIDE
  *********************************************/
 
-.white-on-blue {
-    color: #ffffff;
-    background-color: #2a9ddf;
-}
-
-.green-on-white {
-    margin:      200px 0 0 0;
-    color: #2CA02C;
-    background-color: #ffffff;
-}
-
 .reveal .title {
-    margin-top:  50px 0 0 0;
-    padding:     30px;
+    margin-left:  40px;
+    padding:     40px;
     font-weight: bold;
     font-style:  normal;
     font-size:   1.5em;
-    text-align:  center;
+    text-align:  left;
 }
 
 .reveal .subtitle {
-    margin:      0;
-    padding:     0 30px 30px 30px;
-    font-weight: normal;
+    margin-left:      80px;
     font-style:  italic;
     font-size:   1.3em;
-    text-align:  center;
 }
-
+/*
 .reveal .teaser img {
     margin:      50px 0 0 0;
     height:      300px;
     width:       auto;
     object-fit:  contain;
 }
-
+*/
 .reveal .author {
-    margin:      50px 0 0 0;
-    font-weight: normal;
-    font-style:  normal;
+    margin-left:      80px;
     font-size:   1.0em;
-    text-align:  center;
 }
-
+/*
 .reveal .affiliation {
     margin:      10px 0 0 0;
     font-weight: normal;
     font-style:  normal;
     font-size:   0.8em;
     text-align:  center;
-}
+}*/
 
 
 /*********************************************
@@ -611,16 +446,16 @@ body {
  * MARIO: image sequence, shown one after the other
  *********************************************/
 
-.fragment.sequence:not(.current-fragment) {
+/*.fragment.sequence:not(.current-fragment) {
     display: none;
-}
+}*
 
 
 /*********************************************
  * MARIO: COMMENT BUBBLES
  *********************************************/
 
-.reveal .bubble {
+/*.reveal .bubble {
     display: inline-block;
     font-size: 0.7em;
     color: #ffffff;
@@ -668,7 +503,7 @@ body {
     border-radius:5px;
     box-shadow: 0px 0px 30px 0px rgba(0,0,0,0.35);
 }
-
+*/
 
 /*********************************************
  * MARIO: FOOTER COMMENTS
@@ -698,31 +533,11 @@ body {
 
 
 /*********************************************
- * MARIO: GENERIC HIGHLIGHT
- *********************************************/
-
-.reveal .highlight {
-    background-color: #fdfbaa;
-}
-
-/*********************************************
  * MARIO: margin: auto
  *********************************************/
 
 .reveal .automargin {
     margin: 10px auto;
-}
-
-/*********************************************
- * MARIO: ADD SHADOWS (e.g. to images)
- *********************************************/
-
-.reveal .shadow {
-    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.25);
-}
-
-.reveal table p {
-    margin: 0px;
 }
 
 .reveal .neg80 {
@@ -731,202 +546,4 @@ body {
 
 .reveal .neg60 {
     margin-top: -60px;
-}
-
-/* class for aligning divs in a row */
-.reveal .ilb {
-    display: inline-block;
-    vertical-align: top;
-}
-
-/* MARIO: fix menu positioning */
-/*.reveal .slide-number {
-  position: fixed;
-}
-*/
-
-
-/* CSS for chalkboard color picker */
-.reveal .color-picker {
-    background: rgba(255, 255, 255, 0.75);
-    padding: 0px;
-    border: 1px solid rgba(203, 203, 203, 0.6);
-    border-radius: 2px;
-}
-
-.reveal .color-picker > div {
-    width: 20px;
-    display: inline-block;
-    height: 20px;
-    margin: 3px;
-    border: 1px solid rgba(203, 203, 203, 0.6);
-    border-radius: 100%;
-    opacity: 0.7;
-}
-
-/* make chalkboard scrollbar visible in Safari */
-/*::-webkit-scrollbar {*/
-    /*-webkit-appearance: none;*/
-    /*width: 7px;*/
-    /*background-color: "white";*/
-/*}*/
-/*::-webkit-scrollbar-thumb {*/
-    /*border-radius: 4px;*/
-    /*background-color: rgba(0,0,0,.5);*/
-/*}*/
-
-/*********************************************
- * MARIO: Task lists
- *********************************************/
-
-.reveal li input[type="checkbox"] {
-    visibility: hidden;
-    vertical-align: top;
-    margin-right: 1em;
-}
-.reveal li input[type="checkbox"]::before {
-    visibility: visible;
-    opacity: 1;
-    font-weight: bold;
-    font-size: 200%;
-    color: red; 
-    content: "✗";
-}
-.reveal li input[type="checkbox"]:checked::before {
-    color: green; 
-    content: "✓";
-}
-
-/* Firefox doesn't suppprt ::after for <input>,
- * so we disable the above */
-@-moz-document url-prefix() {
-    .reveal li input[type="checkbox"] {
-        visibility: visible;
-        vertical-align: middle;
-    }
-}
-
-
-/*********************************************
- * MARIO: Quizzes with task list syntax
- *********************************************/
-
-.reveal .quiz ul {
-    text-align: center;
-    list-style-type: upper-latin;
-    counter-reset: answer;
-}
-
-.reveal .quiz ul li {
-    display:       inline-block;
-    position:      relative;
-    width:         400px;
-    text-align:    left;
-    margin:        20px;
-    border:        3px solid #2a9ddf;
-    border-radius: 20px;
-    padding:       20px;
-    font-weight:   normal;
-    color:         black;
-}
-
-.reveal .quiz ul li:before {
-    content: counter(answer, upper-latin) ": ";
-    counter-increment: answer;
-    margin-right: 0.5em;
-    font-weight:  bold;
-}
-
-.reveal .quiz ul li input[type="checkbox"] {
-    display: none;
-}
-
-.reveal .quiz .tip {
-    display:          block;
-    visibility:       hidden;
-    max-width:        390px;
-    top:              100%;
-    background-color: grey;
-    color:            #ffffff;
-    text-align:       center;
-    padding:          5px;
-    border-radius:    6px;
-    position:         absolute;
-    z-index:          1;
-    font-size:        1rem;
-}
-
-.reveal .quiz ul li.show-wrong {
-    background-color: #ffaaaa;
-    border:           3px solid red;
-}
-
-.reveal .quiz ul li.show-right {
-    background-color: #aaffaa;
-    border:           3px solid green;
-}
-
-.reveal .show-wrong:hover .tip, 
-.reveal .show-right:hover .tip {
-    visibility: visible;
-}
-
-
-/* old quiz stuff below (delete it later...) */
-
-.reveal .slides > section {
-  counter-reset: wwm-counter;
-}
-
-.reveal .answer {
-    display:  inline-block;
-    position: relative;
-    width:    400px;
-    text-align: left;
-    margin:   20px;
-    border:   3px solid #2a9ddf;
-    border-radius: 20px;
-    padding:  20px;
-    font-weight: normal;
-    color:    black;
-}
-
-.reveal .answer:before {
-  content: counter(wwm-counter, upper-latin) ": ";
-  counter-increment: wwm-counter;
-  margin-right: 0.5em;
-  font-weight: bold;
-}
-
-.reveal .tooltip {
-    display: block;
-    visibility: hidden;
-    max-width: 390px;
-    top:        100%;
-    background-color: grey;
-    color:      #ffffff;
-    text-align: center;
-    padding:    5px;
-    border-radius: 6px;
-    position:   absolute;
-    z-index: 1;
-    font-size: 1rem;
-}
-
-.reveal .show-wrong {
-    background-color: #ffaaaa;
-    border:           3px solid red;
-}
-
-.reveal .show-right {
-    background-color: #aaffaa;
-    border:           3px solid green;
-}
-
-.reveal .show-wrong:hover .tooltip, .reveal .show-right:hover .tooltip {
-    visibility: visible;
-}
-
-.reveal .transparent {
-    opacity: 0.1;
 }
