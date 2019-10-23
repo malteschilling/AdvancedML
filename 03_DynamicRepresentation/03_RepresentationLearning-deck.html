@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<!-- This is the pandoc 2.7.3 template for reveal.js output modified for decker. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">
+  <title>03 Dynamic Representation</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="support/vendor/reveal/css/reset.css">
+  <link rel="stylesheet" href="support/vendor/reveal/css/reveal.css">
+  <link rel="stylesheet" href="support/css/thebelab.css">
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="support/css/decker.css">
+  <link rel="stylesheet" href="mschilling.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'support/vendor/reveal/css/print/pdf.css' : 'support/vendor/reveal/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script type="text/x-thebe-config">
+  {
+      bootstrap: false,
+      requestKernel: false,
+      predefinedOutput: false,
+      binderOptions: {
+          repo: "malteschilling/advml_binder",
+          ref: "master",
+          binderUrl: "https://mybinder.org",
+          repoProvider: "github",
+      },
+      kernelOptions: {
+          name: "python3"
+      },
+      selector: "[data-executable]",
+      mathjaxUrl: false,
+      codeMirrorConfig: {
+          mode: "python3"
+      }
+  }
+  </script>
+  <script src="https://unpkg.com/thebelab@0.4.0/lib/index.js"></script> 
+  <!-- <script src="support/vendor/thebelab/index.js"></script> -->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+  <h1 class="title">03 Dynamic Representation</h1>
+  <p class="subtitle">Advanced Machine Learning</p>
+  <p class="author">Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
+</section>
+
+<section class="slide level1">
+<h1>Goals for Today</h1>
+<div>
+<ul>
+<li class="fragment">Understanding how projection into higher dimensions can help for regression and classification tasks.</li>
+<li class="fragment">Modelling dynamical features as dynamical systems.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Support Vector Machines</h1>
+</section>
+<section class="slide level1">
+<h1>Support Vector Machine</h1>
+<div>
+<figure><img data-src="data/02/Kernel_Machine_right.svg" style="height:360px;width:auto;" alt="from Wikipedia:Support-vector machine" title="fig:"><figcaption>from Wikipedia:Support-vector machine</figcaption></figure>
+</div>
+<p>Distance (geometric margin) of data points to border:</p>
+<p><span class="math display">\[\begin{align*}
+y^{(i)} \Big( \big(\frac{\vec{w}}{\norm{\vec{w}}}\big)^T \vec{x}^{(i)} + \frac{b}{\norm{\vec{w}}} \Big) = \gamma^{(i)}
+\end{align*}\]</span></p>
+<div class="biblio">
+<p>For details and derivation see <span class="citation" data-cites="cs229_2018">(Ng 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Finding the Largest Margin</h1>
+<p><span class="math display">\[\begin{align*}
+\gamma &amp;= min_{i = 1,...,m} \: \gamma^{(i)} = min_{i = 1,...,m} \: y^{(i)} \Big( \big(\frac{\vec{w}}{\norm{\vec{w}}}\big)^T \vec{x}^{(i)} + \frac{b}{\norm{\vec{w}}} \Big) \\
+&amp;\Rightarrow max_{\gamma, \vec{w}, b} \: y^{(i)} \Big( \vec{w}^T \vec{x}^{(i)} + b \Big) \geq \gamma, i= 1,... , m \text{, with } \norm{\vec{w}} = 1
+\end{align*}\]</span> Unfortunately, the constraint on <span class="math inline">\(\vec{w}\)</span> makes this none convex and not directly solvable.</p>
+<p><span class="math display">\[\begin{align*}
+&amp;\Rightarrow max_{\hat{\gamma}, \vec{w}, b} \: \frac{\hat{\gamma}}{\norm{\vec{w}}}, \text{introducing a functional margin as the relation } \gamma = \frac{\hat{\gamma}}{\norm{\vec{w}}}\\
+&amp; \hspace{18mm} \text{s.t. } y^{(i)} \Big( \vec{w}^T \vec{x}^{(i)} + b \Big) \geq \hat{\gamma}, i= 1,... , m
+\end{align*}\]</span></p>
+<p>Now, we can freely choose <span class="math inline">\(\hat{\gamma}\)</span> which requires us to find appropriate weights. We set <span class="math inline">\(\hat{\gamma} = 1\)</span> and can now instead solve:</p>
+<p><span class="math display">\[\begin{align*}
+min_{\vec{w}, b} \: \frac{1}{2} \norm{\vec{w}}^2, \text{ s.t. } y^{(i)} \Big( \vec{w}^T \vec{x}^{(i)} + b \Big) \geq 1, i= 1,... , m
+\end{align*}\]</span></p>
+</section>
+<section class="slide level1">
+<h1>In General: Lagrangian Multiplier</h1>
+<p>We can reformulate a (primal) optimization problem: <span class="math display">\[\begin{align*}
+min_{\vec{w}} \: f(\vec{w}) &amp;\\
+\text{s.t. } g_i(\vec{w}) &amp;\leq 0, i = 1,...,k\\
+h_j(\vec{w}) &amp;= 0, j = 1,...,l
+\end{align*}\]</span></p>
+<p>And instead solve the <em>generalized Lagrangian</em> (when the Karush-Kuhn-Tucker conditions are met): <span class="math display">\[\begin{align*}
+\mathcal{L} (\vec{w}, \vec{\alpha}, \vec{\beta}) = f(\vec{w}) + 
+\sum_{i=1}^{k} \alpha_i g_i(\vec{w}) + \sum_{j=1}^L \beta_j h_j(\vec{w})
+\end{align*}\]</span></p>
+<p><span class="math inline">\(\alpha_i\)</span> and <span class="math inline">\(\beta_j\)</span> are the Lagrangian multipliers.</p>
+</section>
+<section class="slide level1 sub">
+<h1>Apply Lagrangian Multiplier</h1>
+<p><span class="math display">\[\begin{align*}
+min_{\vec{w}, b} \: \frac{1}{2} \norm{\vec{w}}^2, \text{ s.t. } y^{(i)} \Big( \vec{w}^T \vec{x}^{(i)} + b \Big) \geq 1, i= 1,... , m
+\end{align*}\]</span></p>
+<p>We can formulate <span class="math inline">\(f(\vec{w}) = 1/2 \norm{\vec{w}}^2\)</span> and the constraints as: <span class="math display">\[\begin{align*}
+g_i(\vec{w}) = -y^{(i)} \Big( \vec{w}^T \vec{x}^{(i)} + b \Big) + 1 \leq 0, i= 1,... , m
+\end{align*}\]</span></p>
+<p>and now solve the Lagrangian <span class="math display">\[\begin{align*}
+\mathcal{L}(\vec{w}, b, \vec{\alpha}) =  \frac{1}{2} \norm{\vec{w}}^2 - \sum_{i=1}^{m} \alpha_i \Big( y^{(i)} \big( \vec{w}^T \vec{x}^{(i)} + b \big) - 1 \Big)
+\end{align*}\]</span></p>
+<p>by setting the derivatives to zero (<span class="math inline">\(\nabla_b \mathcal{L} = 0 \text{ because of the KKT conditions}\)</span>): <span class="math display">\[\begin{align*}
+\nabla_{\vec{w}}\mathcal{L} (\vec{w}, b, \vec{\alpha}) = \vec{w} - \sum_{i=1}^{m} \alpha_i y^{(i)} \vec{x}^{(i)} = 0 \Rightarrow \vec{w} = \sum_{i=1}^{m} \alpha_i y^{(i)} \vec{x}^{(i)}
+\end{align*}\]</span></p>
+</section>
+<section class="slide level1 sub">
+<h1>Finding optimal weights</h1>
+<p>This gives us the optimal weights when having found the Lagrangian multipliers on our inputs: <span class="math display">\[\begin{align*}
+\vec{w}^* = \sum_{i=1}^{m} \alpha_i y^{(i)} \vec{x}^{(i)}
+\end{align*}\]</span></p>
+<p>Importantly, when now use this for a novel input <span class="math inline">\(\vec{x}&#39;\)</span> we would apply <span class="math inline">\({\vec{w}^*}^T \vec{x}&#39; + b\)</span> and decide classification based on the sign.</p>
+<p>Using the above equality, we can reformulate this as <span class="math display">\[\begin{align*}
+{\vec{w}^*}^T \vec{x}&#39; + b &amp;= \Big( \sum_{i=1}^{m} \alpha_i y^{(i)} \vec{x}^{(i)} \Big)^T \vec{x}&#39; + b\\
+&amp;= \sum_{i=1}^{m} \alpha_i y^{(i)} \langle \vec{x}^{(i)}, \vec{x}&#39; \rangle + b
+\end{align*}\]</span></p>
+</section>
+<section class="slide level1">
+<h1>Largest margin Separation</h1>
+<div class="col30">
+<div>
+<ul>
+<li class="fragment">this only involves some data points (support vectors)</li>
+<li class="fragment">the constrained optimization can be solved through a Lagrange multiplier</li>
+<li class="fragment">this leads to the hyperplane decision function <span class="math display">\[ \alpha_i \geq 0, \\
+f( \vec{x}) = sgn(\sum_{i=1}^m \alpha^{(i)} y^{(i)} \langle \vec{x}, \vec{x}^{(i)} \rangle + b \ )\]</span></li>
+</ul>
+</div>
+</div>
+<div class="col70">
+<p><img data-src="data/02/two_classes_2.svg" style="height:480px;width:auto;"></p>
+<p><span class="math display">\[ \max_{\vec{w}, b} \min \{ \norm{\vec{x} - \vec{x}^{(i)}} \} \\
+with \langle \vec{w}, \vec{x} \rangle + b = 0 \text{ defining the hyperplane}
+\]</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Application of Kernel</h1>
+<div>
+<figure><img data-src="data/02/kernel.png" style="height:auto;width:1200px;" alt="Example of a labeled data inseparable in 2-Dimension is separable in 3-Dimension." title="fig:"><figcaption>Example of a labeled data inseparable in 2-Dimension is separable in 3-Dimension.</figcaption></figure>
+</div>
+</section>
+<section class="slide level1 sub">
+<h1>Support Vector Machine</h1>
+<p><img data-src="data/02/Kernel_Machine_right.svg" style="height:360px;width:auto;"> <img data-src="data/02/Kernel_Machine.svg" style="height:360px;width:auto;margin-top:-360px;" class="fragment"></p>
+<div class="biblio">
+<p>SVMs go back to <span class="citation" data-cites="Vapnik1998">(Vapnik 1998)</span> , and a good tutorial can be found in <span class="citation" data-cites="Burges98atutorial">(Burges 1998)</span>.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Kernel Trick</h1>
+<p>The kernel trick for kernel methods as SVMs is a substitution:</p>
+<div>
+<ul>
+<li class="fragment">All computations can be formulated in a scalar product space.</li>
+<li class="fragment">We introduce a kernel function – this express the scalar product in the higher dimensional feature space in terms of the lower-dimensional input space.</li>
+<li class="fragment">The kernel function evaluates the function and scalar product of the feature space only from the lower-dimensional input space.</li>
+</ul>
+<p><span class="math display">\[ \text{e.g., } k(\vec{x}, \vec{x}&#39;) := \langle \vec{x},\vec{x&#39;} \rangle \]</span></p>
+</div>
+</section>
+<section class="slide level1 sub">
+<h1>Recap – Example for Application of Kernel</h1>
+<div class="col30">
+<p>Kernel functions provide mappings that allow for separability:</p>
+<p><span class="math display">\[ \phi (\vec{x}) \rightarrow   x_1^2, x_2^2, \sqrt 2 x_1x_2
+\]</span></p>
+<div>
+<p>Importantly, the scalar product is not computed explicitly in the feature space. It can be applied in the input space – Kernel Trick.</p>
+</div>
+</div>
+<div class="col70">
+<p><img data-src="data/02/kernel_berkeley_course.jpeg"></p>
+</div>
+</section>
+<section class="slide level1 sub">
+<h1>Kernel trick</h1>
+<p><span class="math display">\[\begin{align*}
+\phi (\vec{x}) &amp;\rightarrow x_1^2, x_2^2, \sqrt{2} x_1 x_2 \\
+\\
+\langle \phi (\vec{x}), \phi (\vec{x}&#39;) \rangle &amp;= \langle (x_1^2, x_2^2, \sqrt{2} x_1 x_2), ({x&#39;}_1^2, {x&#39;}_2^2, \sqrt{2} {x&#39;}_1 {x&#39;}_2) \rangle \\
+&amp;= \underbrace{x_1^2 {x&#39;}_1^2}_{a^2} + \underbrace{x_2^2 {x&#39;}_2^2}_{b^2} + \underbrace{2 x_1 x_2 {x&#39;}_1 {x&#39;}_2}_{2ab} \\
+&amp;= (\underbrace{x_1 {x&#39;}_1}_{a} + \underbrace{x_2 {x&#39;}_2}_{b})^2 \\
+&amp;= \langle \vec{x}, \vec{x}&#39; \rangle ^2 = k(\vec{x}, \vec{x}&#39;)
+\end{align*}\]</span></p>
+</section>
+<section class="slide level1">
+<h1>Summary: Support Vector Machine</h1>
+<p><img data-src="data/02/Kernel_Machine.png" style="height:260px;width:auto;"></p>
+<ul>
+<li>Support vector machines implement the large margin principle.</li>
+<li>They apply non-linear mappings.</li>
+<li>Importantly, the scalar product is not computed explicitly in the feature space. using the Kernel Trick. This is much more efficient.</li>
+<li>The kernel function (weighted by multipliers) is applied wrt. the support vectors.</li>
+</ul>
+<div class="biblio">
+<p>SVMs go back to <span class="citation" data-cites="Vapnik1998">(Vapnik 1998)</span> , and a good tutorial can be found in <span class="citation" data-cites="Burges98atutorial">(Burges 1998)</span>.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Kernel functions</h1>
+<div class="col50">
+<p>Polynomial kernel (of degree <span class="math inline">\(d\)</span>)</p>
+<p><span class="math display">\[ k(x, x&#39;) := \langle x,x&#39; \rangle ^d\]</span></p>
+<ul>
+<li>Includes all polynomial terms up to degree d.</li>
+</ul>
+</div>
+<div class="col50">
+<p>Radial Basis Function kernels</p>
+<p><span class="math display">\[ k(x, x&#39;) := exp( - \frac{\norm{x - x&#39;}^2}{2\sigma^2}) \]</span></p>
+<ul>
+<li>Allows to map into an infinite dimensional feature space (Gaussian kernel can be constructed from an infinite sum over polynomial kernels).</li>
+<li>Scales with number of features.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>SVM – Advantages</h1>
+<div>
+<ul>
+<li class="fragment">Very robust, guaranteed to be a global minimum</li>
+<li class="fragment">Work well on small (and high dimensional) data spaces.</li>
+<li class="fragment">Does allow for non-linearly separable data (using Kernel trick).</li>
+<li class="fragment">Can be softened through a simple parameter allowing for violation of the maximum margin.</li>
+<li class="fragment">Is efficient for high-dimensional datasets as the complexity is characterized by the number of support vectors.</li>
+<li class="fragment">Support Vectors can help to understand the problem better.</li>
+<li class="fragment">Only a small number of hyperparameters.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1 sub">
+<h1>SVM – Disadvantages</h1>
+<div>
+<ul>
+<li class="fragment">Not suitable for big datasets as the training time with SVMs becomes much more computationally intensive.</li>
+<li class="fragment">They are less effective on noisier datasets with overlapping classes.</li>
+<li class="fragment">Are often outperformed by Deep Neural Networks.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#FF6600">
+<h1>Commercial Break</h1>
+</section>
+<section class="slide level1">
+<h1>CITEC Conference today and tomorrow</h1>
+<p><iframe data-src="https://www.cit-ec.de/sites/default/files/citec_conference_2019_programme.pdf" style="height:540px;width:1200px;">Browser does not support iframe.</iframe></p>
+<p>For information see <a href="https://www.cit-ec.de/sites/default/files/citec_conference_2019_programme.pdf">Conference Webpage.</a></p>
+</section>
+<section class="slide level1">
+<h1><figure class="sub" style="controls:1;"><div style="position:relative;padding-top:25px;padding-bottom:56.25%;height:0;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" width="560" height="315" src="https://www.youtube.com/embed/a0PYhrIblRg?iv_load_policy=3&amp;disablekb=1&amp;rel=0&amp;modestbranding=1&amp;autohide=1&amp;start=0" frameborder="0" allowfullscreen=""><p></p></iframe></div></figure></h1>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Reservoir Computing</h1>
+</section>
+<section class="slide level1">
+<h1>From Dynamical Features …</h1>
+<p>Temporal Filters can be seen as dynamical systems that compute at each time step a state that is some function of previous states and the current input:</p>
+<p><span class="math display">\[ s_t = F(s_{t-1}, s_{t-2}, ... s_{t-k}, x_t, x_{t-1}, ..., x_{t-l} )\]</span></p>
+<p>In the simplest case, the function is linear in its arguments, leading to the well-known recursive filters</p>
+<p><span class="math display">\[ s_t = \sum_{i=1}^K a_i s_{t-1} + \sum_{j=0}^L b_j x_{t-j}\]</span></p>
+<p>that allow, e.g., to selectively damp/enhance specifiable frequency bands of the input time sequence. For example a smoothing filter:</p>
+<p><span class="math display">\[ s_t = (1 - \gamma) s_{t-1} + \gamma x_{t} \]</span></p>
+</section>
+<section class="slide level1 sub">
+<h1>… to Dynamical Systems</h1>
+<p>Yet, combining linear filters always leads back to a linear filter.</p>
+<p>Richer processing can only occur when non-linearities are included.</p>
+<p>For example, we can consider non-linear filters arising from recurrent neural networks as in reservoir computing.</p>
+</section>
+<section class="slide level1">
+<h1>Learning from Random Features</h1>
+<p>Simple learning approach in a feedforward neural network:</p>
+<div>
+<ul>
+<li class="fragment">using randomly initialized early layers and keep them fixed (comparable to expansion in SVMs) – use large input layers that provide diversity</li>
+<li class="fragment">During learning: only adapt output weights – linear transformation of the (random) features.</li>
+<li class="fragment">Such an expansion of the input space can facilitate learning and allow for better separability.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Random Features in a Recurrent Neural Net</h1>
+<p>Echo state networks apply the same idea in a recurrent neural network:</p>
+<div>
+<ul>
+<li class="fragment">Initialize the recurrent neural network randomly and keep it fixed.</li>
+<li class="fragment">The same holds true for the projection of the input onto the recurrent layers.</li>
+<li class="fragment">Only train the connections towards the output layer which makes learning very simple.</li>
+<li class="fragment">The recurrent part is called a reservoir – it should cover a diversity of dynamics that can be recruited.</li>
+</ul>
+</div>
+<div class="biblio">
+<p>Following <span class="citation" data-cites="hinton2013esn">(Hinton 2013)</span> in his Advanced Machine Learning Course.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Setting the Connections inside the Reservoir</h1>
+<p>Crucial for Echo State Networks is the setup of the random recurrent connections:</p>
+<ul>
+<li>They have to kept bound and fulfill the echo state property to prevent dying or exploding activations.</li>
+<li>Still, activities may decay too fast or too slowly. Therefore, the reservoir has to be tuned in a way that the dynamics of the features match the time scales of the application task.</li>
+</ul>
+<div class="box definition">
+<h2 class="definition">Echo Property</h2>
+<p>Without external excitation all activities of the reservoir will decay slowly to zero. A criterion for this is that the spectral radius (the largest eigenvalue of <span class="math inline">\(A^TA\)</span>) is less than 1 (or set to 1).</p>
+<aside class="notes">
+<ul>
+<li>hidden to hidden weights set so that activity in net stays the same</li>
+<li>use sparse connectivity (creates many oscillators)</li>
+<li>fast learning.</li>
+</ul>
+</aside>
+</div>
+</section>
+<section class="slide level1">
+<h1>Echo State Network</h1>
+<div class="col30">
+<ul>
+<li>Input projects onto reservoir, here a real value.</li>
+<li>Target output: is a sine wave with the frequency given by the input.</li>
+</ul>
+</div>
+<div class="col70">
+<p><img data-src="data/02/esn_wikipedia.png"></p>
+<div class="biblio">
+<p><span class="citation" data-cites="jaeger2007esn">(Jaeger 2007)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 sub">
+<h1>Echo State Network Example Results</h1>
+<p><img data-src="data/02/esn_frequency.png" style="height:auto;width:800px;"></p>
+<p>A test run of the frequency generator from the previous slide.</p>
+<p>In the back, the input step function is shown.</p>
+<p>The black sinewaves is the target output (unknown to the network).</p>
+<p>The gray sinewaves is the network output – which ends up in a phase shift but maintaining the correct frequency.</p>
+<p>Example code from [https://github.com/cknd/pyESN] and adapted [https://github.com/malteschilling/advml_binder/]: <a href="https://mybinder.org/v2/gh/malteschilling/advml_binder/master?filepath=lecture_sine_mackey.ipynb">start here using binder</a></p>
+</section>
+<section class="slide level1" data-background-iframe="https://localhost:9999/notebooks/pyESN/lecture_sine_mackey.ipynb">
+<h1> </h1>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Recap – Representation Learning</h1>
+</section>
+<section class="slide level1 columns">
+<h1>Representation Learning</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1" data-align="center">
+<div class="left" data-align="center">
+<p>Current ML Pipeline <img data-src="data/02/goodfellow_learningMultiple.svg" style="height:540px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3" data-align="center">
+<div class="right" data-align="center">
+<p>End-to-End Learning in Deep NN <img data-src="data/02/deep_nn_layers.svg" style="height:540px;width:auto;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="bottom">
+<div class="biblio">
+<p><span class="citation" data-cites="goodfellow2016">(Goodfellow, Bengio, and Courville 2016)</span></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1 sub">
+<h1>Example: Waymo</h1>
+<p>Scene Representation in Autonomous Driving</p>
+<div data-align="center">
+<iframe width="1120" height="630" src="https://www.youtube.com/embed/B8R148hFxPw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+</iframe>
+</div>
+</section>
+<section class="slide level1">
+<h1>Features: Transfer Learning</h1>
+<div>
+<figure><img data-src="data/02/transfer-learning-768x431.jpg" style="height:auto;width:1000px;" alt="Learning for multiple tasks – building a common representation." title="fig:"><figcaption>Learning for multiple tasks – building a common representation.</figcaption></figure>
+</div>
+<div class="biblio">
+<p><span class="citation" data-cites="learnopencv2019">(Nayak 2019)</span></p>
+</div>
+</section>
+<section id="example-multicolumn" class="slide level1 sub" data-layout="columns">
+<h1>Autoencoder <span class="citation" data-cites="weng2018ae">(Weng 2018)</span></h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Entangled Representation</h2>
+<p><img data-src="data/03/garnelo2019_1b_entangled.svg" style="height:320px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-2">
+<div class="box center">
+<h2 class="center">Autoencoder</h2>
+<p><img data-src="data/02/autoencoder-architecture.png" style="height:400px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Disentangled Representation</h2>
+<p><img data-src="data/03/garnelo2019_1b_disentangled.svg" style="height:320px;width:auto;" class="right"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<ul>
+<li>Encoder translates high-dimension input into latent low-dimensional code.</li>
+<li>Decoder recovers data from the code.</li>
+</ul>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Support Vector Machine</h1>
+<p><img data-src="data/02/Kernel_Machine.png" style="height:260px;width:auto;"></p>
+<ul>
+<li>Support vector machines implement the large margin principle.</li>
+<li>They apply non-linear mappings.</li>
+<li>Importantly, the scalar product is not computed explicitly in the feature space. using the Kernel Trick. This is much more efficient.</li>
+<li>The kernel function (weighted by multipliers) is applied wrt. the support vectors.</li>
+</ul>
+<div class="biblio">
+<p>SVMs go back to <span class="citation" data-cites="Vapnik1998">(Vapnik 1998)</span> , and a good tutorial can be found in <span class="citation" data-cites="Burges98atutorial">(Burges 1998)</span>.</p>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Outlook – Bayesian Reasoning</h1>
+</section>
+<section class="slide level1" data-layout="columns">
+<h1>Gaussian Processes</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Prior</h2>
+<div>
+<figure><img data-src="data/03/rasmussen_2_2_b_prior.svg" style="height:auto;width:540px;" alt="Three random function rollouts for a zero-mean prior." title="fig:"><figcaption>Three random function rollouts for a zero-mean prior.</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right fragment">
+<h2 class="right">Posterior</h2>
+<div>
+<figure><img data-src="data/03/rasmussen_2_2_b_posterior.svg" style="height:auto;width:540px;" alt="Three random function drawn from the posterior that includes example points." title="fig:"><figcaption>Three random function drawn from the posterior that includes example points.</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<div class="biblio">
+<p><span class="citation" data-cites="rasmussen2006">(Rasmussen and Williams 2006)</span></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1" data-layout="columns">
+<h1>Comparison of Decision Boundaries of Classifiers</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1" data-align="center">
+<div class="box left" data-align="center">
+<h2 class="left" data-align="center">Input</h2>
+<p><img data-src="data/03/sphx_glr_plot_classifier_comparison_001_A_input.png" style="height:480px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-2" data-align="center">
+<div class="box center fragment" data-align="center">
+<h2 class="center" data-align="center">Nearest Neighbor</h2>
+<p><img data-src="data/03/sphx_glr_plot_classifier_comparison_001_B_nearest.png" style="height:480px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3" data-align="center">
+<div class="box right fragment" data-align="center">
+<h2 class="right" data-align="center">SVM</h2>
+<p><img data-src="data/03/sphx_glr_plot_classifier_comparison_001_C_SVM.png" style="height:480px;width:auto;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>from <a href="https://scikit-learn.org/stable/auto_examples/classification/plot_classifier_comparison.html">scikit-learn.org</a></p>
+</div>
+</div>
+</section>
+<section class="slide level1 sub" data-layout="columns">
+<h1>Comparison of Decision Boundaries of Classifiers</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1" data-align="center">
+<div class="box left" data-align="center">
+<h2 class="left" data-align="center">Input</h2>
+<p><img data-src="data/03/sphx_glr_plot_classifier_comparison_001_A_input.png" style="height:480px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-2" data-align="center">
+<div class="box center fragment" data-align="center">
+<h2 class="center" data-align="center">Neural Network</h2>
+<p><img data-src="data/03/sphx_glr_plot_classifier_comparison_001_D_nnet.png" style="height:480px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3" data-align="center">
+<div class="box right fragment" data-align="center">
+<h2 class="right" data-align="center">Gaussian Process</h2>
+<p><img data-src="data/03/sphx_glr_plot_classifier_comparison_001_E_gp.png" style="height:480px;width:auto;"></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1" data-layout="columns">
+<h1>Outlook: Gaussian Processes …</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>aware of uncertainty of the fitted GP that increases away from the training data,</li>
+<li>let you incorporate expert knowledge,</li>
+<li>are non-parametric,</li>
+<li>need to take into account the whole training data for prediction.</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<div>
+<figure><img data-src="data/03/sphx_glr_plot_gpr_noisy_targets_002.png" style="height:auto;width:480px;" alt="Three random function drawn from the posterior that includes example points." title="fig:"><figcaption>Three random function drawn from the posterior that includes example points.</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>Further reading: <span class="citation" data-cites="rasmussen2006">(Rasmussen and Williams 2006)</span> or <a href="https://distill.pub/2019/visual-exploration-gaussian-processes/">Visual Exploration GP</a>.</p>
+</div>
+</div>
+</section>
+<section class="slide level1 unnumbered biblio">
+<h1>References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-Burges98atutorial">
+<p>Burges, Christopher J. C. 1998. “A Tutorial on Support Vector Machines for Pattern Recognition.” <em>Data Mining and Knowledge Discovery</em> 2: 121–67.</p>
+</div>
+<div id="ref-goodfellow2016">
+<p>Goodfellow, Ian, Yoshua Bengio, and Aaron Courville. 2016. <em>Deep Learning</em>. MIT Press.</p>
+</div>
+<div id="ref-hinton2013esn">
+<p>Hinton, Geoffrey E. 2013. “Recurrent Neural Networks.” CSC 2535: Advanced Machine Learning Course.</p>
+</div>
+<div id="ref-jaeger2007esn">
+<p>Jaeger, Herbert. 2007. “Echo State Network.” <em>Scholarpedia</em> 2 (9): 2330. <a href="https://doi.org/10.4249/scholarpedia.2330">https://doi.org/10.4249/scholarpedia.2330</a>.</p>
+</div>
+<div id="ref-learnopencv2019">
+<p>Nayak, Sunita. 2019. “Image Classification Using Transfer Learning in Pytorch.” 2019. <a href="https://www.learnopencv.com/image-classification-using-transfer-learning-in-pytorch/">https://www.learnopencv.com/image-classification-using-transfer-learning-in-pytorch/</a>.</p>
+</div>
+<div id="ref-cs229_2018">
+<p>Ng, Andrew. 2018. “Support Vector Machines.” Course CS229, Stanford University, Lecture Notes.</p>
+</div>
+<div id="ref-rasmussen2006">
+<p>Rasmussen, CE., and CKI. Williams. 2006. <em>Gaussian Processes for Machine Learning</em>. Adaptive Computation and Machine Learning. Cambridge, MA, USA: Biologische Kybernetik; Max-Planck-Gesellschaft; MIT Press.</p>
+</div>
+<div id="ref-Vapnik1998">
+<p>Vapnik, Vladimir N. 1998. <em>Statistical Learning Theory</em>. Wiley-Interscience.</p>
+</div>
+<div id="ref-weng2018ae">
+<p>Weng, Lilian. 2018. “From Autoencoder to Beta-Vae.” 2018. <a href="https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html">https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html</a>.</p>
+</div>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="support/vendor/reveal/js/reveal.js"></script>
+  <script src="support/vendor/jquery.js"></script>
+  <script src="support/vendor/piklor.js"></script>
+
+  <script>
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        pdfMaxPagesPerSlide: 1,
+        pdfSeparateFragments: false,
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Display the page number of the current slide
+        slideNumber: false,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: true,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Loop the presentation
+        loop: false,
+        // Change the presentation direction to be RTL
+        rtl: false,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: false,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: false,
+        mouseWheel: false,
+        hideAddressBar: false,
+        previewLinks: false,
+        // Transition style
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'none', // none/fade/slide/convex/concave/zoom
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+        height: 800,
+        menu: {
+          side: 'left',
+          // 'normal', 'wide', 'third', 'half', 'full', or
+          width: 'wide',
+          numbers: false,
+          titleSelector: 'h1',
+          useTextContentForMissingTitles: false,
+          hideMissingTitles: false,
+          markers: true,
+          // Specify custom panels to be included in the menu, by
+          // providing an array of objects with 'title', 'icon'
+          // properties, and either a 'src' or 'content' property.
+          custom: false,  
+          themes: false,
+          transitions: false,
+          openButton: true,
+          openSlideNumber: true,
+          keyboard: true,
+          sticky: false,
+          autoOpen: true,
+          delayInit: false,
+          openOnInit: false,
+          loadIcons: false
+	    },
+        thebelab: true,
+        math: {
+          mathjax: "support/vendor/mathjax/MathJax.js",
+          TeX: {
+              Macros: {
+              R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+              laplace: "{\\Delta}",
+              grad: "{\\nabla}",
+              T: "^{\\mathsf{T}}",
+  
+              norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+              iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+              vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              set: ['\\mathcal{#1}', 1],
+              func: ['\\mathrm{#1}', 1],
+              trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+              matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+              vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+              of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+              diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+              pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+  
+              vc: ['\\mathbf{#1}', 1],
+              abs: ['\\lvert#1\\rvert', 1],
+              norm: ['\\lVert#1\\rVert', 1],
+              det: ['\\lvert#1\\rvert', 1],
+              qt: ['\\hat{\\vc {#1}}', 1],
+              mt: ['\\boldsymbol{#1}', 1],
+              pt: ['\\boldsymbol{#1}', 1],
+              textcolor: ['\\color{#1}', 1]
+              }
+          },
+        },
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'support/vendor/reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'support/vendor/reveal/plugin/zoom-js/zoom.js', async: true },
+          { src: 'support/vendor/whiteboard/whiteboard.js'},
+          { src: 'support/vendor/reveal.js-menu/menu.js', async: true },
+          //{ src: 'support/vendor/reveal/plugin/math/math.js', async: true },
+          { src: 'support/vendor/math/math.js' },
+          { src: 'support/js/thebelab.js', async: true },
+          { src: 'support/vendor/reveal/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    <script src="support/js/quiz.js" type="text/javascript"></script>
+    <script src="support/js/decker.js" type="text/javascript"></script>
+    <!-- Reload on change machinery -->
+            <script>makeVertical();</script>
+        <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+      window.location.reload(true);
+      };
+    </script>
+    </body>
+</html>
