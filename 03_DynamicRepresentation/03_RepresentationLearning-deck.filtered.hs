@@ -9,7 +9,7 @@
 ,HorizontalRule
 ,Header 1 ("",[],[]) [Str "Support",Space,Str "Vector",Space,Str "Machine"]
 ,Div ("",[],[])
- [Plain [RawInline (Format "html") "<figure>",RawInline (Format "html") "<img data-src=\"data/02/Kernel_Machine_right.svg\" style=\"height:360px;width:auto;\" alt=\"from Wikipedia:Support-vector machine\" title=\"fig:\">",RawInline (Format "html") "<figcaption>",Str "from",Space,Str "Wikipedia:Support-vector",Space,Str "machine",RawInline (Format "html") "</figcaption>",RawInline (Format "html") "</figure>"]]
+ [Plain [RawInline (Format "html") "<figure>",RawInline (Format "html") "<img data-src=\"../data/02/Kernel_Machine_right.svg\" style=\"height:360px;width:auto;\" alt=\"from Wikipedia:Support-vector machine\" title=\"fig:\">",RawInline (Format "html") "<figcaption>",Str "from",Space,Str "Wikipedia:Support-vector",Space,Str "machine",RawInline (Format "html") "</figcaption>",RawInline (Format "html") "</figure>"]]
 ,Para [Str "Distance",Space,Str "(geometric",Space,Str "margin)",Space,Str "of",Space,Str "data",Space,Str "points",Space,Str "to",Space,Str "border:"]
 ,Para [RawInline (Format "tex") "\\begin{align*}\ny^{(i)} \\Big( \\big(\\frac{\\vec{w}}{\\norm{\\vec{w}}}\\big)^T \\vec{x}^{(i)} + \\frac{b}{\\norm{\\vec{w}}} \\Big) = \\gamma^{(i)}\n\\end{align*}"]
 ,Div ("",["biblio"],[])
@@ -23,7 +23,7 @@
 ,HorizontalRule
 ,Header 1 ("",[],[]) [Str "In",Space,Str "General:",Space,Str "Lagrangian",Space,Str "Multiplier"]
 ,Para [Str "We",Space,Str "can",Space,Str "reformulate",Space,Str "a",Space,Str "(primal)",Space,Str "optimization",Space,Str "problem:",SoftBreak,RawInline (Format "tex") "\\begin{align*}\nmin_{\\vec{w}} \\: f(\\vec{w}) &\\\\\n\\text{s.t. } g_i(\\vec{w}) &\\leq 0, i = 1,...,k\\\\\nh_j(\\vec{w}) &= 0, j = 1,...,l\n\\end{align*}"]
-,Para [Str "And",Space,Str "instead",Space,Str "solve",Space,Str "the",Space,Emph [Str "generalized",Space,Str "Lagrangian"],Space,Str "(when",Space,Str "the",Space,Str "Karush-Kuhn-Tucker",Space,Str "conditions",Space,Str "are",Space,Str "met):",SoftBreak,RawInline (Format "tex") "\\begin{align*}\n\\mathcal{L} (\\vec{w}, \\vec{\\alpha}, \\vec{\\beta}) = f(\\vec{w}) + \n\\sum_{i=1}^{k} \\alpha_i g_i(\\vec{w}) + \\sum_{j=1}^L \\beta_j h_j(\\vec{w})\n\\end{align*}"]
+,Para [Str "And",Space,Str "instead",Space,Str "solve",Space,Str "the",Space,Emph [Str "generalized",Space,Str "Lagrangian"],Space,Str "(when",Space,Str "the",Space,Link ("",[],[]) [Str "Karush-Kuhn-Tucker",Space,Str "conditions"] ("https://en.wikipedia.org/wiki/Karush%E2%80%93Kuhn%E2%80%93Tucker_conditions",""),Space,Str "are",Space,Str "met):",SoftBreak,RawInline (Format "tex") "\\begin{align*}\n\\mathcal{L} (\\vec{w}, \\vec{\\alpha}, \\vec{\\beta}) = f(\\vec{w}) + \n\\sum_{i=1}^{k} \\alpha_i g_i(\\vec{w}) + \\sum_{j=1}^L \\beta_j h_j(\\vec{w})\n\\end{align*}"]
 ,Para [Math InlineMath "\\alpha_i",Space,Str "and",Space,Math InlineMath "\\beta_j",Space,Str "are",Space,Str "the",Space,Str "Lagrangian",Space,Str "multipliers."]
 ,HorizontalRule
 ,Header 1 ("",["sub"],[]) [Str "Apply",Space,Str "Lagrangian",Space,Str "Multiplier"]
@@ -45,15 +45,15 @@
    ,[Plain [Str "the",Space,Str "constrained",Space,Str "optimization",Space,Str "can",Space,Str "be",Space,Str "solved",Space,Str "through",Space,Str "a",Space,Str "Lagrange",Space,Str "multiplier"]]
    ,[Plain [Str "this",Space,Str "leads",Space,Str "to",Space,Str "the",Space,Str "hyperplane",Space,Str "decision",Space,Str "function",SoftBreak,Math DisplayMath " \\alpha_i \\geq 0, \\\\\nf( \\vec{x}) = sgn(\\sum_{i=1}^m \\alpha^{(i)} y^{(i)} \\langle \\vec{x}, \\vec{x}^{(i)} \\rangle + b \\ )"]]]]]
 ,Div ("",["col70"],[])
- [Para [RawInline (Format "html") "<img data-src=\"data/02/two_classes_2.svg\" style=\"height:480px;width:auto;\">"]
+ [Para [RawInline (Format "html") "<img data-src=\"../data/02/two_classes_2.svg\" style=\"height:480px;width:auto;\">"]
  ,Para [Math DisplayMath " \\max_{\\vec{w}, b} \\min \\{ \\norm{\\vec{x} - \\vec{x}^{(i)}} \\} \\\\\nwith \\langle \\vec{w}, \\vec{x} \\rangle + b = 0 \\text{ defining the hyperplane}\n"]]
 ,HorizontalRule
 ,Header 1 ("",[],[]) [Str "Application",Space,Str "of",Space,Str "Kernel"]
 ,Div ("",[],[])
- [Plain [RawInline (Format "html") "<figure>",RawInline (Format "html") "<img data-src=\"data/02/kernel.png\" style=\"height:auto;width:1200px;\" alt=\"Example of a labeled data inseparable in 2-Dimension is separable in 3-Dimension.\" title=\"fig:\">",RawInline (Format "html") "<figcaption>",Str "Example",Space,Str "of",Space,Str "a",Space,Str "labeled",Space,Str "data",Space,Str "inseparable",Space,Str "in",Space,Str "2-Dimension",Space,Str "is",Space,Str "separable",Space,Str "in",Space,Str "3-Dimension.",RawInline (Format "html") "</figcaption>",RawInline (Format "html") "</figure>"]]
+ [Plain [RawInline (Format "html") "<figure>",RawInline (Format "html") "<img data-src=\"../data/02/kernel.png\" style=\"height:auto;width:1200px;\" alt=\"Example of a labeled data inseparable in 2-Dimension is separable in 3-Dimension.\" title=\"fig:\">",RawInline (Format "html") "<figcaption>",Str "Example",Space,Str "of",Space,Str "a",Space,Str "labeled",Space,Str "data",Space,Str "inseparable",Space,Str "in",Space,Str "2-Dimension",Space,Str "is",Space,Str "separable",Space,Str "in",Space,Str "3-Dimension.",RawInline (Format "html") "</figcaption>",RawInline (Format "html") "</figure>"]]
 ,HorizontalRule
 ,Header 1 ("",["sub"],[]) [Str "Support",Space,Str "Vector",Space,Str "Machine"]
-,Para [RawInline (Format "html") "<img data-src=\"data/02/Kernel_Machine_right.svg\" style=\"height:360px;width:auto;\">",SoftBreak,RawInline (Format "html") "<img data-src=\"data/02/Kernel_Machine.svg\" style=\"height:360px;width:auto;margin-top:-360px;\" class=\"fragment\">"]
+,Para [RawInline (Format "html") "<img data-src=\"../data/02/Kernel_Machine_right.svg\" style=\"height:360px;width:auto;\">",SoftBreak,RawInline (Format "html") "<img data-src=\"../data/02/Kernel_Machine.svg\" style=\"height:360px;width:auto;margin-top:-360px;\" class=\"fragment\">"]
 ,Div ("",["biblio"],[])
  [Para [Str "SVMs",Space,Str "go",Space,Str "back",Space,Str "to",Space,Cite [Citation {citationId = "Vapnik1998", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 2}] [Str "(Vapnik",Space,Str "1998)"],Space,Str ",",Space,Str "and",Space,Str "a",Space,Str "good",Space,Str "tutorial",Space,Str "can",Space,Str "be",Space,Str "found",Space,Str "in",Space,Cite [Citation {citationId = "Burges98atutorial", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 3}] [Str "(Burges",Space,Str "1998)"],Str "."]]
 ,HorizontalRule
@@ -73,13 +73,13 @@
  ,Div ("",["incremental"],[])
   [Para [Str "Importantly,",Space,Str "the",Space,Str "scalar",Space,Str "product",Space,Str "is",Space,Str "not",Space,Str "computed",Space,Str "explicitly",Space,Str "in",Space,Str "the",Space,Str "feature",Space,Str "space.",Space,Str "It",Space,Str "can",Space,Str "be",Space,Str "applied",Space,Str "in",Space,Str "the",Space,Str "input",Space,Str "space",Space,Str "\8211",Space,Str "Kernel",Space,Str "Trick."]]]
 ,Div ("",["col70"],[])
- [Para [RawInline (Format "html") "<img data-src=\"data/02/kernel_berkeley_course.jpeg\">"]]
+ [Para [RawInline (Format "html") "<img data-src=\"../data/02/kernel_berkeley_course.jpeg\">"]]
 ,HorizontalRule
 ,Header 1 ("",["sub"],[]) [Str "Kernel",Space,Str "trick"]
 ,Para [RawInline (Format "tex") "\\begin{align*}\n\\phi (\\vec{x}) &\\rightarrow x_1^2, x_2^2, \\sqrt{2} x_1 x_2 \\\\\n\\\\\n\\langle \\phi (\\vec{x}), \\phi (\\vec{x}') \\rangle &= \\langle (x_1^2, x_2^2, \\sqrt{2} x_1 x_2), ({x'}_1^2, {x'}_2^2, \\sqrt{2} {x'}_1 {x'}_2) \\rangle \\\\\n&= \\underbrace{x_1^2 {x'}_1^2}_{a^2} + \\underbrace{x_2^2 {x'}_2^2}_{b^2} + \\underbrace{2 x_1 x_2 {x'}_1 {x'}_2}_{2ab} \\\\\n&= (\\underbrace{x_1 {x'}_1}_{a} + \\underbrace{x_2 {x'}_2}_{b})^2 \\\\\n&= \\langle \\vec{x}, \\vec{x}' \\rangle ^2 = k(\\vec{x}, \\vec{x}')\n\\end{align*}"]
 ,HorizontalRule
 ,Header 1 ("",[],[]) [Str "Summary:",Space,Str "Support",Space,Str "Vector",Space,Str "Machine"]
-,Para [RawInline (Format "html") "<img data-src=\"data/02/Kernel_Machine.png\" style=\"height:260px;width:auto;\">"]
+,Para [RawInline (Format "html") "<img data-src=\"../data/02/Kernel_Machine.png\" style=\"height:260px;width:auto;\">"]
 ,BulletList
  [[Plain [Str "Support",Space,Str "vector",Space,Str "machines",Space,Str "implement",Space,Str "the",Space,Str "large",Space,Str "margin",Space,Str "principle."]]
  ,[Plain [Str "They",Space,Str "apply",Space,Str "non-linear",Space,Str "mappings."]]
@@ -133,7 +133,7 @@
 ,Para [Str "Temporal",Space,Str "Filters",Space,Str "can",Space,Str "be",Space,Str "seen",Space,Str "as",Space,Str "dynamical",Space,Str "systems",Space,Str "that",Space,Str "compute",Space,Str "at",Space,Str "each",Space,Str "time",Space,Str "step",Space,Str "a",Space,Str "state",Space,Str "that",Space,Str "is",Space,Str "some",Space,Str "function",Space,Str "of",Space,Str "previous",Space,Str "states",Space,Str "and",Space,Str "the",Space,Str "current",Space,Str "input:"]
 ,Para [Math DisplayMath " s_t = F(s_{t-1}, s_{t-2}, ... s_{t-k}, x_t, x_{t-1}, ..., x_{t-l} )"]
 ,Para [Str "In",Space,Str "the",Space,Str "simplest",Space,Str "case,",Space,Str "the",Space,Str "function",Space,Str "is",Space,Str "linear",Space,Str "in",Space,Str "its",Space,Str "arguments,",Space,Str "leading",Space,Str "to",Space,Str "the",Space,Str "well-known",Space,Str "recursive",Space,Str "filters"]
-,Para [Math DisplayMath " s_t = \\sum_{i=1}^K a_i s_{t-1} + \\sum_{j=0}^L b_j x_{t-j}"]
+,Para [Math DisplayMath " s_t = \\sum_{i=1}^K a_i s_{t-i} + \\sum_{j=0}^L b_j x_{t-j}"]
 ,Para [Str "that",Space,Str "allow,",Space,Str "e.g.,",Space,Str "to",Space,Str "selectively",Space,Str "damp/enhance",Space,Str "specifiable",Space,Str "frequency",Space,Str "bands",Space,Str "of",SoftBreak,Str "the",Space,Str "input",Space,Str "time",Space,Str "sequence.",Space,Str "For",Space,Str "example",Space,Str "a",Space,Str "smoothing",Space,Str "filter:"]
 ,Para [Math DisplayMath " s_t = (1 - \\gamma) s_{t-1} + \\gamma x_{t} "]
 ,HorizontalRule
@@ -181,19 +181,19 @@
   [[Plain [Str "Input",Space,Str "projects",Space,Str "onto",Space,Str "reservoir,",Space,Str "here",Space,Str "a",Space,Str "real",Space,Str "value."]]
   ,[Plain [Str "Target",Space,Str "output:",Space,Str "is",Space,Str "a",Space,Str "sine",Space,Str "wave",Space,Str "with",Space,Str "the",Space,Str "frequency",Space,Str "given",Space,Str "by",Space,Str "the",Space,Str "input."]]]]
 ,Div ("",["col70"],[])
- [Para [RawInline (Format "html") "<img data-src=\"data/02/esn_wikipedia.png\">"]
+ [Para [RawInline (Format "html") "<img data-src=\"../data/02/esn_wikipedia.png\">"]
  ,Div ("",["biblio"],[])
   [Para [Cite [Citation {citationId = "jaeger2007esn", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 7}] [Str "(Jaeger",Space,Str "2007)"]]]]
 ,HorizontalRule
 ,Header 1 ("",["sub"],[]) [Str "Echo",Space,Str "State",Space,Str "Network",Space,Str "Example",Space,Str "Results"]
-,Para [RawInline (Format "html") "<img data-src=\"data/02/esn_frequency.png\" style=\"height:auto;width:800px;\">"]
+,Para [RawInline (Format "html") "<img data-src=\"../data/02/esn_frequency.png\" style=\"height:auto;width:800px;\">"]
 ,Para [Str "A",Space,Str "test",Space,Str "run",Space,Str "of",Space,Str "the",Space,Str "frequency",Space,Str "generator",Space,Str "from",Space,Str "the",Space,Str "previous",Space,Str "slide."]
 ,Para [Str "In",Space,Str "the",Space,Str "back,",Space,Str "the",Space,Str "input",Space,Str "step",Space,Str "function",Space,Str "is",Space,Str "shown."]
 ,Para [Str "The",Space,Str "black",Space,Str "sinewaves",Space,Str "is",Space,Str "the",Space,Str "target",Space,Str "output",Space,Str "(unknown",Space,Str "to",Space,Str "the",Space,Str "network)."]
 ,Para [Str "The",Space,Str "gray",Space,Str "sinewaves",Space,Str "is",Space,Str "the",Space,Str "network",Space,Str "output",Space,Str "\8211",Space,Str "which",Space,Str "ends",Space,Str "up",Space,Str "in",Space,Str "a",Space,Str "phase",Space,Str "shift",Space,Str "but",Space,Str "maintaining",Space,Str "the",Space,Str "correct",Space,Str "frequency."]
 ,Para [Str "Example",Space,Str "code",Space,Str "from",Space,Str "[https://github.com/cknd/pyESN]",Space,Str "and",Space,Str "adapted",Space,Str "[https://github.com/malteschilling/advml_binder/]:",Space,Link ("",[],[]) [Str "start",Space,Str "here",Space,Str "using",Space,Str "binder"] ("https://mybinder.org/v2/gh/malteschilling/advml_binder/master?filepath=lecture_sine_mackey.ipynb","")]
 ,HorizontalRule
-,Header 1 ("",[],[("data-background-iframe","https://localhost:9999/notebooks/pyESN/lecture_sine_mackey.ipynb")]) [Space]
+,Header 1 ("",[],[("data-background-iframe","https://mybinder.org/v2/gh/malteschilling/advml_binder/master?filepath=lecture_sine_mackey.ipynb")]) [Space]
 ,HorizontalRule
 ,Header 1 ("",["section"],[("data-background-color","#2CA02C")]) [Str "Recap",Space,Str "\8211",Space,Str "Representation",Space,Str "Learning"]
 ,HorizontalRule
@@ -201,10 +201,10 @@
 ,Div ("",["multi-column-row","multi-column-row-3"],[])
  [Div ("",["grow-1","column","column-1"],[("align","center")])
   [Div ("",["left"],[("align","center")])
-   [Para [Str "Current",Space,Str "ML",Space,Str "Pipeline",SoftBreak,RawInline (Format "html") "<img data-src=\"data/02/goodfellow_learningMultiple.svg\" style=\"height:540px;width:auto;\">"]]]
+   [Para [Str "Current",Space,Str "ML",Space,Str "Pipeline",SoftBreak,RawInline (Format "html") "<img data-src=\"../data/02/goodfellow_learningMultiple.svg\" style=\"height:540px;width:auto;\">"]]]
  ,Div ("",["grow-1","column","column-3"],[("align","center")])
   [Div ("",["right"],[("align","center")])
-   [Para [Str "End-to-End",Space,Str "Learning",Space,Str "in",Space,Str "Deep",Space,Str "NN",SoftBreak,RawInline (Format "html") "<img data-src=\"data/02/deep_nn_layers.svg\" style=\"height:540px;width:auto;\">"]]]]
+   [Para [Str "End-to-End",Space,Str "Learning",Space,Str "in",Space,Str "Deep",Space,Str "NN",SoftBreak,RawInline (Format "html") "<img data-src=\"../data/02/deep_nn_layers.svg\" style=\"height:540px;width:auto;\">"]]]]
 ,Div ("",["single-column-row"],[])
  [Div ("",["bottom"],[])
   [Div ("",["biblio"],[])
@@ -218,7 +218,7 @@
 ,HorizontalRule
 ,Header 1 ("",[],[]) [Str "Features:",Space,Str "Transfer",Space,Str "Learning"]
 ,Div ("",[],[])
- [Plain [RawInline (Format "html") "<figure>",RawInline (Format "html") "<img data-src=\"data/02/transfer-learning-768x431.jpg\" style=\"height:auto;width:1000px;\" alt=\"Learning for multiple tasks \8211 building a common representation.\" title=\"fig:\">",RawInline (Format "html") "<figcaption>",Str "Learning",Space,Str "for",Space,Str "multiple",Space,Str "tasks",Space,Str "\8211",Space,Str "building",Space,Str "a",Space,Str "common",Space,Str "representation.",RawInline (Format "html") "</figcaption>",RawInline (Format "html") "</figure>"]]
+ [Plain [RawInline (Format "html") "<figure>",RawInline (Format "html") "<img data-src=\"../data/02/transfer-learning-768x431.jpg\" style=\"height:auto;width:1000px;\" alt=\"Learning for multiple tasks \8211 building a common representation.\" title=\"fig:\">",RawInline (Format "html") "<figcaption>",Str "Learning",Space,Str "for",Space,Str "multiple",Space,Str "tasks",Space,Str "\8211",Space,Str "building",Space,Str "a",Space,Str "common",Space,Str "representation.",RawInline (Format "html") "</figcaption>",RawInline (Format "html") "</figure>"]]
 ,Div ("",["biblio"],[])
  [Para [Cite [Citation {citationId = "learnopencv2019", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 9}] [Str "(Nayak",Space,Str "2019)"]]]
 ,HorizontalRule
@@ -227,15 +227,15 @@
  [Div ("",["grow-1","column","column-1"],[])
   [Div ("",["box","left"],[])
    [Header 2 ("",["left"],[]) [Str "Entangled",Space,Str "Representation"]
-   ,Para [RawInline (Format "html") "<img data-src=\"data/03/garnelo2019_1b_entangled.svg\" style=\"height:320px;width:auto;\">"]]]
+   ,Para [RawInline (Format "html") "<img data-src=\"../data/03/garnelo2019_1b_entangled.svg\" style=\"height:320px;width:auto;\">"]]]
  ,Div ("",["grow-1","column","column-2"],[])
   [Div ("",["box","center"],[])
    [Header 2 ("",["center"],[]) [Str "Autoencoder"]
-   ,Para [RawInline (Format "html") "<img data-src=\"data/02/autoencoder-architecture.png\" style=\"height:400px;width:auto;\">"]]]
+   ,Para [RawInline (Format "html") "<img data-src=\"../data/02/autoencoder-architecture.png\" style=\"height:400px;width:auto;\">"]]]
  ,Div ("",["grow-1","column","column-3"],[])
   [Div ("",["box","right"],[])
    [Header 2 ("",["right"],[]) [Str "Disentangled",Space,Str "Representation"]
-   ,Para [RawInline (Format "html") "<img data-src=\"data/03/garnelo2019_1b_disentangled.svg\" style=\"height:320px;width:auto;\" class=\"right\">"]]]]
+   ,Para [RawInline (Format "html") "<img data-src=\"../data/03/garnelo2019_1b_disentangled.svg\" style=\"height:320px;width:auto;\" class=\"right\">"]]]]
 ,Div ("",["single-column-row"],[])
  [Div ("",["box","bottom"],[])
   [Header 2 ("",["bottom"],[]) []
@@ -244,7 +244,7 @@
    ,[Plain [Str "Decoder",Space,Str "recovers",Space,Str "data",Space,Str "from",Space,Str "the",Space,Str "code."]]]]]
 ,HorizontalRule
 ,Header 1 ("",[],[]) [Str "Support",Space,Str "Vector",Space,Str "Machine"]
-,Para [RawInline (Format "html") "<img data-src=\"data/02/Kernel_Machine.png\" style=\"height:260px;width:auto;\">"]
+,Para [RawInline (Format "html") "<img data-src=\"../data/02/Kernel_Machine.png\" style=\"height:260px;width:auto;\">"]
 ,BulletList
  [[Plain [Str "Support",Space,Str "vector",Space,Str "machines",Space,Str "implement",Space,Str "the",Space,Str "large",Space,Str "margin",Space,Str "principle."]]
  ,[Plain [Str "They",Space,Str "apply",Space,Str "non-linear",Space,Str "mappings."]]
@@ -252,80 +252,6 @@
  ,[Plain [Str "The",Space,Str "kernel",Space,Str "function",Space,Str "(weighted",Space,Str "by",Space,Str "multipliers)",Space,Str "is",Space,Str "applied",Space,Str "wrt.",Space,Str "the",Space,Str "support",Space,Str "vectors."]]]
 ,Div ("",["biblio"],[])
  [Para [Str "SVMs",Space,Str "go",Space,Str "back",Space,Str "to",Space,Cite [Citation {citationId = "Vapnik1998", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 11}] [Str "(Vapnik",Space,Str "1998)"],Space,Str ",",Space,Str "and",Space,Str "a",Space,Str "good",Space,Str "tutorial",Space,Str "can",Space,Str "be",Space,Str "found",Space,Str "in",Space,Cite [Citation {citationId = "Burges98atutorial", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 12}] [Str "(Burges",Space,Str "1998)"],Str "."]]
-,HorizontalRule
-,Header 1 ("",["section"],[("data-background-color","#2CA02C")]) [Str "Outlook",Space,Str "\8211",Space,Str "Bayesian",Space,Str "Reasoning"]
-,HorizontalRule
-,Header 1 ("",[],[("layout","columns")]) [Str "Gaussian",Space,Str "Processes"]
-,Div ("",["multi-column-row","multi-column-row-3"],[])
- [Div ("",["grow-1","column","column-1"],[])
-  [Div ("",["box","left"],[])
-   [Header 2 ("",["left"],[]) [Str "Prior"]
-   ,Div ("",[],[])
-    [Plain [RawInline (Format "html") "<figure>",RawInline (Format "html") "<img data-src=\"data/03/rasmussen_2_2_b_prior.svg\" style=\"height:auto;width:540px;\" alt=\"Three random function rollouts for a zero-mean prior.\" title=\"fig:\">",RawInline (Format "html") "<figcaption>",Str "Three",Space,Str "random",Space,Str "function",Space,Str "rollouts",Space,Str "for",Space,Str "a",Space,Str "zero-mean",Space,Str "prior.",RawInline (Format "html") "</figcaption>",RawInline (Format "html") "</figure>"]]]]
- ,Div ("",["grow-1","column","column-3"],[])
-  [Div ("",["box","right","fragment"],[])
-   [Header 2 ("",["right"],[]) [Str "Posterior"]
-   ,Div ("",[],[])
-    [Plain [RawInline (Format "html") "<figure>",RawInline (Format "html") "<img data-src=\"data/03/rasmussen_2_2_b_posterior.svg\" style=\"height:auto;width:540px;\" alt=\"Three random function drawn from the posterior that includes example points.\" title=\"fig:\">",RawInline (Format "html") "<figcaption>",Str "Three",Space,Str "random",Space,Str "function",Space,Str "drawn",Space,Str "from",Space,Str "the",Space,Str "posterior",Space,Str "that",Space,Str "includes",Space,Str "example",Space,Str "points.",RawInline (Format "html") "</figcaption>",RawInline (Format "html") "</figure>"]]]]]
-,Div ("",["single-column-row"],[])
- [Div ("",["box","bottom"],[])
-  [Header 2 ("",["bottom"],[]) []
-  ,Div ("",["biblio"],[])
-   [Para [Cite [Citation {citationId = "rasmussen2006", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 13}] [Str "(Rasmussen",Space,Str "and",Space,Str "Williams",Space,Str "2006)"]]]]]
-,HorizontalRule
-,Header 1 ("",[],[("layout","columns")]) [Str "Comparison",Space,Str "of",Space,Str "Decision",Space,Str "Boundaries",Space,Str "of",Space,Str "Classifiers"]
-,Div ("",["multi-column-row","multi-column-row-3"],[])
- [Div ("",["grow-1","column","column-1"],[("align","center")])
-  [Div ("",["box","left"],[("align","center")])
-   [Header 2 ("",["left"],[("align","center")]) [Str "Input"]
-   ,Para [RawInline (Format "html") "<img data-src=\"data/03/sphx_glr_plot_classifier_comparison_001_A_input.png\" style=\"height:480px;width:auto;\">"]]]
- ,Div ("",["grow-1","column","column-2"],[("align","center")])
-  [Div ("",["box","center","fragment"],[("align","center")])
-   [Header 2 ("",["center"],[("align","center")]) [Str "Nearest",Space,Str "Neighbor"]
-   ,Para [RawInline (Format "html") "<img data-src=\"data/03/sphx_glr_plot_classifier_comparison_001_B_nearest.png\" style=\"height:480px;width:auto;\">"]]]
- ,Div ("",["grow-1","column","column-3"],[("align","center")])
-  [Div ("",["box","right","fragment"],[("align","center")])
-   [Header 2 ("",["right"],[("align","center")]) [Str "SVM"]
-   ,Para [RawInline (Format "html") "<img data-src=\"data/03/sphx_glr_plot_classifier_comparison_001_C_SVM.png\" style=\"height:480px;width:auto;\">"]]]]
-,Div ("",["single-column-row"],[])
- [Div ("",["box","bottom"],[])
-  [Header 2 ("",["bottom"],[]) []
-  ,Para [Str "from",Space,Link ("",[],[]) [Str "scikit-learn.org"] ("https://scikit-learn.org/stable/auto_examples/classification/plot_classifier_comparison.html","")]]]
-,HorizontalRule
-,Header 1 ("",["sub"],[("layout","columns")]) [Str "Comparison",Space,Str "of",Space,Str "Decision",Space,Str "Boundaries",Space,Str "of",Space,Str "Classifiers"]
-,Div ("",["multi-column-row","multi-column-row-3"],[])
- [Div ("",["grow-1","column","column-1"],[("align","center")])
-  [Div ("",["box","left"],[("align","center")])
-   [Header 2 ("",["left"],[("align","center")]) [Str "Input"]
-   ,Para [RawInline (Format "html") "<img data-src=\"data/03/sphx_glr_plot_classifier_comparison_001_A_input.png\" style=\"height:480px;width:auto;\">"]]]
- ,Div ("",["grow-1","column","column-2"],[("align","center")])
-  [Div ("",["box","center","fragment"],[("align","center")])
-   [Header 2 ("",["center"],[("align","center")]) [Str "Neural",Space,Str "Network"]
-   ,Para [RawInline (Format "html") "<img data-src=\"data/03/sphx_glr_plot_classifier_comparison_001_D_nnet.png\" style=\"height:480px;width:auto;\">"]]]
- ,Div ("",["grow-1","column","column-3"],[("align","center")])
-  [Div ("",["box","right","fragment"],[("align","center")])
-   [Header 2 ("",["right"],[("align","center")]) [Str "Gaussian",Space,Str "Process"]
-   ,Para [RawInline (Format "html") "<img data-src=\"data/03/sphx_glr_plot_classifier_comparison_001_E_gp.png\" style=\"height:480px;width:auto;\">"]]]]
-,HorizontalRule
-,Header 1 ("",[],[("layout","columns")]) [Str "Outlook:",Space,Str "Gaussian",Space,Str "Processes",Space,Str "\8230"]
-,Div ("",["multi-column-row","multi-column-row-3"],[])
- [Div ("",["grow-1","column","column-1"],[])
-  [Div ("",["box","left"],[])
-   [Header 2 ("",["left"],[]) []
-   ,BulletList
-    [[Plain [Str "aware",Space,Str "of",Space,Str "uncertainty",Space,Str "of",Space,Str "the",Space,Str "fitted",Space,Str "GP",Space,Str "that",Space,Str "increases",Space,Str "away",Space,Str "from",Space,Str "the",Space,Str "training",Space,Str "data,"]]
-    ,[Plain [Str "let",Space,Str "you",Space,Str "incorporate",Space,Str "expert",Space,Str "knowledge,"]]
-    ,[Plain [Str "are",Space,Str "non-parametric,"]]
-    ,[Plain [Str "need",Space,Str "to",Space,Str "take",Space,Str "into",Space,Str "account",Space,Str "the",Space,Str "whole",Space,Str "training",Space,Str "data",Space,Str "for",Space,Str "prediction."]]]]]
- ,Div ("",["grow-1","column","column-3"],[])
-  [Div ("",["box","right"],[])
-   [Header 2 ("",["right"],[]) []
-   ,Div ("",[],[])
-    [Plain [RawInline (Format "html") "<figure>",RawInline (Format "html") "<img data-src=\"data/03/sphx_glr_plot_gpr_noisy_targets_002.png\" style=\"height:auto;width:480px;\" alt=\"Three random function drawn from the posterior that includes example points.\" title=\"fig:\">",RawInline (Format "html") "<figcaption>",Str "Three",Space,Str "random",Space,Str "function",Space,Str "drawn",Space,Str "from",Space,Str "the",Space,Str "posterior",Space,Str "that",Space,Str "includes",Space,Str "example",Space,Str "points.",RawInline (Format "html") "</figcaption>",RawInline (Format "html") "</figure>"]]]]]
-,Div ("",["single-column-row"],[])
- [Div ("",["box","bottom"],[])
-  [Header 2 ("",["bottom"],[]) []
-  ,Para [Str "Further",Space,Str "reading:",Space,Cite [Citation {citationId = "rasmussen2006", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 14}] [Str "(Rasmussen",Space,Str "and",Space,Str "Williams",Space,Str "2006)"],Space,Str "or",Space,Link ("",[],[]) [Str "Visual",Space,Str "Exploration",Space,Str "GP"] ("https://distill.pub/2019/visual-exploration-gaussian-processes/",""),Str "."]]]
 ,HorizontalRule
 ,Header 1 ("",["unnumbered","biblio"],[]) [Str "References"]
 ,Div ("refs",["references"],[])
@@ -341,8 +267,6 @@
   [Para [Str "Nayak,",Space,Str "Sunita.",Space,Str "2019.",Space,Str "\8220Image",Space,Str "Classification",Space,Str "Using",Space,Str "Transfer",Space,Str "Learning",Space,Str "in",Space,Str "Pytorch.\8221",Space,Str "2019.",Space,Link ("",[],[]) [Str "https://www.learnopencv.com/image-classification-using-transfer-learning-in-pytorch/"] ("https://www.learnopencv.com/image-classification-using-transfer-learning-in-pytorch/",""),Str "."]]
  ,Div ("ref-cs229_2018",[],[])
   [Para [Str "Ng,",Space,Str "Andrew.",Space,Str "2018.",Space,Str "\8220Support",Space,Str "Vector",Space,Str "Machines.\8221",Space,Str "Course",Space,Str "CS229,",Space,Str "Stanford",Space,Str "University,",Space,Str "Lecture",Space,Str "Notes."]]
- ,Div ("ref-rasmussen2006",[],[])
-  [Para [Str "Rasmussen,",Space,Str "CE.,",Space,Str "and",Space,Str "CKI.",Space,Str "Williams.",Space,Str "2006.",Space,Emph [Str "Gaussian",Space,Str "Processes",Space,Str "for",Space,Str "Machine",Space,Str "Learning"],Str ".",Space,Str "Adaptive",Space,Str "Computation",Space,Str "and",Space,Str "Machine",Space,Str "Learning.",Space,Str "Cambridge,",Space,Str "MA,",Space,Str "USA:",Space,Str "Biologische",Space,Str "Kybernetik;",Space,Str "Max-Planck-Gesellschaft;",Space,Str "MIT",Space,Str "Press."]]
  ,Div ("ref-Vapnik1998",[],[])
   [Para [Str "Vapnik,",Space,Str "Vladimir",Space,Str "N.",Space,Str "1998.",Space,Emph [Str "Statistical",Space,Str "Learning",Space,Str "Theory"],Str ".",Space,Str "Wiley-Interscience."]]
  ,Div ("ref-weng2018ae",[],[])

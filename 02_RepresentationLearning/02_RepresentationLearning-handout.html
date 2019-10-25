@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">     <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">       <title>02 Representation Learning</title>
+    <style type="text/css">
+      code {
+        white-space: pre;
+      }
+    </style>
+            <style type="text/css">
+      pre > code.sourceCode { white-space: pre; position: relative; }
+      pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+      pre > code.sourceCode > span:empty { height: 1.2em; }
+      code.sourceCode > span { color: inherit; text-decoration: inherit; }
+      div.sourceCode { margin: 1em 0; }
+      pre.sourceCode { margin: 0; }
+      @media screen {
+      div.sourceCode { overflow: auto; }
+      }
+      @media print {
+      pre > code.sourceCode { white-space: pre-wrap; }
+      pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+      }
+      pre.numberSource code
+        { counter-reset: source-line 0; }
+      pre.numberSource code > span
+        { position: relative; left: -4em; counter-increment: source-line; }
+      pre.numberSource code > span > a:first-child::before
+        { content: counter(source-line);
+          position: relative; left: -1em; text-align: right; vertical-align: baseline;
+          border: none; display: inline-block;
+          -webkit-touch-callout: none; -webkit-user-select: none;
+          -khtml-user-select: none; -moz-user-select: none;
+          -ms-user-select: none; user-select: none;
+          padding: 0 4px; width: 4em;
+          color: #aaaaaa;
+        }
+      pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+      div.sourceCode
+        {   }
+      @media screen {
+      pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+      }
+      code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+      code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+      code span.at { color: #7d9029; } /* Attribute */
+      code span.bn { color: #40a070; } /* BaseN */
+      code span.bu { } /* BuiltIn */
+      code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+      code span.ch { color: #4070a0; } /* Char */
+      code span.cn { color: #880000; } /* Constant */
+      code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+      code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+      code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+      code span.dt { color: #902000; } /* DataType */
+      code span.dv { color: #40a070; } /* DecVal */
+      code span.er { color: #ff0000; font-weight: bold; } /* Error */
+      code span.ex { } /* Extension */
+      code span.fl { color: #40a070; } /* Float */
+      code span.fu { color: #06287e; } /* Function */
+      code span.im { } /* Import */
+      code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+      code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+      code span.op { color: #666666; } /* Operator */
+      code span.ot { color: #007020; } /* Other */
+      code span.pp { color: #bc7a00; } /* Preprocessor */
+      code span.sc { color: #4070a0; } /* SpecialChar */
+      code span.ss { color: #bb6688; } /* SpecialString */
+      code span.st { color: #4070a0; } /* String */
+      code span.va { color: #19177c; } /* Variable */
+      code span.vs { color: #4070a0; } /* VerbatimString */
+      code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    </style>
+    
+    <link rel="stylesheet" href="../support/css/handout.css">
+    <script src="../support/js/handout.js"></script>
+
+    <!-- MathJax config -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+      menuSettings: { zoom: "Double-Click" },
+      TeX: {
+          Macros: {
+            R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+            laplace: "{\\Delta}",
+            grad: "{\\nabla}",
+            T: "^{\\mathsf{T}}",
+
+            norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+            iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+            vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+            mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+            set: ['\\mathcal{#1}', 1],
+            func: ['\\mathrm{#1}', 1],
+            trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+            matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+            vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+            of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+            diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+            pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+
+            vc: ['\\mathbf{#1}', 1],
+            abs: ['\\lvert#1\\rvert', 1],
+            norm: ['\\lVert#1\\rVert', 1],
+            det: ['\\lvert#1\\rvert', 1],
+            qt: ['\\hat{\\vc {#1}}', 1],
+            mt: ['\\boldsymbol{#1}', 1],
+            pt: ['\\boldsymbol{#1}', 1],
+            textcolor: ['\\color{#1}', 1]
+          }
+      }
+      });
+    </script>
+    <script src="../support/vendor/mathjax/MathJax.js?config=TeX-AMS_SVG"></script>
+
+    <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+        window.location.reload(true);
+      };
+    </script>
+            <link rel="stylesheet" href="../mschilling.css">
+      </head>
+
+  <body>
+        <div class="container decker-handout">
+            <header>
+        <div class="page-header">
+          <div class="row">
+            <div class="col-lg-12">
+              <h1 class="title">02 Representation Learning</h1>
+                            <p class="lead subtitle">Advanced Machine Learning</p>
+                          </div>
+          </div>
+        </div>
+      </header>
+            <div class="row">
+        <div class="col-lg-12">
+          
+<!-- body must not be indented or code blocks render badly -->
+<!-- The following line must be left aligned! -->
+<hr />
+<h1>Recap - A spectrum of intelligence</h1>
+<p><img src="../data/01/intelligence_spectrum.svg" id="svg"></p>
+<div class="biblio">
+<p>Spectrum of different “levels” of intelligence – for Machine Learning (following <span class="citation" data-cites="cs221_2018">(Liang 2018)</span>).</p>
+</div>
+<hr />
+<h1 class="sub">Overview common ML algorithms</h1>
+<div>
+<figure><img src="https://miro.medium.com/max/1600/1*dYgEs2roROf3j2ANzkDHMA.png" style="height:600px;width:auto;" alt="How to decide which machine learning algorithm to choose for a problem [@cheatsheet2018]." title="fig:"><figcaption>How to decide which machine learning algorithm to choose for a problem <span class="citation" data-cites="cheatsheet2018">(“Choosing the Right Estimator” 2018)</span>.</figcaption></figure>
+</div>
+<hr />
+<h1 class="sub">Remark on Gradient Boosting</h1>
+<ul>
+<li>ensemble method: combining multiple (weak) models, e.g. using a decision tree</li>
+<li>applied for regression and classification</li>
+</ul>
+<p>Will be mentioned in fourth lecture on combining models.<br />
+</p>
+<p>See <span class="citation" data-cites="friedman2002stochastic">(Friedman 2002)</span></p>
+<hr />
+<h1>Goals for Today</h1>
+<div class="incremental">
+<ul class="incremental">
+<li>Selection of meaningful and disentangled features.</li>
+<li>Understanding how reduction of dimensionality makes machine learning feasible, but projecting into higher dimensions can help for regression and classification tasks.</li>
+<li>Modelling dynamical features as dynamical systems.</li>
+</ul>
+</div>
+<hr />
+<h1 class="section" data-background-color="#2CA02C">Representation Learning</h1>
+<hr />
+<h1>Machine Learning Pipeline</h1>
+<p><img src="../data/02/boedecker_MLpipeline.svg" style="height:auto;width:1200px;"></p>
+<div class="biblio">
+<p><span class="citation" data-cites="boedeckerLecture">(Boedecker, Hutter, and Tangermann 2016)</span></p>
+</div>
+<hr />
+<h1>Features</h1>
+<div class="incremental">
+<ul class="incremental">
+<li>typically hand-crafted (“feature engineering”)</li>
+<li>feature choice impacts on required computation and obtainable generalization</li>
+<li>extreme case: raw sensory data as features</li>
+<li>dimensionality as major “feature choice feature”</li>
+</ul>
+<p>High-dimensional feature spaces can simplify computations, e.g. enable linear separability of class regions.</p>
+</div>
+<div class="box definition">
+<h2 class="definition">Features:</h2>
+<p>elements in terms of which (usually input and output) information is encoded.</p>
+</div>
+<hr />
+<h1 class="sub">Elements of Representation</h1>
+<ul>
+<li>features</li>
+<li>mappings</li>
+<li>dynamical systems</li>
+<li>gaussian processes</li>
+<li>graphical models</li>
+</ul>
+<hr />
+<h1 class="columns">Towards End-to-End Learning</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1" data-align="center">
+<div class="left" data-align="center">
+<p>Current ML Pipeline <img src="../data/02/goodfellow_learningMultiple.svg" style="height:540px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3" data-align="center">
+<div class="right" data-align="center">
+<p>End-to-End Learning in Deep NN <img src="../data/02/deep_nn_layers.svg" style="height:540px;width:auto;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="bottom">
+<div class="biblio">
+<p><span class="citation" data-cites="goodfellow2016">(Goodfellow, Bengio, and Courville 2016)</span></p>
+</div>
+</div>
+</div>
+<hr />
+<h1 class="sub">Features: Transfer Learning</h1>
+<div>
+<figure><img src="../data/02/transfer-learning-768x431.jpg" style="height:auto;width:1000px;" alt="Learning for multiple tasks – building a common representation." title="fig:"><figcaption>Learning for multiple tasks – building a common representation.</figcaption></figure>
+</div>
+<div class="biblio">
+<p><span class="citation" data-cites="learnopencv2019">(Nayak 2019)</span></p>
+</div>
+<hr />
+<h1 class="sub">Example: Waymo</h1>
+<p>Scene Representation in Autonomous Driving</p>
+<div data-align="center">
+<iframe width="1120" height="630" src="https://www.youtube.com/embed/B8R148hFxPw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+</iframe>
+</div>
+<hr />
+<h1>What is a Knowledge Representation</h1>
+<p>Roles of knowledge representation in AI following <span class="citation" data-cites="davis93what">(Davis, Shrobe, and Szolovits 1993)</span>.</p>
+<p>A knowledge representation is …</p>
+<div class="incremental">
+<ul class="incremental">
+<li>a Surrogate – it refers/represents something in the world.</li>
+<li>a Set of Ontological Commitments – a focus and perspective on how to see the target domain.</li>
+<li>a Theory of Intelligent Reasoning – how is reasoning realized and what kind of inferences does the knowledge representation support?</li>
+<li>a Medium for Efficient Computation – with respect to a tradeoff of expressability and efficiency.</li>
+<li>a Medium of Human Expression – usability for humans.</li>
+</ul>
+</div>
+<hr />
+<h1>Building a Representation</h1>
+<div class="incremental">
+<ul class="incremental">
+<li>From raw visual input: pretrained convolutional networks</li>
+<li>Principal Component Analysis <span><figure><img src="../data/02/goodfellow_5_8_pca.svg" style="height:auto;width:540px;" alt="PCA learns a linear projection that aligns the direction of greatest variance with the axes of the new space. [@goodfellow2016]"><figcaption>PCA learns a linear projection that aligns the direction of greatest variance with the axes of the new space. <span class="citation" data-cites="goodfellow2016">(Goodfellow, Bengio, and Courville 2016)</span></figcaption></figure></span></li>
+<li>Autoencoder (and variations)</li>
+</ul>
+<p>Goal is usually to reduce dimensionality and to come up with meaningful features.</p>
+</div>
+<hr />
+<h1 style="overflow: scroll;">Example for PCA: Python Environment</h1>
+<div class="box">
+<h2>Initialize and load python environment.</h2>
+<div class="sourceCode" id="cb1" data-executable="true" data-language="python"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="op">%</span>matplotlib inline</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4"></a></span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="im">from</span> time <span class="im">import</span> time</span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-7"><a href="#cb1-7"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb1-8"><a href="#cb1-8"></a></span>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="bu">print</span>(<span class="st">&quot;Kernel loaded and initialized with libraries.&quot;</span>)</span></code></pre></div>
+<p>Load faces dataset (black-white photographs).</p>
+<div class="sourceCode" id="cb2" data-executable="true" data-language="python3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> fetch_lfw_people</span>
+<span id="cb2-2"><a href="#cb2-2"></a>lfw_people <span class="op">=</span> fetch_lfw_people(min_faces_per_person<span class="op">=</span><span class="dv">70</span>, resize<span class="op">=</span><span class="fl">0.4</span>)</span>
+<span id="cb2-3"><a href="#cb2-3"></a></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="co"># introspect the images arrays to find the shapes (for plotting)</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a>n_samples, h, w <span class="op">=</span> lfw_people.images.shape</span>
+<span id="cb2-6"><a href="#cb2-6"></a></span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="co"># for machine learning we use the 2 data directly (as relative pixel</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a><span class="co"># positions info is ignored by this model)</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a>X <span class="op">=</span> lfw_people.data</span>
+<span id="cb2-10"><a href="#cb2-10"></a>n_features <span class="op">=</span> X.shape[<span class="dv">1</span>]</span>
+<span id="cb2-11"><a href="#cb2-11"></a></span>
+<span id="cb2-12"><a href="#cb2-12"></a><span class="co"># the label to predict is the id of the person</span></span>
+<span id="cb2-13"><a href="#cb2-13"></a>y <span class="op">=</span> lfw_people.target</span>
+<span id="cb2-14"><a href="#cb2-14"></a>target_names <span class="op">=</span> lfw_people.target_names</span>
+<span id="cb2-15"><a href="#cb2-15"></a>n_classes <span class="op">=</span> target_names.shape[<span class="dv">0</span>]</span>
+<span id="cb2-16"><a href="#cb2-16"></a></span>
+<span id="cb2-17"><a href="#cb2-17"></a><span class="bu">print</span>(<span class="st">&quot;Total dataset size:&quot;</span>)</span>
+<span id="cb2-18"><a href="#cb2-18"></a><span class="bu">print</span>(<span class="st">&quot;n_samples: </span><span class="sc">%d</span><span class="st">&quot;</span> <span class="op">%</span> n_samples)</span>
+<span id="cb2-19"><a href="#cb2-19"></a><span class="bu">print</span>(<span class="st">&quot;n_features: </span><span class="sc">%d</span><span class="st">&quot;</span> <span class="op">%</span> n_features)</span>
+<span id="cb2-20"><a href="#cb2-20"></a><span class="bu">print</span>(<span class="st">&quot;n_classes: </span><span class="sc">%d</span><span class="st">&quot;</span> <span class="op">%</span> n_classes)</span></code></pre></div>
+</div>
+<div class="box">
+<h2>Show examples of different faces.</h2>
+<pre class="python3" data-executable="true" data-language="python3"><code>fig, ax = plt.subplots(3, 5)
+for i, axi in enumerate(ax.flat):
+    axi.imshow(lfw_people.images[i], cmap=&#39;bone&#39;)
+    axi.set(xticks=[], yticks=[],
+            xlabel=lfw_people.target_names[lfw_people.target[i]])</code></pre>
+<p>Split into training and test data set.</p>
+<pre class="python3" data-executable="true" data-language="python3"><code># for machine learning we use the 2 data directly (as relative pixel
+# positions info is ignored by this model)
+X = lfw_people.data
+n_features = X.shape[1]
+
+# the label to predict is the id of the person
+y = lfw_people.target
+target_names = lfw_people.target_names
+n_classes = target_names.shape[0]
+
+print(&quot;Total dataset size:&quot;)
+print(&quot;n_samples: %d&quot; % n_samples)
+print(&quot;n_features: %d&quot; % n_features)
+print(&quot;n_classes: %d&quot; % n_classes)
+
+# split into a training and testing set
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42)</code></pre>
+</div>
+<div class="box">
+<h2>Apply PCA</h2>
+<pre class="python3" data-executable="true" data-language="python3"><code>n_components = 150
+
+print(&quot;Extracting the top %d eigenfaces from %d faces&quot;
+      % (n_components, X_train.shape[0]))
+t0 = time()
+pca = PCA(n_components=n_components, svd_solver=&#39;randomized&#39;,
+          whiten=True).fit(X_train)
+print(&quot;done in %0.3fs&quot; % (time() - t0))
+
+eigenfaces = pca.components_.reshape((n_components, h, w))
+
+print(&quot;Projecting the input data on the eigenfaces orthonormal basis&quot;)
+t0 = time()
+X_train_pca = pca.transform(X_train)
+X_test_pca = pca.transform(X_test)
+print(&quot;done in %0.3fs&quot; % (time() - t0))</code></pre>
+</div>
+<div class="box">
+<h2>Visualize Principal Components</h2>
+<pre class="python3" data-executable="true" data-language="python3"><code>eigenface_titles = [&quot;eigenface %d&quot; % i for i in range(eigenfaces.shape[0])]
+plt.figure(figsize=(1.8 * 4, 2.4 * 3))
+plt.subplots_adjust(bottom=0, left=.01, right=.99, top=.90, hspace=.35)
+for i in range(3 * 4):
+    plt.subplot(3, 4, i + 1)
+    plt.imshow(eigenfaces[i].reshape((h, w)), cmap=plt.cm.gray)
+    plt.title(eigenface_titles[i], size=12)
+    plt.xticks(())
+    plt.yticks(())
+</code></pre>
+<p>From Scikit-learn tutorials:<br />
+<span class="citation" data-cites="scikit2019eigenfaces">(“Faces Recognition Example Using Eigenfaces and Svms” 2019)</span>.</p>
+</div>
+<hr />
+<h1>Example: Transfer Learning – early visual features</h1>
+<div>
+<figure><img src="../data/02/hinton_nips_hierarchy.svg" alt="Learning a hierarchy of visual features on a large database, using imagenet." title="fig:"><figcaption>Learning a hierarchy of visual features on a large database, using imagenet.</figcaption></figure>
+</div>
+<div class="biblio">
+<p><span class="citation" data-cites="hinton2015nips">(Hinton, Bengio, and LeCun 2015)</span></p>
+</div>
+<hr />
+<h1>Autoencoder <span class="citation" data-cites="weng2018ae">(Weng 2018)</span></h1>
+<p><img src="../data/02/autoencoder-architecture.png" style="height:480px;width:auto;"></p>
+<ul>
+<li>Encoder translates high-dimension input into latent low-dimensional code.</li>
+<li>Decoder recovers data from the code.</li>
+</ul>
+<hr />
+<h1 class="sub" data-layout="columns"><a href="https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html">Variations of Autoencoder</a></h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Denoising AE</h2>
+<p><img src="../data/02/denoising-autoencoder-architecture.png"></p>
+<p>… use partially corrupted input to avoid overfitting.</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Variational AE</h2>
+<p><img src="../data/02/vae-gaussian.png"></p>
+<p>Input: mapped on pregiven distribution – uses priors for latent space.</p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom definition">
+<h2 class="bottom definition">Disentanglement:</h2>
+<p>… a single latent unit/factor is sensitive to variations in a single generative factor.</p>
+</div>
+</div>
+<hr />
+<h1 class="section" data-background-color="#FF6600">“Homework” Question</h1>
+<hr />
+<h1>“The robots are rising …”</h1>
+<div class="col30">
+<p><img src="../data/Discussion.png" style="height:auto;width:300;"></p>
+</div>
+<div class="col70">
+<p>Looking at the spectrum of intelligence</p>
+<ul>
+<li>What are (in your opinion) the next breakthroughs?</li>
+<li></li>
+<li>What are implications for society?</li>
+</ul>
+</div>
+<p><img src="../data/01/intelligence_spectrum.svg"></p>
+<hr />
+<h1 class="section" data-background-color="#2CA02C">Support Vector Machines</h1>
+<hr />
+<h1>Linear Separability</h1>
+<div class="col30">
+<p>Find a plane that separates the two different classes<br />
+<br />
+</p>
+<div class="incremental">
+<p>Maximize the distance of the plane to the closest points.</p>
+</div>
+</div>
+<div class="col70">
+<p><img src="../data/02/two_classes_1.svg"></p>
+</div>
+<hr />
+<h1 class="sub">Separation Plane</h1>
+<p><img src="../data/02/two_classes_3.svg" style="height:600px;width:auto;"></p>
+<hr />
+<h1 class="sub">Maximum Margin of Separation</h1>
+<div class="col30">
+<div class="incremental">
+<ul class="incremental">
+<li>this only involves some data points (support vectors)</li>
+<li>the constrained optimization can be solved through a Lagrange multiplier</li>
+<li>this leads to the hyperplane decision function <span class="math display">\[ \alpha_i \geq 0, \\
+f( \vec{x}) = sgn(\sum_{i=1}^m \alpha_i y_i \langle \vec{x}, \vec{x_i} \rangle + b \ )\]</span></li>
+</ul>
+</div>
+</div>
+<div class="col70">
+<p><img src="../data/02/two_classes_2.svg" style="height:480px;width:auto;"></p>
+<p><span class="math display">\[ \max_{\vec{w}, b} \min \{ \norm{\vec{x} - \vec{x_i}} \} \\
+with \langle \vec{w}, \vec{x} \rangle + b = 0 \text{ defining the hyperplane}
+\]</span></p>
+</div>
+<hr />
+<h1>Recap: Hinge-loss</h1>
+<p>The hinge loss is used as a loss function for training classifiers. The hinge loss aims at maximum-margin classification <span class="citation" data-cites="cs231_2015">(Karpathy 2015)</span>.</p>
+<p><span class="math display">\[
+L_i = \sum_{j \neq y^{(i)}} \max (0, f(\vec{x}^{(i)}, W)_j - f(\vec{x}^{(i)}, W)_{y^{(i)}} + \Delta) \\
+\text{with } y^{(i)} \text{ the correct class assignment}
+\]</span></p>
+<p><img src="../data/02/CS_231_margin.jpg" style="height:auto;width:1200px;"></p>
+<p>A good initial choice for the hyperparameter is <span class="math display">\[\Delta=1.0\]</span>.</p>
+<hr />
+<h1>Non-linear problems</h1>
+<div class="col40">
+<p>Many real world problems are not easily separable through a linear (hyper-)plane.<br />
+<br />
+</p>
+<p>The idea is to map the data into a higher dimensional space in which a separation is possible.</p>
+</div>
+<div class="col60">
+<p><video src="../data/02/bending_line.mp4" style="height:480;width:auto;" autoplay="1">Browser does not support video.</video></p>
+</div>
+<hr />
+<h1 class="sub">Application of Kernel</h1>
+<div>
+<figure><img src="../data/02/kernel.png" style="height:auto;width:1200px;" alt="Example of a labeled data inseparable in 2-Dimension is separable in 3-Dimension." title="fig:"><figcaption>Example of a labeled data inseparable in 2-Dimension is separable in 3-Dimension.</figcaption></figure>
+</div>
+<hr />
+<h1>Kernel trick</h1>
+<div class="col30">
+<p>Kernel functions provide mappings that allow for separability:</p>
+<p><span class="math display">\[ \phi (\vec{x}) \rightarrow   x_1^2, x_2^2, \sqrt 2 x_1x_2
+\]</span></p>
+<div class="incremental">
+<p>Importantly, the scalar product is not computed explicitly in the feature space. It can be applied in the input space – Kernel Trick.</p>
+</div>
+</div>
+<div class="col70">
+<p><img src="../data/02/kernel_berkeley_course.jpeg"></p>
+</div>
+<hr />
+<h1 class="sub">Derivation for an example kernel function</h1>
+<p><span class="math display">\[\begin{align*}
+\phi (\vec{x}) &amp;\rightarrow x_1^2, x_2^2, \sqrt{2} x_1 x_2 \\
+\\
+\langle \phi (\vec{x}), \phi (\vec{x}&#39;) \rangle &amp;= \langle (x_1^2, x_2^2, \sqrt{2} x_1 x_2), ({x&#39;}_1^2, {x&#39;}_2^2, \sqrt{2} {x&#39;}_1 {x&#39;}_2) \rangle \\
+&amp;= \underbrace{x_1^2 {x&#39;}_1^2}_{a^2} + \underbrace{x_2^2 {x&#39;}_2^2}_{b^2} + \underbrace{2 x_1 x_2 {x&#39;}_1 {x&#39;}_2}_{2ab} \\
+&amp;= (\underbrace{x_1 {x&#39;}_1}_{a} + \underbrace{x_2 {x&#39;}_2}_{b})^2 \\
+&amp;= \langle \vec{x}, \vec{x}&#39; \rangle ^2 = k(\vec{x}, \vec{x}&#39;)
+\end{align*}\]</span></p>
+<p>The complete calculation (transformation into feature space and scalar product in order to determine similarity) can be reduced to a simpler kernel function <span class="math inline">\(k\)</span> that does not involve the costly transformation to the high dimensional space.</p>
+<hr />
+<h1>Kernel Trick</h1>
+<p>The kernel trick for kernel methods as SVMs is a substitution:</p>
+<div class="incremental">
+<ul class="incremental">
+<li>All computations can be formulated in a scalar product space.</li>
+<li>We introduce a kernel function – this express the scalar product in the higher dimensional feature space in terms of the lower-dimensional input space.</li>
+<li>The kernel function evaluates the scalar product of the feature space only from the lower-dimensional input space.</li>
+</ul>
+<p><span class="math display">\[ k(x, x&#39;) := \langle \vec{x},\vec{x&#39;} \rangle \]</span></p>
+</div>
+<hr />
+<h1 class="sub">Kernel functions</h1>
+<div class="col50">
+<p>Polynomial kernel (of degree <em>d</em>)</p>
+<p><span class="math display">\[ k(x, x&#39;) := \langle x,x&#39; \rangle ^d\]</span></p>
+</div>
+<div class="col50">
+<p>Radial Basis Function kernels</p>
+<p><span class="math display">\[ k(x, x&#39;) := exp( - \frac{\norm{x - x&#39;}^2}{2\sigma^2}) \]</span></p>
+</div>
+<hr />
+<h1>Support Vector Machine</h1>
+<ul>
+<li>Support vector machines implement the large margin principle.</li>
+<li>They apply non-linear mappings.</li>
+<li>Importantly, the scalar product is not computed explicitly in the feature space. using the Kerne Trick. This is much more efficient.</li>
+</ul>
+<p><img src="../data/02/Kernel_Machine.png" style="height:360px;width:auto;"></p>
+<div class="biblio">
+<p>SVMs go back to <span class="citation" data-cites="Vapnik1998">(Vapnik 1998)</span> , and a good tutorial can be found in <span class="citation" data-cites="Burges98atutorial">(Burges 1998)</span>.</p>
+</div>
+<hr />
+<h1>Example: scikit-learn SVM implementation</h1>
+<div class="sourceCode" id="cb7"><pre class="sourceCode txt"><code class="sourceCode default"><span id="cb7-1"><a href="#cb7-1"></a>sklearn.svm.SVC (C=1.0, kernel=’rbf’, degree=3, gamma=’auto’)</span></code></pre></div>
+<p>Parameters:</p>
+<ul>
+<li>C: regularization parameter, C, of error term for soft-margin.</li>
+<li>kernel: kernel type (‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’).</li>
+<li>degree: only for polynomial kernel – degree of the polynomial kernel</li>
+<li>gamma: kernel coefficient for ‘rbf’, ‘poly’, and ‘sigmoid’</li>
+</ul>
+<hr />
+<h1 style="overflow: scroll;">Example: SVM Face Detection</h1>
+<div class="box">
+<h2>Check if environment is still running.</h2>
+<div class="sourceCode" id="cb8" data-executable="true" data-language="python"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1"></a><span class="bu">print</span>(<span class="st">&quot;Environment still running.&quot;</span>)</span></code></pre></div>
+</div>
+<div class="box">
+<h2>Train a Support Vector Machine (standard parameters).</h2>
+<div class="sourceCode" id="cb9" data-executable="true" data-language="python"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1"></a><span class="im">from</span> sklearn.svm <span class="im">import</span> SVC</span>
+<span id="cb9-2"><a href="#cb9-2"></a></span>
+<span id="cb9-3"><a href="#cb9-3"></a>clf <span class="op">=</span> SVC(kernel<span class="op">=</span><span class="st">&#39;rbf&#39;</span>, class_weight<span class="op">=</span><span class="st">&#39;balanced&#39;</span>)</span>
+<span id="cb9-4"><a href="#cb9-4"></a>clf <span class="op">=</span> clf.fit(X_train_pca, y_train)</span></code></pre></div>
+</div>
+<div class="box">
+<h2>Evaluate SVM</h2>
+<div class="sourceCode" id="cb10" data-executable="true" data-language="python"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report</span>
+<span id="cb10-2"><a href="#cb10-2"></a></span>
+<span id="cb10-3"><a href="#cb10-3"></a>y_pred <span class="op">=</span> clf.predict(X_test_pca)</span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="bu">print</span>(classification_report(y_test, y_pred, target_names<span class="op">=</span>target_names))</span></code></pre></div>
+</div>
+<hr />
+<h1 class="sub" style="overflow: scroll;">RELOAD Python Environment</h1>
+<div class="box">
+<h2>Initialize and load python environment.</h2>
+<div class="sourceCode" id="cb11" data-executable="true" data-language="python"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1"></a><span class="op">%</span>matplotlib inline</span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb11-4"><a href="#cb11-4"></a></span>
+<span id="cb11-5"><a href="#cb11-5"></a><span class="im">from</span> time <span class="im">import</span> time</span>
+<span id="cb11-6"><a href="#cb11-6"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb11-7"><a href="#cb11-7"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb11-8"><a href="#cb11-8"></a></span>
+<span id="cb11-9"><a href="#cb11-9"></a><span class="bu">print</span>(<span class="st">&quot;Kernel loaded and initialized with libraries.&quot;</span>)</span>
+<span id="cb11-10"><a href="#cb11-10"></a></span>
+<span id="cb11-11"><a href="#cb11-11"></a><span class="co"># Load faces dataset (black-white photographs).</span></span>
+<span id="cb11-12"><a href="#cb11-12"></a></span>
+<span id="cb11-13"><a href="#cb11-13"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> fetch_lfw_people</span>
+<span id="cb11-14"><a href="#cb11-14"></a>lfw_people <span class="op">=</span> fetch_lfw_people(min_faces_per_person<span class="op">=</span><span class="dv">70</span>, resize<span class="op">=</span><span class="fl">0.4</span>)</span>
+<span id="cb11-15"><a href="#cb11-15"></a></span>
+<span id="cb11-16"><a href="#cb11-16"></a><span class="co"># introspect the images arrays to find the shapes (for plotting)</span></span>
+<span id="cb11-17"><a href="#cb11-17"></a>n_samples, h, w <span class="op">=</span> lfw_people.images.shape</span>
+<span id="cb11-18"><a href="#cb11-18"></a></span>
+<span id="cb11-19"><a href="#cb11-19"></a><span class="co"># for machine learning we use the 2 data directly (as relative pixel</span></span>
+<span id="cb11-20"><a href="#cb11-20"></a><span class="co"># positions info is ignored by this model)</span></span>
+<span id="cb11-21"><a href="#cb11-21"></a>X <span class="op">=</span> lfw_people.data</span>
+<span id="cb11-22"><a href="#cb11-22"></a>n_features <span class="op">=</span> X.shape[<span class="dv">1</span>]</span>
+<span id="cb11-23"><a href="#cb11-23"></a></span>
+<span id="cb11-24"><a href="#cb11-24"></a><span class="co"># the label to predict is the id of the person</span></span>
+<span id="cb11-25"><a href="#cb11-25"></a>y <span class="op">=</span> lfw_people.target</span>
+<span id="cb11-26"><a href="#cb11-26"></a>target_names <span class="op">=</span> lfw_people.target_names</span>
+<span id="cb11-27"><a href="#cb11-27"></a>n_classes <span class="op">=</span> target_names.shape[<span class="dv">0</span>]</span>
+<span id="cb11-28"><a href="#cb11-28"></a></span>
+<span id="cb11-29"><a href="#cb11-29"></a><span class="co"># Split into training and test data set.</span></span>
+<span id="cb11-30"><a href="#cb11-30"></a></span>
+<span id="cb11-31"><a href="#cb11-31"></a><span class="co"># for machine learning we use the 2 data directly (as relative pixel</span></span>
+<span id="cb11-32"><a href="#cb11-32"></a><span class="co"># positions info is ignored by this model)</span></span>
+<span id="cb11-33"><a href="#cb11-33"></a>X <span class="op">=</span> lfw_people.data</span>
+<span id="cb11-34"><a href="#cb11-34"></a>n_features <span class="op">=</span> X.shape[<span class="dv">1</span>]</span>
+<span id="cb11-35"><a href="#cb11-35"></a></span>
+<span id="cb11-36"><a href="#cb11-36"></a><span class="co"># the label to predict is the id of the person</span></span>
+<span id="cb11-37"><a href="#cb11-37"></a>y <span class="op">=</span> lfw_people.target</span>
+<span id="cb11-38"><a href="#cb11-38"></a>target_names <span class="op">=</span> lfw_people.target_names</span>
+<span id="cb11-39"><a href="#cb11-39"></a>n_classes <span class="op">=</span> target_names.shape[<span class="dv">0</span>]</span>
+<span id="cb11-40"><a href="#cb11-40"></a></span>
+<span id="cb11-41"><a href="#cb11-41"></a><span class="co"># split into a training and testing set</span></span>
+<span id="cb11-42"><a href="#cb11-42"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
+<span id="cb11-43"><a href="#cb11-43"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.25</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb11-44"><a href="#cb11-44"></a></span>
+<span id="cb11-45"><a href="#cb11-45"></a>n_components <span class="op">=</span> <span class="dv">150</span></span>
+<span id="cb11-46"><a href="#cb11-46"></a></span>
+<span id="cb11-47"><a href="#cb11-47"></a><span class="bu">print</span>(<span class="st">&quot;Extracting the top </span><span class="sc">%d</span><span class="st"> eigenfaces from </span><span class="sc">%d</span><span class="st"> faces&quot;</span></span>
+<span id="cb11-48"><a href="#cb11-48"></a>      <span class="op">%</span> (n_components, X_train.shape[<span class="dv">0</span>]))</span>
+<span id="cb11-49"><a href="#cb11-49"></a>t0 <span class="op">=</span> time()</span>
+<span id="cb11-50"><a href="#cb11-50"></a>pca <span class="op">=</span> PCA(n_components<span class="op">=</span>n_components, svd_solver<span class="op">=</span><span class="st">&#39;randomized&#39;</span>,</span>
+<span id="cb11-51"><a href="#cb11-51"></a>          whiten<span class="op">=</span><span class="va">True</span>).fit(X_train)</span>
+<span id="cb11-52"><a href="#cb11-52"></a><span class="bu">print</span>(<span class="st">&quot;done in </span><span class="sc">%0.3f</span><span class="st">s&quot;</span> <span class="op">%</span> (time() <span class="op">-</span> t0))</span>
+<span id="cb11-53"><a href="#cb11-53"></a></span>
+<span id="cb11-54"><a href="#cb11-54"></a>eigenfaces <span class="op">=</span> pca.components_.reshape((n_components, h, w))</span>
+<span id="cb11-55"><a href="#cb11-55"></a></span>
+<span id="cb11-56"><a href="#cb11-56"></a><span class="bu">print</span>(<span class="st">&quot;Projecting the input data on the eigenfaces orthonormal basis&quot;</span>)</span>
+<span id="cb11-57"><a href="#cb11-57"></a>t0 <span class="op">=</span> time()</span>
+<span id="cb11-58"><a href="#cb11-58"></a>X_train_pca <span class="op">=</span> pca.transform(X_train)</span>
+<span id="cb11-59"><a href="#cb11-59"></a>X_test_pca <span class="op">=</span> pca.transform(X_test)</span>
+<span id="cb11-60"><a href="#cb11-60"></a><span class="bu">print</span>(<span class="st">&quot;done in </span><span class="sc">%0.3f</span><span class="st">s&quot;</span> <span class="op">%</span> (time() <span class="op">-</span> t0))</span></code></pre></div>
+<p>From Scikit-learn tutorials:<br />
+<span class="citation" data-cites="scikit2019eigenfaces">(“Faces Recognition Example Using Eigenfaces and Svms” 2019)</span>.</p>
+</div>
+<hr />
+<h1>SVM – Advantages</h1>
+<div class="incremental">
+<ul class="incremental">
+<li>Very robust, guaranteed to be a global minimum</li>
+<li>Work well on small (and high dimensional) data spaces.</li>
+<li>Does allow for non-linearly separable data (using Kernel trick).</li>
+<li>Can be softened through a simple parameter allowing for violation of the maximum margin.</li>
+<li>Is efficient for high-dimensional datasets as the complexity is characterized by the number of support vectors.</li>
+<li>Support Vectors can help to understand the problem better.</li>
+<li>Only a small number of hyperparameters.</li>
+</ul>
+</div>
+<hr />
+<h1 class="sub">SVM – Disadvantages</h1>
+<div class="incremental">
+<ul class="incremental">
+<li>Not suitable for big datasets as the training time with SVMs becomes much more computationally intensive.</li>
+<li>They are less effective on noisier datasets with overlapping classes.</li>
+<li>Are often outperformed by Deep Neural Networks.</li>
+</ul>
+</div>
+<hr />
+<h1>Further announcements</h1>
+<div class="incremental">
+<ul class="incremental">
+<li>Remember, there is no exercise tomorrow.</li>
+<li>There is a seminar on Deep Learning and its application in Artificial Intelligence (Dr. Andrew Melnik) - will work on current literature: 392115 Deep Learning for AI.</li>
+</ul>
+</div>
+<hr />
+<h1 class="unnumbered biblio">References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-boedeckerLecture">
+<p>Boedecker, Joschka, Frank Hutter, and Michael Tangermann. 2016. “Machine Learning.” Lecture Notes, University of Freiburg.</p>
+</div>
+<div id="ref-Burges98atutorial">
+<p>Burges, Christopher J. C. 1998. “A Tutorial on Support Vector Machines for Pattern Recognition.” <em>Data Mining and Knowledge Discovery</em> 2: 121–67.</p>
+</div>
+<div id="ref-cheatsheet2018">
+<p>“Choosing the Right Estimator.” 2018. 2018. <a href="https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html">https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html</a>.</p>
+</div>
+<div id="ref-davis93what">
+<p>Davis, Randall, Howard E. Shrobe, and Peter Szolovits. 1993. “What Is a Knowledge Representation?” <em>AI Magazine</em> 14 (1): 17–33. <a href="citeseer.nj.nec.com/davis93what.html">citeseer.nj.nec.com/davis93what.html</a>.</p>
+</div>
+<div id="ref-scikit2019eigenfaces">
+<p>“Faces Recognition Example Using Eigenfaces and Svms.” 2019. 2019. <a href="https://scikit-learn.org/stable/auto_examples/applications/plot_face_recognition.html">https://scikit-learn.org/stable/auto_examples/applications/plot_face_recognition.html</a>.</p>
+</div>
+<div id="ref-friedman2002stochastic">
+<p>Friedman, Jerome H. 2002. “Stochastic Gradient Boosting.” <em>Computational Statistics &amp; Data Analysis</em> 38 (4): 367–78.</p>
+</div>
+<div id="ref-goodfellow2016">
+<p>Goodfellow, Ian, Yoshua Bengio, and Aaron Courville. 2016. <em>Deep Learning</em>. MIT Press.</p>
+</div>
+<div id="ref-hinton2015nips">
+<p>Hinton, Geoff, Yoshua Bengio, and Yann LeCun. 2015. “Deep Learning.” NIPS 2015 Tutorial.</p>
+</div>
+<div id="ref-cs231_2015">
+<p>Karpathy, Andrej. 2015. “Convolutional Neural Networks for Visual Recognition.” Course CS231, Stanford University, Lecture Notes.</p>
+</div>
+<div id="ref-cs221_2018">
+<p>Liang, Percy. 2018. “Artificial Intelligence: Principles and Techniques.” Course CS221, Stanford University, Lecture Notes.</p>
+</div>
+<div id="ref-learnopencv2019">
+<p>Nayak, Sunita. 2019. “Image Classification Using Transfer Learning in Pytorch.” 2019. <a href="https://www.learnopencv.com/image-classification-using-transfer-learning-in-pytorch/">https://www.learnopencv.com/image-classification-using-transfer-learning-in-pytorch/</a>.</p>
+</div>
+<div id="ref-Vapnik1998">
+<p>Vapnik, Vladimir N. 1998. <em>Statistical Learning Theory</em>. Wiley-Interscience.</p>
+</div>
+<div id="ref-weng2018ae">
+<p>Weng, Lilian. 2018. “From Autoencoder to Beta-Vae.” 2018. <a href="https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html">https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html</a>.</p>
+</div>
+</div>
+<!-- The previous line must be left aligned! -->
+
+                              <hr>
+          <address>
+                        <p class="author"> Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
+                      </address>
+        </div>
+      </div>
+    </div>
+  </body>
+
+
+  </html>

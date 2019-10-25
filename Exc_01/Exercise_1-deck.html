@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<!-- This is the pandoc 2.7.3 template for reveal.js output modified for decker. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">
+  <title>01 Exercise</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reset.css">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reveal.css">
+  <link rel="stylesheet" href="../support/css/thebelab.css">
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="../support/css/decker.css">
+  <link rel="stylesheet" href="../mschilling.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? '../support/vendor/reveal/css/print/pdf.css' : '../support/vendor/reveal/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script type="text/x-thebe-config">
+  {
+      bootstrap: false,
+      requestKernel: false,
+      predefinedOutput: false,
+      binderOptions: {
+          repo: "malteschilling/advml_binder",
+          ref: "master",
+          binderUrl: "https://mybinder.org",
+          repoProvider: "github",
+      },
+      kernelOptions: {
+          name: "python3"
+      },
+      selector: "[data-executable]",
+      mathjaxUrl: false,
+      codeMirrorConfig: {
+          mode: "python3"
+      }
+  }
+  </script>
+  <script src="https://unpkg.com/thebelab@0.4.0/lib/index.js"></script> 
+  <!-- <script src="../support/vendor/thebelab/index.js"></script> -->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+  <h1 class="title">01 Exercise</h1>
+  <p class="subtitle">Advanced Machine Learning</p>
+  <p class="author">Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
+</section>
+
+<section class="slide level1">
+<h1>Exercise 1</h1>
+<div class="box">
+<h2>a) Variation classification hyperparameters</h2>
+<p>The classification hyperparameters are varied using gridsearch. What is the best set of hyperparameters and explain the effect of the different hyperparameters?</p>
+</div>
+<div class="box">
+<h2>b) Feature Selection</h2>
+<p>Analyze how the selection of features changes the results of the system. You should change</p>
+<ul>
+<li>the number of used features for the classification;</li>
+<li>apply the PCA on the whole dataset containing images of many more persons (see function .fetch_lfw_people in the code).</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Exercise 2</h1>
+<p>Replace the feature extraction:</p>
+<ul>
+<li>Use a Convolutional Neural Network and train it in a supervised way.</li>
+<li>Or you can use the latent space of an autoencoder trained in an unsupervised fashion.</li>
+</ul>
+<p>Train the Support Vector Machine with the provided features and compare the results to the original approach.</p>
+</section>
+<section class="slide level1">
+<h1>SVM – Advantages</h1>
+<ul>
+<li>Very robust, guaranteed to be a global minimum</li>
+<li>Work well on small (and high dimensional) data spaces.</li>
+<li>Does allow for non-linearly separable data (using Kernel trick).</li>
+<li>Can be softened through a simple parameter allowing for violation of the maximum margin.</li>
+<li>Is efficient for high-dimensional datasets as the complexity is characterized by the number of support vectors.</li>
+<li>Support Vectors can help to understand the problem better.</li>
+<li>Only a small number of hyperparameters.</li>
+</ul>
+</section>
+<section class="slide level1 sub">
+<h1>SVM – Disadvantages</h1>
+<ul>
+<li>Not suitable for big datasets as the training time with SVMs becomes much more computationally intensive.</li>
+<li>They are less effective on noisier datasets with overlapping classes.</li>
+<li>Are often outperformed by Deep Neural Networks.</li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Exercise 3</h1>
+<p>What is the associated higher dimensional space for this kernel function: <span class="math display">\[
+K(\vec{x}, \vec{x}&#39;) = ( 1 + \langle \vec{x}, \vec{x}&#39; \rangle )^2
+\]</span></p>
+</section>
+<section class="slide level1">
+<h1>Polynom of second order</h1>
+<p><span class="math display">\[\begin{align*}
+\phi (\vec{x}) &amp;\rightarrow 1, \sqrt{2} x_1, \sqrt{2} x_2, x_1^2, x_2^2, \sqrt{2} x_1 x_2 \\
+\\
+\langle \phi (\vec{x}), \phi (\vec{x}&#39;) \rangle &amp;= \langle (1, \sqrt{2} x_1, \sqrt{2} x_2, x_1^2, x_2^2, \sqrt{2} x_1 x_2), (1, \sqrt{2} {x&#39;}_1, \sqrt{2} {x&#39;}_2, {x&#39;}_1^2, {x&#39;}_2^2, \sqrt{2} {x&#39;}_1 {x&#39;}_2) \rangle \\
+&amp;= 1 + 2 \underbrace{x_1 {x&#39;}_1}_{a} + 2 \underbrace{x_2 {x&#39;}_2}_{b} + \underbrace{x_1^2 {x&#39;}_1^2}_{a^2} + \underbrace{x_2^2 {x&#39;}_2^2}_{b^2} + \underbrace{2 x_1 {x&#39;}_1 x_2 {x&#39;}_2}_{2ab} \\
+&amp;= (1 + \underbrace{x_1 {x&#39;}_1}_{a} + \underbrace{x_2 {x&#39;}_2}_{b} ) ^2\\
+&amp;= (1 + \langle \vec{x}, \vec{x}&#39; \rangle ) ^2 = k(\vec{x}, \vec{x}&#39;)
+\end{align*}\]</span></p>
+<div class="box">
+<h2>Kernel function for polynoms of order n:</h2>
+<p><span class="math display">\[
+K(\vec{x}, \vec{x}&#39;) = ( 1 + \langle \vec{x}, \vec{x}&#39; \rangle )^n
+\]</span></p>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="../support/vendor/reveal/js/reveal.js"></script>
+  <script src="../support/vendor/jquery.js"></script>
+  <script src="../support/vendor/piklor.js"></script>
+
+  <script>
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        pdfMaxPagesPerSlide: 1,
+        pdfSeparateFragments: false,
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Display the page number of the current slide
+        slideNumber: false,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: true,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Loop the presentation
+        loop: false,
+        // Change the presentation direction to be RTL
+        rtl: false,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: false,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: false,
+        mouseWheel: false,
+        hideAddressBar: false,
+        previewLinks: false,
+        // Transition style
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'none', // none/fade/slide/convex/concave/zoom
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+        height: 800,
+        menu: {
+          side: 'left',
+          // 'normal', 'wide', 'third', 'half', 'full', or
+          width: 'wide',
+          numbers: false,
+          titleSelector: 'h1',
+          useTextContentForMissingTitles: false,
+          hideMissingTitles: false,
+          markers: true,
+          // Specify custom panels to be included in the menu, by
+          // providing an array of objects with 'title', 'icon'
+          // properties, and either a 'src' or 'content' property.
+          custom: false,  
+          themes: false,
+          transitions: false,
+          openButton: true,
+          openSlideNumber: true,
+          keyboard: true,
+          sticky: false,
+          autoOpen: true,
+          delayInit: false,
+          openOnInit: false,
+          loadIcons: false
+	    },
+        thebelab: true,
+        math: {
+          mathjax: "../support/vendor/mathjax/MathJax.js",
+          TeX: {
+              Macros: {
+              R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+              laplace: "{\\Delta}",
+              grad: "{\\nabla}",
+              T: "^{\\mathsf{T}}",
+  
+              norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+              iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+              vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              set: ['\\mathcal{#1}', 1],
+              func: ['\\mathrm{#1}', 1],
+              trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+              matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+              vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+              of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+              diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+              pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+  
+              vc: ['\\mathbf{#1}', 1],
+              abs: ['\\lvert#1\\rvert', 1],
+              norm: ['\\lVert#1\\rVert', 1],
+              det: ['\\lvert#1\\rvert', 1],
+              qt: ['\\hat{\\vc {#1}}', 1],
+              mt: ['\\boldsymbol{#1}', 1],
+              pt: ['\\boldsymbol{#1}', 1],
+              textcolor: ['\\color{#1}', 1]
+              }
+          },
+        },
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '../support/vendor/reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: '../support/vendor/reveal/plugin/zoom-js/zoom.js', async: true },
+          { src: '../support/vendor/whiteboard/whiteboard.js'},
+          { src: '../support/vendor/reveal.js-menu/menu.js', async: true },
+          //{ src: '../support/vendor/reveal/plugin/math/math.js', async: true },
+          { src: '../support/vendor/math/math.js' },
+          { src: '../support/js/thebelab.js', async: true },
+          { src: '../support/vendor/reveal/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    <script src="../support/js/quiz.js" type="text/javascript"></script>
+    <script src="../support/js/decker.js" type="text/javascript"></script>
+    <!-- Reload on change machinery -->
+            <script>makeVertical();</script>
+        <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+      window.location.reload(true);
+      };
+    </script>
+    </body>
+</html>
