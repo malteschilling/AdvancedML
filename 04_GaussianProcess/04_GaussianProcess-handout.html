@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">     <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">       <title>04 Gaussian Process</title>
+    <style type="text/css">
+      code {
+        white-space: pre;
+      }
+    </style>
+        
+    <link rel="stylesheet" href="../support/css/handout.css">
+    <script src="../support/js/handout.js"></script>
+
+    <!-- MathJax config -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+      menuSettings: { zoom: "Double-Click" },
+      TeX: {
+          Macros: {
+            R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+            laplace: "{\\Delta}",
+            grad: "{\\nabla}",
+            T: "^{\\mathsf{T}}",
+
+            norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+            iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+            vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+            mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+            set: ['\\mathcal{#1}', 1],
+            func: ['\\mathrm{#1}', 1],
+            trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+            matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+            vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+            of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+            diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+            pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+
+            vc: ['\\mathbf{#1}', 1],
+            abs: ['\\lvert#1\\rvert', 1],
+            norm: ['\\lVert#1\\rVert', 1],
+            det: ['\\lvert#1\\rvert', 1],
+            qt: ['\\hat{\\vc {#1}}', 1],
+            mt: ['\\boldsymbol{#1}', 1],
+            pt: ['\\boldsymbol{#1}', 1],
+            textcolor: ['\\color{#1}', 1]
+          }
+      }
+      });
+    </script>
+    <script src="../support/vendor/mathjax/MathJax.js?config=TeX-AMS_SVG"></script>
+
+    <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+        window.location.reload(true);
+      };
+    </script>
+            <link rel="stylesheet" href="../mschilling.css">
+      </head>
+
+  <body>
+        <div class="container decker-handout">
+            <header>
+        <div class="page-header">
+          <div class="row">
+            <div class="col-lg-12">
+              <h1 class="title">04 Gaussian Process</h1>
+                            <p class="lead subtitle">Advanced Machine Learning</p>
+                          </div>
+          </div>
+        </div>
+      </header>
+            <div class="row">
+        <div class="col-lg-12">
+          
+<!-- body must not be indented or code blocks render badly -->
+<!-- The following line must be left aligned! -->
+<hr />
+<h1 class="section" data-background-color="#2CA02C">Recap – Representation Learning</h1>
+<hr />
+<h1 class="columns">Representation Learning</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1" data-align="center">
+<div class="left" data-align="center">
+<p>Current ML Pipeline <img src="../data/02/goodfellow_learningMultiple.svg" style="height:540px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3" data-align="center">
+<div class="right" data-align="center">
+<p>End-to-End Learning in Deep NN <img src="../data/02/deep_nn_layers.svg" style="height:540px;width:auto;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="bottom">
+<div class="biblio">
+<p><span class="citation" data-cites="goodfellow2016">(Goodfellow, Bengio, and Courville 2016)</span></p>
+</div>
+</div>
+</div>
+<hr />
+<h1 class="sub">Example: Waymo</h1>
+<p>Scene Representation in Autonomous Driving</p>
+<div data-align="center">
+<iframe width="1120" height="630" src="https://www.youtube.com/embed/B8R148hFxPw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+</iframe>
+</div>
+<hr />
+<h1 data-layout="columns">Autoencoder <span class="citation" data-cites="weng2018ae">(Weng 2018)</span></h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Entangled Representation</h2>
+<p><img src="../data/03/garnelo2019_1b_entangled.svg" style="height:320px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-2">
+<div class="box center">
+<h2 class="center">Autoencoder</h2>
+<p><img src="../data/02/autoencoder-architecture.png" style="height:400px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Disentangled Representation</h2>
+<p><img src="../data/03/garnelo2019_1b_disentangled.svg" style="height:320px;width:auto;" class="right"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<ul>
+<li>Encoder translates high-dimension input into latent low-dimensional code.</li>
+<li>Decoder recovers data from the code.</li>
+</ul>
+</div>
+</div>
+<hr />
+<h1 class="sub">Autoencoder – trained on faces</h1>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">precision</th>
+<th style="text-align: right;">recall</th>
+<th style="text-align: right;">f1-score</th>
+<th style="text-align: right;">support</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Ariel Sharon</td>
+<td style="text-align: right;">0.44</td>
+<td style="text-align: right;">0.54</td>
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">13</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Colin Powell</td>
+<td style="text-align: right;">0.63</td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">0.69</td>
+<td style="text-align: right;">60</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Donald Rumsfeld</td>
+<td style="text-align: right;">0.71</td>
+<td style="text-align: right;">0.56</td>
+<td style="text-align: right;">0.63</td>
+<td style="text-align: right;">27</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">George W Bush</td>
+<td style="text-align: right;">0.85</td>
+<td style="text-align: right;">0.88</td>
+<td style="text-align: right;">0.87</td>
+<td style="text-align: right;">146</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Gerhard Schroeder</td>
+<td style="text-align: right;">0.81</td>
+<td style="text-align: right;">0.52</td>
+<td style="text-align: right;">0.63</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Hugo Chavez</td>
+<td style="text-align: right;">0.56</td>
+<td style="text-align: right;">0.60</td>
+<td style="text-align: right;">0.58</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">micro avg</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">322</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">macro avg</td>
+<td style="text-align: right;">0.67</td>
+<td style="text-align: right;">0.63</td>
+<td style="text-align: right;">0.64</td>
+<td style="text-align: right;">322</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">weighted avg</td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">322</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 class="sub" data-layout="columns">Autoencoder – trained on faces</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Dense Autoencoder</h2>
+<p><img src="../data/04/autoencoder_reconstruction_faces.png" style="height:auto;width:600px;"></p>
+<p>Weighted Average score 0.72</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Convolutional Autoencoder</h2>
+<p><img src="../data/04/conv_ae_reconstruction_faces.png" style="height:auto;width:600px;"></p>
+<p>Weighted Average score 0.72</p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<ul>
+<li>For small latent space: performs worse than PCA.</li>
+<li>Convolutional AE has much less parameters – therefore allows to increase latent space which leads to much better results.</li>
+</ul>
+</div>
+</div>
+<hr />
+<h1 data-layout="columns">Convolutional NN – trained on faces</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Differing Learning Goals</h2>
+<div class="incremental">
+<ul class="incremental">
+<li>Classification using SVM performed better for small feature set (140) than the fully NN approach.</li>
+<li>Higher feature number improved results and the CNN outperformed the SVM (w. score 0.93)</li>
+<li>Comparing features from autoencoder and CNN: features from a net trained for classification worked better than features trained for reconstruction.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Classification using SVM</h2>
+<p><img src="../data/04/convNN_forFeatures_svm_forClassification.png" style="height:auto;width:480px;"></p>
+</div>
+</div>
+</div>
+<hr />
+<h1 class="sub">Features: Transfer Learning</h1>
+<div>
+<figure><img src="../data/02/transfer-learning-768x431.jpg" style="height:auto;width:1000px;" alt="Learning for multiple tasks – building a common representation." title="fig:"><figcaption>Learning for multiple tasks – building a common representation.</figcaption></figure>
+</div>
+<div class="biblio">
+<p><span class="citation" data-cites="learnopencv2019">(Nayak 2019)</span></p>
+</div>
+<hr />
+<h1>Support Vector Machine</h1>
+<p><img src="../data/02/Kernel_Machine.png" style="height:260px;width:auto;"></p>
+<ul>
+<li>Support vector machines implement the large margin principle.</li>
+<li>They apply non-linear mappings.</li>
+<li>Importantly, the scalar product does not have to be computed in the high-dimenional space which is much more efficient.</li>
+<li>The kernel function (weighted by multipliers) is applied wrt. the support vectors.</li>
+</ul>
+<div class="biblio">
+<p>SVMs go back to <span class="citation" data-cites="Vapnik1998">(Vapnik 1998)</span> , and a good tutorial can be found in <span class="citation" data-cites="Burges98atutorial">(Burges 1998)</span>.</p>
+</div>
+<hr />
+<h1 class="sub">Kernels as Mappings</h1>
+<p>Mappings transform features.</p>
+<p>There are many types and implementations:</p>
+<div class="incremental">
+<ul class="incremental">
+<li>linear mappings: can be easily constructed from few data</li>
+<li>Kernel machines: linear superposition of non-linear Kernels</li>
+<li>Gaussian processes: generalize deterministic mappings</li>
+<li>Neural networks: concatenation of many simple mappings (“neurons”)</li>
+</ul>
+</div>
+<hr />
+<h1 data-layout="columns">Comparison of Decision Boundaries of Classifiers</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1" data-align="center">
+<div class="box left" data-align="center">
+<h2 class="left" data-align="center">Input</h2>
+<p><img src="../data/03/sphx_glr_plot_classifier_comparison_001_A_input.png" style="height:480px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-2" data-align="center">
+<div class="box center fragment" data-align="center">
+<h2 class="center" data-align="center">Nearest Neighbor</h2>
+<p><img src="../data/03/sphx_glr_plot_classifier_comparison_001_B_nearest.png" style="height:480px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3" data-align="center">
+<div class="box right fragment" data-align="center">
+<h2 class="right" data-align="center">SVM</h2>
+<p><img src="../data/03/sphx_glr_plot_classifier_comparison_001_C_SVM.png" style="height:480px;width:auto;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>from <a href="https://scikit-learn.org/stable/auto_examples/classification/plot_classifier_comparison.html">scikit-learn.org</a></p>
+</div>
+</div>
+<hr />
+<h1 class="sub" data-layout="columns">Comparison of Decision Boundaries of Classifiers</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1" data-align="center">
+<div class="box left" data-align="center">
+<h2 class="left" data-align="center">Input</h2>
+<p><img src="../data/03/sphx_glr_plot_classifier_comparison_001_A_input.png" style="height:480px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-2" data-align="center">
+<div class="box center fragment" data-align="center">
+<h2 class="center" data-align="center">Neural Network</h2>
+<p><img src="../data/03/sphx_glr_plot_classifier_comparison_001_D_nnet.png" style="height:480px;width:auto;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3" data-align="center">
+<div class="box right fragment" data-align="center">
+<h2 class="right" data-align="center">Gaussian Process</h2>
+<p><img src="../data/03/sphx_glr_plot_classifier_comparison_001_E_gp.png" style="height:480px;width:auto;"></p>
+</div>
+</div>
+</div>
+<hr />
+<h1>Two perspectives on function learning</h1>
+<p>SVM and kernel machines already offer two different spaces:</p>
+<ul>
+<li>an input space and</li>
+<li>a function space that we exploited through the kernel function.</li>
+</ul>
+<p>When we learn a parametric model, we can consider the parameters</p>
+<ul>
+<li>as a distribution over parameters,</li>
+<li>which induces a distribution over functions.</li>
+</ul>
+<div class="box fragment">
+<h2>Guiding Question</h2>
+<p>Can we directly work in the space of functions and make predictions through marginalization?</p>
+</div>
+<hr />
+<h1 data-layout="columns">Gaussian Processes – Bayesian Inference</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Prior</h2>
+<div>
+<figure><img src="../data/03/rasmussen_2_2_b_prior.svg" style="height:auto;width:540px;" alt="Three random function rollouts for a zero-mean prior." title="fig:"><figcaption>Three random function rollouts for a zero-mean prior.</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right fragment">
+<h2 class="right">Posterior</h2>
+<div>
+<figure><img src="../data/03/rasmussen_2_2_b_posterior.svg" style="height:auto;width:540px;" alt="Three random function drawn from the posterior that includes example points." title="fig:"><figcaption>Three random function drawn from the posterior that includes example points.</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<div class="biblio">
+<p>We are following <span class="citation" data-cites="rasmussen2006">(Rasmussen and Williams 2006)</span> and <span class="citation" data-cites="rasmussen2016">(Rasmussen 2016)</span>.</p>
+</div>
+</div>
+</div>
+<hr />
+<h1 data-layout="columns">Gaussian Processes Overview</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>aware of uncertainty of the fitted GP that increases away from the training data,</li>
+<li>let you incorporate expert knowledge,</li>
+<li>are non-parametric,</li>
+<li>need to take into account the whole training data for prediction.</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<div>
+<figure><img src="../data/03/sphx_glr_plot_gpr_noisy_targets_002.png" style="height:auto;width:480px;" alt="Three random function drawn from the posterior that includes example points." title="fig:"><figcaption>Three random function drawn from the posterior that includes example points.</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>Further reading: <span class="citation" data-cites="rasmussen2006">(Rasmussen and Williams 2006)</span>.</p>
+</div>
+</div>
+<hr />
+<h1 class="section" data-background-color="#2CA02C">Probabilities and Bayesian Reasoning</h1>
+<hr />
+<h1>Basic rules of probability</h1>
+<div class="box">
+<h2>Product rule</h2>
+<p>The joint probability of an event <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> is given as</p>
+<p><span class="math display">\[ p(A,B) = p(A \wedge B) = p(A|B)p(B) \]</span></p>
+</div>
+<div class="box">
+<h2>Sum rule</h2>
+<p>From a joint distribution <span class="math inline">\(p(A,B)\)</span>, we get the marginal distribution</p>
+<p><span class="math display">\[ p(A) = \sum_b p(A,B) = \sum_b p(A|B=b) p(B=b) \]</span></p>
+</div>
+<hr />
+<h1 class="sub">Example: Two dice</h1>
+<p>We are throwing two dices – a red one (containing numbers 1 to 6) and a blue one which contains each of the numbers from 1 to 3 twice. We throw the blue one twice as often.</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><span class="math inline">\(p(C,N)\)</span></th>
+<th style="text-align: center;">1</th>
+<th style="text-align: center;">2</th>
+<th style="text-align: center;">3</th>
+<th style="text-align: center;">4</th>
+<th style="text-align: center;">5</th>
+<th style="text-align: center;">6</th>
+<th style="text-align: center;">any number <span class="math inline">\(p(C)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">red</td>
+<td style="text-align: center;">1/9</td>
+<td style="text-align: center;">1/9</td>
+<td style="text-align: center;">1/9</td>
+<td style="text-align: center;">1/9</td>
+<td style="text-align: center;">1/9</td>
+<td style="text-align: center;">1/9</td>
+<td style="text-align: center;">6/9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">blue</td>
+<td style="text-align: center;">1/9</td>
+<td style="text-align: center;">1/9</td>
+<td style="text-align: center;">1/9</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3/9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">any color <span class="math inline">\(p(N)\)</span></td>
+<td style="text-align: center;">2/9</td>
+<td style="text-align: center;">2/9</td>
+<td style="text-align: center;">2/9</td>
+<td style="text-align: center;">1/9</td>
+<td style="text-align: center;">1/9</td>
+<td style="text-align: center;">1/9</td>
+<td style="text-align: center;">9/9</td>
+</tr>
+</tbody>
+</table>
+<p>Joint probabilities <span class="math inline">\(p(C,N)\)</span> are given in the central area.</p>
+<p>The marginal probabilities are given at the bottom (<span class="math inline">\(p(N)\)</span>) and on the right (<span class="math inline">\(p(C)\)</span>).</p>
+<hr />
+<h1 class="sub">Example: Conditional Probabilities</h1>
+<p>Conditional probabilities are calculated through renormalization: $ p(C|N) = $</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><span class="math inline">\(P(C|N)\)</span></th>
+<th style="text-align: center;">1</th>
+<th style="text-align: center;">2</th>
+<th style="text-align: center;">3</th>
+<th style="text-align: center;">4</th>
+<th style="text-align: center;">5</th>
+<th style="text-align: center;">6</th>
+<th style="text-align: left;">any number</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">red</td>
+<td style="text-align: center;">1/2</td>
+<td style="text-align: center;">1/2</td>
+<td style="text-align: center;">1/2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;">9/2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">blue</td>
+<td style="text-align: center;">1/2</td>
+<td style="text-align: center;">1/2</td>
+<td style="text-align: center;">1/2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;">3/2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">any color</td>
+<td style="text-align: center;">2/2</td>
+<td style="text-align: center;">2/2</td>
+<td style="text-align: center;">2/2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<div class="biblio">
+<p>Example from <span class="citation" data-cites="wiskott2016">(Wiskott 2016)</span>.</p>
+</div>
+<hr />
+<h1>Bayes rule</h1>
+<p><img src="../data/04/bayes_visual0.svg" style="height:600px;width:auto;" class="fragment current-visible"> <img src="../data/04/bayes_visual1.svg" style="height:600px;width:auto;margin-top:-600px;" class="fragment current-visible"> <img src="../data/04/bayes_visual2.svg" style="height:600px;width:auto;margin-top:-600px;" class="fragment current-visible"> <img src="../data/04/bayes_visual3.svg" style="height:600px;width:auto;margin-top:-600px;" class="fragment current-visible"> <img src="../data/04/bayes_visual4.svg" style="height:600px;width:auto;margin-top:-600px;" class="fragment"></p>
+<hr />
+<h1 class="sub">Bayes’ rule</h1>
+<p>… tells us how to invert conditional probabilities:</p>
+<p><span class="math display">\[\begin{align*}
+
+p(A,B) &amp;= p(A|B)p(B) = p(B|A) p(A) \\
+\Rightarrow p(B|A) &amp;= \frac{p(A|B) p(B)}{p(A)}
+\end{align*}\]</span></p>
+<p>Here,</p>
+<ul>
+<li><span class="math inline">\(p(B)\)</span> is the <em>a priory probability</em>, or the prior,</li>
+<li><span class="math inline">\(p(A|B)\)</span> is the <em>likelihood of <span class="math inline">\(B\)</span> for a fixed <span class="math inline">\(A\)</span></em>,</li>
+<li>and <span class="math inline">\(p(B|A)\)</span> is the <em>a posteriori probability</em> of <span class="math inline">\(B\)</span> given <span class="math inline">\(A\)</span>.</li>
+</ul>
+<hr />
+<h1>Gaussian (normal) distribution</h1>
+<p>Is characterized by mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma\)</span>. The probability distribution is given as</p>
+<p><span class="math display">\[
+p(X = x) = \mathcal{N} (x | \mu, \sigma^2) = \frac{1}{\sqrt{2\pi \sigma^2}} e^{-\frac{1}{2\sigma^2}(x-\mu)^2}
+\]</span></p>
+<p>The multivariate Gaussian for <span class="math inline">\(D\)</span> dimensions is given as</p>
+<p><span class="math display">\[
+\mathcal{N} (\vec{x} | \vec{\mu}, \Sigma) = \frac{1}{(2\pi)^{D/2} (det\ \Sigma)^{1/2}} exp\ (-\frac{1}{2} (\vec{x}-\vec{\mu})^T\Sigma^{-1}(\vec{x} - \vec{\mu}) )
+\]</span></p>
+<p>For <a href="https://distill.pub/2019/visual-exploration-gaussian-processes/#Multivariate">Visual Exploration of Covariance and GP</a></p>
+<hr />
+<h1 class="section" data-background-color="#2CA02C">Gaussian Process – Distribution over Parameters</h1>
+<hr />
+<h1>Bayesian Inference</h1>
+<p>Our goal is to establish inferences between inputs and targets. This is the conditional distribution of the targets given the input.</p>
+<p>Our training set <span class="math inline">\(\mathcal{D}\)</span> consists of <span class="math inline">\(n\)</span> observations: <span class="math display">\[ \mathcal{D} = \{ (\vec{x}_i, y_i) | i = 1,...,n \}
+\]</span></p>
+<p>which we can collect in the design matrix.</p>
+<div class="biblio">
+<p><span class="citation" data-cites="rasmussen2006">(Rasmussen and Williams 2006)</span></p>
+</div>
+<hr />
+<h1>A prior on parameters</h1>
+<p>In a parametric model <span class="math inline">\(\mathcal{M}\)</span>, the model is defined by the structure and the parameters:</p>
+<p><span class="math display">\[ f_w(\vec{x}) = \sum_{m=0}^{M} w_m \phi_m(\vec{x})\]</span></p>
+<p>We can define a prior <span class="math inline">\(p(\vec{w} | \mathcal{M})\)</span> for the parameters of the model – this determines the functions the model can generate.</p>
+<ul>
+<li>First, we are selecting a structure.</li>
+<li>Secondly, we are selecting a probability distribution for the parameters.</li>
+</ul>
+<hr />
+<h1 class="columns sub">Example: A prior distribution over functions</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>As an example,</p>
+<ul>
+<li>we choose a polynomical model with <span class="math inline">\(M = 17\)</span>: <span class="math inline">\(\phi_m(\vec{x}) = \vec{x}^m\)</span></li>
+<li>as a prior for the parameter distribution we choose a normal distribution: <span class="math display">\[p(w_m) = \mathcal{N} (w_m | \mu, \sigma_w^2)\]</span></li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img src="../data/04/rasmussen2016_parametric_function.svg" style="height:auto;width:540px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>Shown is one example for which we sampled all the parameters from the normal distribution.</p>
+</div>
+</div>
+<hr />
+<h1>Distribution over functions</h1>
+<ul>
+<li>We have seen now an algorithm for building a model through selecting the model type and sample parameters.</li>
+</ul>
+<div class="incremental">
+<ul class="incremental">
+<li><p>But we are interested in predictions of the model and not the parameters as such.</p></li>
+<li><p>Secondly, we want to work directly in the space of functions. This becomes possible as a distribution over parameters induces a distribution over functions <span class="math inline">\(p(\vec{f} | \mathcal{M})\)</span>.</p></li>
+<li><p>This would be simpler and allow for more efficient inference.</p></li>
+</ul>
+</div>
+<hr />
+<h1 class="columns">Posterior probabilities for a function</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>Our goal is to use our functions <span class="math inline">\(\vec{f}\)</span> to make predictions for novel inputs. But until now, we have only looked at the prior for these functions <span class="math inline">\(p(\vec{f}| \mathcal{M})\)</span>.</p>
+<p>We are interested in the posterior distribution of the function – that is which is conditioned on our evidence:</p>
+<p><span class="math display">\[\begin{align*}
+
+p(\vec{f} | \vec{y}) = \frac{p(\vec{y}|\vec{f}) p(\vec{f})}{p(\vec{y})}
+
+\end{align*}\]</span></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img src="../data/04/rasmussen2016_sample_posterior.svg" style="height:auto;width:400px;"></p>
+<p>Sample from the posterior <span class="citation" data-cites="rasmussen2016">(Rasmussen 2016)</span></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<div class="incremental">
+<ul class="incremental">
+<li>we can consider this as: when sampling from the prior, reject only that fit the data (go through the data points)</li>
+<li>closeness to the data is given through the likelihood <span class="math inline">\(p(\vec{y}|\vec{f})\)</span></li>
+</ul>
+</div>
+</div>
+</div>
+<hr />
+<h1>Drawback of polynomials as priors for functions</h1>
+<p><img src="../data/04/rasmussen2016_polynomial_samples.svg" style="height:auto;width:800px;"></p>
+<p>Shown are samples for parameters for polynomial functions of different order <span class="citation" data-cites="rasmussen2016">(Rasmussen 2016)</span>.</p>
+<hr />
+<h1 class="sub">Drawback of sampling over parameters</h1>
+<div class="incremental">
+<ul class="incremental">
+<li>Distributions over parameters induce distribution over functions.</li>
+<li>But sampling over parameter space and using priors over functions might not lead to good results (see example for polynomials).</li>
+<li>Therefore, we want to work directly on priors and probability distributions over functions.</li>
+<li>This leads to the question of how probability distribution over functions look like and how they could be specified.</li>
+</ul>
+</div>
+<hr />
+<h1> </h1>
+<p><iframe src="http://www.it.uu.se/edu/course/homepage/apml/GP/index.html">Browser does not support iframe.</iframe></p>
+<hr />
+<h1 data-layout="columns">Gaussian Processes</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Prior</h2>
+<div>
+<figure><img src="../data/03/rasmussen_2_2_b_prior.svg" style="height:auto;width:540px;" alt="Three random function rollouts for a zero-mean prior." title="fig:"><figcaption>Three random function rollouts for a zero-mean prior.</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right fragment">
+<h2 class="right">Posterior</h2>
+<div>
+<figure><img src="../data/03/rasmussen_2_2_b_posterior.svg" style="height:auto;width:540px;" alt="Three random function drawn from the posterior that includes example points." title="fig:"><figcaption>Three random function drawn from the posterior that includes example points.</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<div class="biblio">
+<p>We are following <span class="citation" data-cites="rasmussen2006">(Rasmussen and Williams 2006)</span> and [rasmussen2016].</p>
+</div>
+</div>
+</div>
+<hr />
+<h1 class="section" data-background-color="#2CA02C">Gaussian Process – Parametric View</h1>
+<hr />
+<h1>Bayesian Analysis of Linear Regression</h1>
+<p>We do regression on a function <span class="math inline">\(t(\vec{x}) = \vec{x}^T \vec{w}\)</span> with added Gaussian noise.</p>
+<p>This leads to observation <span class="math display">\[ y = f(\vec{x}) + \varepsilon, \varepsilon \sim \mathcal{N}(\vec{0}, \sigma^2_n) \]</span></p>
+<div class="box fragment">
+<h2></h2>
+<p>We can calculate the likelihood of the data (due to i.i.d.):</p>
+<p><span class="math display">\[\begin{align*}
+
+p(\vec{y}| \vec{X}, \vec{w})
+
+\end{align*}\]</span></p>
+</div>
+<div class="box fragment">
+<h2></h2>
+<p>A prior on the parameters is required and we use a zero mean Gaussian with covariance matrix <span class="math inline">\(\Sigma_p\)</span>:</p>
+<p><span class="math display">\[ \vec{w} \sim \mathcal{N}(\vec{0}, \Sigma_p) 
+\]</span></p>
+</div>
+<hr />
+<h1>Inference in Bayesian linear model</h1>
+<p>We are looking for the posterior distribution over the weights which we get through Bayes’ rule:</p>
+<p><span class="math display">\[
+\text{posterior} = \frac{\text{likelihood } \times \text{ prior}}{\text{marginal likelihood}},\  p(\vec{w} | \vec{y}, \ X) = \frac{p(\vec{y}|X, w) p(\vec{w})}{p(\vec{y}| X)}
+\]</span></p>
+<hr />
+<h1 class="unnumbered biblio">References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-Burges98atutorial">
+<p>Burges, Christopher J. C. 1998. “A Tutorial on Support Vector Machines for Pattern Recognition.” <em>Data Mining and Knowledge Discovery</em> 2: 121–67.</p>
+</div>
+<div id="ref-goodfellow2016">
+<p>Goodfellow, Ian, Yoshua Bengio, and Aaron Courville. 2016. <em>Deep Learning</em>. MIT Press.</p>
+</div>
+<div id="ref-learnopencv2019">
+<p>Nayak, Sunita. 2019. “Image Classification Using Transfer Learning in Pytorch.” 2019. <a href="https://www.learnopencv.com/image-classification-using-transfer-learning-in-pytorch/">https://www.learnopencv.com/image-classification-using-transfer-learning-in-pytorch/</a>.</p>
+</div>
+<div id="ref-rasmussen2016">
+<p>Rasmussen, Carl Edward. 2016. “Probabilistic Machine Learning.” Lecture Notes, University of Cambridge.</p>
+</div>
+<div id="ref-rasmussen2006">
+<p>Rasmussen, CE., and CKI. Williams. 2006. <em>Gaussian Processes for Machine Learning</em>. Adaptive Computation and Machine Learning. Cambridge, MA, USA: Biologische Kybernetik; Max-Planck-Gesellschaft; MIT Press.</p>
+</div>
+<div id="ref-Vapnik1998">
+<p>Vapnik, Vladimir N. 1998. <em>Statistical Learning Theory</em>. Wiley-Interscience.</p>
+</div>
+<div id="ref-weng2018ae">
+<p>Weng, Lilian. 2018. “From Autoencoder to Beta-Vae.” 2018. <a href="https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html">https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html</a>.</p>
+</div>
+<div id="ref-wiskott2016">
+<p>Wiskott, Laurenz. 2016. “Lecture Notes on Bayesian Theory and Graphical Models.” Lecture Notes, University of Bochum.</p>
+</div>
+</div>
+<!-- The previous line must be left aligned! -->
+
+                              <hr>
+          <address>
+                        <p class="author"> Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
+                      </address>
+        </div>
+      </div>
+    </div>
+  </body>
+
+
+  </html>
