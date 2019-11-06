@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">     <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">       <title>05 Gaussian Process 2</title>
+    <style type="text/css">
+      code {
+        white-space: pre;
+      }
+    </style>
+        
+    <link rel="stylesheet" href="../support/css/handout.css">
+    <script src="../support/js/handout.js"></script>
+
+    <!-- MathJax config -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+      menuSettings: { zoom: "Double-Click" },
+      TeX: {
+          Macros: {
+            R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+            laplace: "{\\Delta}",
+            grad: "{\\nabla}",
+            T: "^{\\mathsf{T}}",
+
+            norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+            iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+            vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+            mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+            set: ['\\mathcal{#1}', 1],
+            func: ['\\mathrm{#1}', 1],
+            trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+            matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+            vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+            of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+            diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+            pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+
+            vc: ['\\mathbf{#1}', 1],
+            abs: ['\\lvert#1\\rvert', 1],
+            norm: ['\\lVert#1\\rVert', 1],
+            det: ['\\lvert#1\\rvert', 1],
+            qt: ['\\hat{\\vc {#1}}', 1],
+            mt: ['\\boldsymbol{#1}', 1],
+            pt: ['\\boldsymbol{#1}', 1],
+            textcolor: ['\\color{#1}', 1]
+          }
+      }
+      });
+    </script>
+    <script src="../support/vendor/mathjax/MathJax.js?config=TeX-AMS_SVG"></script>
+
+    <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+        window.location.reload(true);
+      };
+    </script>
+            <link rel="stylesheet" href="../mschilling.css">
+      </head>
+
+  <body>
+        <div class="container decker-handout">
+            <header>
+        <div class="page-header">
+          <div class="row">
+            <div class="col-lg-12">
+              <h1 class="title">05 Gaussian Process 2</h1>
+                            <p class="lead subtitle">Advanced Machine Learning</p>
+                          </div>
+          </div>
+        </div>
+      </header>
+            <div class="row">
+        <div class="col-lg-12">
+          
+<!-- body must not be indented or code blocks render badly -->
+<!-- The following line must be left aligned! -->
+<hr />
+<h1 class="section" data-background-color="#2CA02C">Recap - Probabilities and Bayesian Reasoning</h1>
+<hr />
+<h1 data-layout="columns">Recap – Gaussian (normal) distribution</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>Is characterized by mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma\)</span>. The probability distribution is given as</p>
+<p><span class="math display">\[
+p(X = x) = \mathcal{N} (x | \mu, \sigma^2) = \frac{1}{\sqrt{2\pi \sigma^2}} e^{-\frac{1}{2\sigma^2}(x-\mu)^2}
+\]</span></p>
+<p>The multivariate Gaussian for <span class="math inline">\(D\)</span> dimensions is given as</p>
+<p><span class="math display">\[
+\mathcal{N} (\vec{x} | \vec{\mu}, \Sigma) = \frac{1}{(2\pi)^{D/2} (det\ \Sigma)^{1/2}} e^{(-\frac{1}{2} (\vec{x}-\vec{\mu})^T\Sigma^{-1}(\vec{x} - \vec{\mu}) )}
+\]</span></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<div>
+<figure><img src="../data/05/rasmussen_gaussian.svg" style="height:auto;width:400px;" alt="Gaussian distributions" title="fig:"><figcaption>Gaussian distributions</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<hr />
+<h1>Recap – Bayes’ rule</h1>
+<p>… tells us how to invert conditional probabilities:</p>
+<p><span class="math display">\[\begin{align*}
+
+p(A,B) &amp;= p(A|B)p(B) = p(B|A) p(A) \\
+\Rightarrow p(B|A) &amp;= \frac{p(A|B) p(B)}{p(A)}
+\end{align*}\]</span></p>
+<p>Here,</p>
+<ul>
+<li><span class="math inline">\(p(B)\)</span> is the <em>a priory probability</em>, or the prior,</li>
+<li><span class="math inline">\(p(A|B)\)</span> is the <em>likelihood of <span class="math inline">\(B\)</span> for a fixed <span class="math inline">\(A\)</span></em>,</li>
+<li>and <span class="math inline">\(p(B|A)\)</span> is the <em>a posteriori probability</em> of <span class="math inline">\(B\)</span> given <span class="math inline">\(A\)</span>.</li>
+</ul>
+<hr />
+<h1 class="section" data-background-color="#2CA02C">Gaussian Process – Parametric View</h1>
+<hr />
+<h1>Bayesian Inference</h1>
+<p>Our goal is to establish inferences between inputs and targets. This is the conditional distribution of the targets given the input.</p>
+<p>Our training set <span class="math inline">\(\mathcal{D}\)</span> consists of <span class="math inline">\(n\)</span> observations: <span class="math display">\[ \mathcal{D} = \{ (\vec{x}_i, y_i) | i = 1,...,n \}
+\]</span></p>
+<p>which we can collect in the design matrix.</p>
+<div class="biblio">
+<p><span class="citation" data-cites="rasmussen2006">(Rasmussen and Williams 2006)</span></p>
+</div>
+<hr />
+<h1>A prior on parameters</h1>
+<p>In a parametric model <span class="math inline">\(\mathcal{M}\)</span>, the model is defined by the structure and the parameters:</p>
+<p><span class="math display">\[ f_w(\vec{x}) = \sum_{m=0}^{M} w_m \phi_m(\vec{x})\]</span></p>
+<p>We can define a prior <span class="math inline">\(p(\vec{w} | \mathcal{M})\)</span> for the parameters of the model – this determines the functions the model can generate.</p>
+<ul>
+<li>First, we are selecting a structure.</li>
+<li>Secondly, we are selecting a probability distribution for the parameters.</li>
+</ul>
+<hr />
+<h1>Bayesian Analysis of Linear Regression</h1>
+<p>We do regression on a function <span class="math inline">\(t(\vec{x}) = \vec{x}^T \vec{w}\)</span> with added Gaussian noise.</p>
+<p>This leads to observation <span class="math display">\[ y = f(\vec{x}) + \varepsilon, \varepsilon \sim \mathcal{N}(\vec{0}, \sigma^2_n) \]</span></p>
+<div class="box fragment">
+<h2></h2>
+<p>We can calculate the likelihood of the data (due to i.i.d.):</p>
+<p><span class="math display">\[\begin{align*}
+
+p(\vec{y}| \vec{X}, \vec{w})
+
+\end{align*}\]</span></p>
+</div>
+<div class="box fragment">
+<h2></h2>
+<p>A prior on the parameters is required and we use a zero mean Gaussian with covariance matrix <span class="math inline">\(\Sigma_p\)</span>:</p>
+<p><span class="math display">\[ \vec{w} \sim \mathcal{N}(\vec{0}, \Sigma_p) 
+\]</span></p>
+</div>
+<hr />
+<h1>Parametric View</h1>
+<p><span class="math display">\[
+f(\vec{x}) = \vec{x}^T \vec{w}, \ y = f(\vec{x}) + \varepsilon, 
+\varepsilon \sim \mathcal{N} ( 0, \sigma_n^2)
+\]</span></p>
+<p>Reminder – Gaussian probability distribution: <span class="math display">\[ g(x) = \frac{1}{\sqrt{2 \pi}\sigma} e^{-\frac{1}{2\sigma^2}(x-\mu)^2}, \mathcal{N} ( \mu, \sigma^2) \]</span></p>
+<div class="box fragment">
+<h2></h2>
+<p>Likelihood: <span class="math display">\[\begin{align*}
+p (\vec{y} | \mathbf{X}, \vec{w} ) &amp;= \prod_{i=1}^n p( y_i | \vec{x}_i, \vec{w}) = \prod_{i=1}^n \frac{1}{\sqrt{2 \pi}\sigma_n} e^{- \frac{(y_i - \vec{x}^T \vec{w})^2}{2\sigma_n^2}} \\
+&amp;= \frac{1}{(2 \pi\sigma_n^2)^{n/2}} e^{- \frac{1}{2\sigma_n^2} |\vec{y} - \vec{x}^T \vec{w}|^2} = \mathcal{N} ( \mathbf{X}^T\vec{w}, \sigma_n^2 \mathbf{I})
+\end{align*}\]</span></p>
+</div>
+<hr />
+<h1 data-layout="columns">Setting the prior</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>Use a zero mean Gaussian as prior on parameters:</p>
+<p><span class="math display">\[
+\vec{w} \sim \mathcal{N} ( 0, \Sigma_p)
+\]</span></p>
+<p><span class="math display">\[\begin{align*}
+
+\text{posterior} &amp;= \frac{\text{likelihood} \times \text{prior}}{\text{marginal likelihood}}, \\ 
+p(\vec{w}| \vec{y}, \mathbf{X}) &amp;= \frac{p(\vec{y}|\mathbf{X}, \vec{w}) p(\vec{w})}{p(\vec{y} | \mathbf{X})}
+\end{align*}\]</span></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<div>
+<figure><img src="../data/05/rasmussen_2_1_a_prior_w.svg" style="height:auto;width:480px;" alt="Contours of the prior distribution (1 and 2 standard deviation equi-probability lines) for f(x) = w_1 + w_2 x" title="fig:"><figcaption>Contours of the prior distribution (1 and 2 standard deviation equi-probability lines) for <span class="math inline">\(f(x) = w_1 + w_2 x\)</span></figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<hr />
+<h1>Deriving the posterior</h1>
+<p>Importantly, the marginal likelihood is independent of the weights and acts as a normalizing constant which does not affect the search for the best weights.</p>
+<p><span class="math display">\[
+p(\vec{y} | \mathbf{X}) = \int p(\vec{y} | \mathbf{X}, \vec{w}) p(\vec{w}) d\vec{w}
+\]</span></p>
+<div class="box fragment">
+<h2></h2>
+<p><span class="math display">\[\begin{align*} 
+p(\vec{w}| \vec{y}, \mathbf{X}) &amp;\varpropto e^{- \frac{1}{2\sigma_n^2}(\vec{y} - \mathbf{X}^T \vec{w})^T (\vec{y} - \mathbf{X}^T \vec{w})} e^{ - \frac{1}{2}\vec{w}^T \Sigma_p^{-1}\vec{w} } \\
+
+&amp;\varpropto e^{- \frac{1}{2}(\vec{w} - \bar{\vec{w}})^T (\frac{1}{\sigma_n^2} \mathbf{X} \mathbf{X}^T + \Sigma_p^{-1}) (\vec{w} - \bar{\vec{w}})}, \bar{\vec{w}} = \sigma_n^{-2} (\sigma_n^{-2} \mathbf{X} \mathbf{X}^T + \Sigma_p^{-1})^{-1}\mathbf{X}\vec{y}
+
+\end{align*}\]</span></p>
+</div>
+<div class="box fragment">
+<h2></h2>
+<p>The form of the posterior distribution is again Gaussian (recognize the form) with mean <span class="math inline">\(\bar{\vec{w}}\)</span> and covariance matrix <span class="math inline">\(\mathbf{A}^{-1}\)</span>:</p>
+<p><span class="math display">\[\begin{align*} 
+p(\vec{w}| \vec{y}, \mathbf{X}) &amp;\sim \mathcal{N}( \bar{\vec{w}} = \frac{1}{\sigma_n^2}\mathbf{A}^{-1}\mathbf{X}\vec{y}, \mathbf{A}^{-1} ),\  \mathbf{A} = \sigma_n^{-2} \mathbf{X} \mathbf{X}^T + \Sigma_p^{-1}
+
+\end{align*}\]</span></p>
+</div>
+<hr />
+<h1 class="sub">Deriving the posterior – provides optimal weights</h1>
+<p><span class="math display">\[\begin{align*} 
+p(\vec{w}| \vec{y}, \mathbf{X}) &amp;\sim \mathcal{N}( \bar{\vec{w}} = \frac{1}{\sigma_n^2}\mathbf{A}^{-1}\mathbf{X}\vec{y}, \mathbf{A}^{-1} ),\  \mathbf{A} = \sigma_n^{-2} \mathbf{X} \mathbf{X}^T + \Sigma_p^{-1}
+
+\end{align*}\]</span></p>
+<p>The mean of this posterior distribution maximizes the (a posterior = MAP) estimate of <span class="math inline">\(\vec{w}\)</span>.</p>
+<p>But, we are not interested in optimal weights (maximum a posteriori) – instead, we want to do good predictions. This will lead to the function view – we are looking at probability distributions over functions.</p>
+<hr />
+<h1 data-layout="columns">Example of Bayesian linear model: Condition on data</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<div>
+<figure><img src="../data/05/rasmussen_2_1_b_data.svg" style="height:auto;width:400px;" alt="Three training data points." title="fig:"><figcaption>Three training data points.</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<div>
+<figure><img src="../data/05/rasmussen_2_1_c_likelihood.svg" style="height:auto;width:400px;" alt="Likelihood p(\vec{y}|\mathbf{X}, \vec{w}) for assumed noise \sigma_n = 1" title="fig:"><figcaption>Likelihood <span class="math inline">\(p(\vec{y}|\mathbf{X}, \vec{w})\)</span> for assumed noise <span class="math inline">\(\sigma_n = 1\)</span></figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>Slope is much more constrained/determined than intercept term.</p>
+</div>
+</div>
+<hr />
+<h1 data-layout="columns">Example of Bayesian linear model: Condition on data</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<div>
+<figure><img src="../data/05/rasmussen_2_1_c_likelihood.svg" style="height:auto;width:400px;" alt="Likelihood p(\vec{y}|\mathbf{X}, \vec{w}) for assumed noise \sigma_n = 1" title="fig:"><figcaption>Likelihood <span class="math inline">\(p(\vec{y}|\mathbf{X}, \vec{w})\)</span> for assumed noise <span class="math inline">\(\sigma_n = 1\)</span></figcaption></figure>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<div>
+<figure><img src="../data/05/rasmussen_2_1_d_posterior.svg" style="height:auto;width:400px;" alt="Posterior p(\vec{w} | \mathbf{X}, \vec{y})." title="fig:"><figcaption>Posterior <span class="math inline">\(p(\vec{w} | \mathbf{X}, \vec{y})\)</span>.</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>In the posterior, the intercept is been pulled (by the prior on the weights) towards zero.</p>
+</div>
+</div>
+<hr />
+<h1>Predictive Distribution</h1>
+<p>We are not choosing (as we would in non-Bayesian schemes, MAP) a specific weight. Instead, we work with the distribution over parameters which is a distribution over functions.</p>
+<p>For prediction, we average over all possible parameters. This gives us a predictive distribution <span class="math inline">\(f_*\)</span> for a test case <span class="math inline">\(\vec{x}_*\)</span></p>
+<p><span class="math display">\[\begin{align*} 
+p(f_*| \vec{x}_*, \mathbf{X}, \vec{y}) &amp;= \int p(f_*| \vec{x}_*, \vec{w})
+p(\vec{w}| \mathbf{X}, \vec{y}) d\vec{w} \\
+&amp;= \mathcal{N} (\frac{1}{\sigma_n^2}\vec{x}_*^T \mathbf{A}^{-1}\
+\mathbf{X} \vec{y}, \vec{x}_*^T \mathbf{A}^{-1}\vec{x}_*).
+\end{align*}\]</span></p>
+<p>This predictive distribution is again Gaussian.</p>
+<hr />
+<h1 data-layout="columns">Example of Bayesian linear model: Predcition</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>Superimposed on the data is the predictive mean plus contours for two standard deviations of the (noise-free) predictive distribution <span class="math display">\[p(f_∗ | \vec{x}_∗, \mathbf{X}, \vec{y}).\]</span></p>
+<p>which is a Gaussian probability distribution for every <span class="math inline">\(x_*\)</span> (see last slide): <span class="math display">\[\mathcal{N} (\frac{1}{\sigma_n^2}\vec{x}_*^T \mathbf{A}^{-1}\
+\mathbf{X} \vec{y}, \vec{x}_*^T \mathbf{A}^{-1}\vec{x}_*).
+\]</span></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<div>
+<figure><img src="../data/05/rasmussen_2_1_b_data.svg" style="height:auto;width:480px;" alt="Three training data points." title="fig:"><figcaption>Three training data points.</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<hr />
+<h1 class="section" data-background-color="#2CA02C">Projection of Inputs into Feature Space</h1>
+<hr />
+<h1>High dimensional feature space</h1>
+<div class="incremental">
+<ul class="incremental">
+<li>Linear model suffers from limited expressiveness.</li>
+<li>Project inputs into high-dimensional space using set of basis functions.</li>
+<li>Combine fixed functions into linear model.</li>
+</ul>
+</div>
+<p><span class="math display">\[ f(\vec{x}) = \phi(\vec{x})^T \vec{w}
+\]</span></p>
+<hr />
+<h1 class="sub">Solution in high-dimensional feature space</h1>
+<p><span class="math inline">\(\phi()\)</span> provides a projection into a new space.</p>
+<p>The predictive distribution now becomes:</p>
+<p><span class="math display">\[\begin{align*} 
+p( f_* | \vec{x}_*, \vec{y}, \mathbf{X}) &amp;\sim \mathcal{N}( \frac{1}{\sigma_n^2}\phi(\vec{x}_*)^T \mathbf{A}^{-1} \Phi \vec{y}, \phi(\vec{x}_*)^T \mathbf{A}^{-1}\phi(\vec{x}_* )), \\
+
+\mathbf{A} &amp;= \sigma_n^{-2} \Phi \Phi^T + \Sigma_p^{-1}
+
+\end{align*}\]</span></p>
+<p>Where <span class="math inline">\(\Phi\)</span> is an aggregation of all <span class="math inline">\(\phi(\mathbf{X})\)</span> of the training data set.</p>
+<hr />
+<h1 class="sub">Reformulation as a kernel</h1>
+<p>A reformulation of the probability distribution of functions over the feature space will only contain inner products (in all instances) for the projections.</p>
+<div class="box definition">
+<h2 class="definition">Kernel trick</h2>
+<p>From an algorithm given by inner products in the input space, we can lift it into feature space using a kernel function and replacing those inner products by <span class="math inline">\(k(\vec{x}, \vec{x}&#39; )\)</span></p>
+</div>
+<hr />
+<h1 class="columns">Example: A prior distribution over functions</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>As an example,</p>
+<ul>
+<li>we choose a polynomical model with <span class="math inline">\(M = 17\)</span>: <span class="math inline">\(\phi_m(\vec{x}) = \vec{x}^m\)</span></li>
+<li>as a prior for the parameter distribution we choose a normal distribution: <span class="math display">\[p(w_m) = \mathcal{N} (w_m | \mu, \sigma_w^2)\]</span></li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img src="../data/04/rasmussen2016_parametric_function.svg" style="height:auto;width:540px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>Shown is one example for which we sampled all the parameters from the normal distribution.</p>
+</div>
+</div>
+<hr />
+<h1>Towards posterior probabilities</h1>
+<ul>
+<li>We have seen now an algorithm for building a model through selecting the model type and sample parameters.</li>
+</ul>
+<div class="incremental">
+<ul class="incremental">
+<li>But we are interested in predictions of the model and not the parameters as such.</li>
+</ul>
+</div>
+<hr />
+<h1 class="columns sub">Posterior probabilities for a function</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>Our goal is to use our functions <span class="math inline">\(\vec{f}\)</span> to make predictions for novel inputs. But until now, we have only looked at the prior for these functions <span class="math inline">\(p(\vec{f}| \mathcal{M})\)</span>.</p>
+<p>We are interested in the posterior distribution of the function – that is which is conditioned on our evidence:</p>
+<p><span class="math display">\[\begin{align*}
+
+p(\vec{f} | \vec{y}) = \frac{p(\vec{y}|\vec{f}) p(\vec{f})}{p(\vec{y})}
+
+\end{align*}\]</span></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img src="../data/04/rasmussen2016_sample_posterior.svg" style="height:auto;width:400px;"></p>
+<p>Sample from the posterior <span class="citation" data-cites="rasmussen2016">(Rasmussen 2016)</span></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<div class="incremental">
+<ul class="incremental">
+<li>we can consider this as: when sampling from the prior, allow only sampled functions that fit the data (go through the data points)</li>
+<li>closeness to the data is given through the likelihood <span class="math inline">\(p(\vec{y}|\vec{f})\)</span></li>
+</ul>
+</div>
+</div>
+</div>
+<hr />
+<h1>Drawback of polynomials as priors for functions</h1>
+<p><img src="../data/04/rasmussen2016_polynomial_samples.svg" style="height:auto;width:800px;"></p>
+<p>Shown are samples for parameters for polynomial functions of different order <span class="citation" data-cites="rasmussen2016">(Rasmussen 2016)</span>.</p>
+<hr />
+<h1 class="sub">Drawback of sampling over parameters</h1>
+<div class="incremental">
+<ul class="incremental">
+<li>Distributions over parameters induce distribution over functions.</li>
+<li>But sampling over parameter space and using priors over functions might not lead to good results (see example for polynomials).</li>
+<li>Therefore, we want to work <em>directly</em> on priors and probability distributions over functions.</li>
+<li>This leads to the question of how probability distribution over functions look like and how they could be specified.</li>
+</ul>
+</div>
+<hr />
+<h1 class="section" data-background-color="#2CA02C">Gaussian Process – Function Space View</h1>
+<hr />
+<h1>Distribution over functions</h1>
+<div class="incremental">
+<ul class="incremental">
+<li><p>We want to work directly in the space of functions. This becomes possible as a distribution over parameters induces a distribution over functions <span class="math inline">\(p(\vec{f} | \mathcal{M})\)</span>.</p></li>
+<li><p>This would be simpler and allow for more efficient inference.</p></li>
+</ul>
+</div>
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<div class="biblio">
+<p>We are following <span class="citation" data-cites="rasmussen2006">(Rasmussen and Williams 2006)</span> and <span class="citation" data-cites="rasmussen2016">(Rasmussen 2016)</span>.</p>
+</div>
+</div>
+<hr />
+<h1 class="columns">Bayesian Perspectives on Functions</h1>
+<div class="single-column-row">
+<div class="box top">
+<h2 class="top"></h2>
+<p>Create Gaussian Distribution for each variable – distribute these through your space.</p>
+<p>Informally such an infinite long vector constitutes a function.</p>
+</div>
+</div>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Prior</h2>
+<p><img src="../data/04/ritter_prior_samples.svg" style="height:auto;width:450px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right fragment">
+<h2 class="right">Posterior</h2>
+<p><img src="../data/04/ritter_posterior_samples.svg" style="height:auto;width:450px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom fragment">
+<h2 class="bottom"></h2>
+<p>A Gaussian process is a collection of random variables, any finite number of which have (consistent) Gaussian distributions.</p>
+</div>
+</div>
+<hr />
+<h1>Marginalization property</h1>
+<p>A Gaussian process can be thought of as an infinite number of Gaussian distributions. It is then specified as an infinitely long mean vector and an infinite by infinite covariance matrix.</p>
+<div class="box fragment">
+<h2></h2>
+<p>While this seems impractical, the marginalization property makes this tractable.</p>
+<p><span class="math display">\[\begin{align*} 
+
+p(\vec{x}) = \int p(\vec{x}, \vec{y}) d\vec{y}
+
+\end{align*}\]</span></p>
+<p>Recall, for Gaussians it holds: <span class="math display">\[\begin{align*} 
+
+p(\vec{x}, \vec{y}) &amp;= \mathcal{N} (
+\left[\begin{array}{c} \vec{a} \\ \vec{b}
+\end{array}\right], 
+\left[\begin{array}{cc} \mathbf{A} &amp; \mathbf{B} \\ \mathbf{B}^T &amp; \mathbf{C}
+\end{array}\right] ) \\
+
+&amp;\Rightarrow p(\vec{x}) = \mathcal{N}(\vec{a}, \mathbf{A})
+\end{align*}\]</span></p>
+<p>This works irrespectively of the size of <span class="math inline">\(\vec{y}\)</span></p>
+</div>
+<hr />
+<h1 class="columns">Gaussian process as a generalization of a Gaussian Distribution</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Gaustian Distribution</h2>
+<p><span class="math display">\[ \mathcal{N}(\mu, \Sigma)\]</span></p>
+<ul>
+<li>Distribution over vectors</li>
+<li>Fully specified by mean and covariance.</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Gaussian Process</h2>
+<p><span class="math display">\[ \mathcal{GP}(m(\vec{x}), k(\vec{x}, \vec{x}’))\]</span></p>
+<ul>
+<li>Distribution over functions.</li>
+<li>Collection of random variables, all of Gaussian distribution.</li>
+<li>Fully specified by a mean function and covariance function <span class="math inline">\(k(\vec{x},\vec{x}&#39;)\)</span>.</li>
+</ul>
+</div>
+</div>
+</div>
+<hr />
+<h1 data-layout="columns">Gaussian Processes</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Prior</h2>
+<div>
+<figure><img src="../data/03/rasmussen_2_2_b_prior.svg" style="height:auto;width:540px;" alt="Three random function rollouts for a zero-mean prior." title="fig:"><figcaption>Three random function rollouts for a zero-mean prior.</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right fragment">
+<h2 class="right">Posterior</h2>
+<div>
+<figure><img src="../data/03/rasmussen_2_2_b_posterior.svg" style="height:auto;width:540px;" alt="Three random function drawn from the posterior that includes example points." title="fig:"><figcaption>Three random function drawn from the posterior that includes example points.</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<ul>
+<li>Covariance function defines the properties in the function space.</li>
+<li>Data points “anchor” the function at specific locations.</li>
+</ul>
+</div>
+</div>
+<hr />
+<h1>Example for a one dimensional Gaussian Process</h1>
+<p><span class="math display">\[\begin{align*} 
+p(f) \sim \mathcal{GP}(m, k), \text{ where } m(x) = 0, \text{ and } k(x, x&#39;) = e^{-\frac{1}{2}(x-x&#39;)^2}.
+\end{align*}\]</span></p>
+<p>Consider, how data constraints random functions and how the distribution over function looks like. We have to focus on a finite subset of function values for <span class="math inline">\(\vec{f} = (f(x_1), ..., f(x_N))^T\)</span> as our data.</p>
+<p><span class="math display">\[\begin{align*} 
+\vec{f} \sim \mathcal{N}(0, \Sigma), \text{ where } \Sigma_{ij} = k(x_i, x_j) = e^{-\frac{1}{2}(x_i - x_j)^2}.
+\end{align*}\]</span></p>
+<hr />
+<h1 class="sub">Example for a one dimensional Gaussian Process</h1>
+<p>We can plot the coordinates of f as a function of the corresponding <span class="math inline">\(x\)</span> values.</p>
+<p><img src="../data/05/rasmussen_random_functions.svg" style="height:auto;width:720px;"></p>
+<div class="biblio">
+<p><span class="citation" data-cites="rasmussen2016">(Rasmussen 2016)</span>.</p>
+</div>
+<hr />
+<h1>Squared Exponential as Covariance function</h1>
+<p>The squared exponential (radial basis functions) is commonly used as a covariance function. The kernel function is defined as</p>
+<p><span class="math display">\[\begin{align*} 
+K_{ij} = k_{ij} = \sigma_1 e^{-\frac{|| \vec{x}_i - \vec{x}_j ||^2}{2 l^2}} \color{red} {+ \sigma_n^2 \delta_{ij}}
+\end{align*}\]</span></p>
+<ul>
+<li><span class="math inline">\(l\)</span> = characteristic lengthscale</li>
+<li><span class="math inline">\(\sigma_1\)</span> = signal variance</li>
+<li><span class="math inline">\(\color{red} {+ \sigma_n^2 \delta_{ij}}\)</span> = also assume prediction noise</li>
+</ul>
+<hr />
+<h1 class="sub columns">Variation of Hyperparameter</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<div>
+<figure><img src="../data/05/rasmussen_2_5_a_lengthscale.svg" style="height:auto;width:360px;" alt="(l, \sigma_1, \sigma_n) = (1., 1., 0.1)" title="fig:"><figcaption><span class="math inline">\((l, \sigma_1, \sigma_n) = (1., 1., 0.1)\)</span></figcaption></figure>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-2">
+<div class="box center fragment">
+<h2 class="center"></h2>
+<div>
+<figure><img src="../data/05/rasmussen_2_5_b_lengthscale.svg" style="height:auto;width:360px;" alt="(l, \sigma_1, \sigma_n) = (0.3, 1.08, 0.00005)" title="fig:"><figcaption><span class="math inline">\((l, \sigma_1, \sigma_n) = (0.3, 1.08, 0.00005)\)</span></figcaption></figure>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right fragment">
+<h2 class="right"></h2>
+<div>
+<figure><img src="../data/05/rasmussen_2_5_c_lengthscale.svg" style="height:auto;width:360px;" alt="(l, \sigma_1, \sigma_n) = (3.0, 1.16, 0.89)" title="fig:"><figcaption><span class="math inline">\((l, \sigma_1, \sigma_n) = (3.0, 1.16, 0.89)\)</span></figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>Prediction from a Gaussian process with different hyperparameters. In grey, 95% confidence region for the underlying function f.</p>
+</div>
+</div>
+<hr />
+<h1> </h1>
+<p><iframe src="http://www.it.uu.se/edu/course/homepage/apml/GP/index.html">Browser does not support iframe.</iframe></p>
+<hr />
+<h1 data-layout="columns">Gaussian Processes Overview</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>aware of uncertainty of the fitted GP that increases away from the training data,</li>
+<li>let you incorporate expert knowledge,</li>
+<li>are non-parametric,</li>
+<li>need to take into account the whole training data for prediction.</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<div>
+<figure><img src="../data/03/sphx_glr_plot_gpr_noisy_targets_002.png" style="height:auto;width:480px;" alt="Three random function drawn from the posterior that includes example points." title="fig:"><figcaption>Three random function drawn from the posterior that includes example points.</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>Further reading: <span class="citation" data-cites="rasmussen2006">(Rasmussen and Williams 2006)</span>.</p>
+</div>
+</div>
+<hr />
+<h1>Example 1: Comparison control of robotic arm</h1>
+<ul>
+<li>seven degrees-of-freedom SARCOS anthropomorphic robot arm</li>
+<li>task is to map from a 21-dimensional input space (7 joint positions, 7 joint velocities, 7 joint accelerations) to 7 joint torques</li>
+</ul>
+<div class="incremental">
+<ul class="incremental">
+<li>real robot arm is actuated hydraulically and lightweight and compliant, no rigid-body-dynamics</li>
+<li>dataset: 48,933 input-output pairs; 44,484 used as a training set</li>
+<li>inputs were linearly rescaled (zero mean and unit variance on the training set)</li>
+<li>The outputs were centered so as to have zero mean on the training set.</li>
+</ul>
+</div>
+<div class="biblio">
+<p><span class="citation" data-cites="rasmussen2006">(Rasmussen and Williams 2006)</span></p>
+</div>
+<hr />
+<h1 class="sub columns">Example 1: Results</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>standardized mean squared error (SMSE): normalized MSE (by the variance of the targets of the test cases)</li>
+<li>Mean standardized log loss (MSLL): evaluate the negative log probability of the target under the model (approximately zero for simple methods, negative is better)</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<div>
+<figure><img src="../data/05/rasmussen_example_results.svg" style="height:auto;width:540px;" alt="Test results on the inverse dynamics problem for a number of different methods (linear regression, rigid body dynamics model, locally weighted projection regression)" title="fig:"><figcaption>Test results on the inverse dynamics problem for a number of different methods (linear regression, rigid body dynamics model, locally weighted projection regression)</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+<hr />
+<h1>Example 2: Learning from demonstration with Gaussian processes</h1>
+<p>"We propose a novel multi-output Gaussian process (MOGP) based on Gaussian mixture regression (GMR). The proposed approach encapsulates the variability retrieved from the demonstrations in the covariance of the MOGP.</p>
+<p>Leveraging the generative nature of GP models, our approach can efficiently modulate trajectories towards new start-, via- or end-points defined by the task.</p>
+<p>Our framework allows the robot to precisely track via-points while being compliant in regions of high variability. We illustrate the proposed approach in simulated examples and validate it in a real-robot experiment."</p>
+<div class="biblio">
+<p><span class="citation" data-cites="Jaquier2019LearningFD">(Jaquier, Ginsbourger, and Calinon 2019)</span></p>
+</div>
+<hr />
+<h1 class="sub">Example 2: Learning from demonstration with Gaussian processes</h1>
+<p><img src="../data/05/jaquier_fig_3.svg" style="height:auto;width:1200px;"></p>
+<hr />
+<h1 class="sub"><figure class="" style=""><div style="position:relative;padding-top:25px;padding-bottom:56.25%;height:0;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" width="560" height="315" src="https://www.youtube.com/embed/jnkHfYN72Bk?iv_load_policy=3&amp;disablekb=1&amp;rel=0&amp;modestbranding=1&amp;autohide=1&amp;start=0" frameborder="0" allowfullscreen=""><p></p></iframe></div></figure></h1>
+<hr />
+<h1>Adapted Overview Topics</h1>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Topic</th>
+<th>Themes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Today</td>
+<td>Introduction</td>
+<td>Types of ML</td>
+</tr>
+<tr class="even">
+<td>2.</td>
+<td>Representation Learning</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>3.</td>
+<td>Dynamic Representation</td>
+<td>Reservoir Computing</td>
+</tr>
+<tr class="even">
+<td>4.</td>
+<td>Summary Representation</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>5.</td>
+<td>Gaussian Process</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>6.</td>
+<td>Bayesian Models</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>7.</td>
+<td>Combining Learners</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>8.</td>
+<td>Reinforcement Learning</td>
+<td>Markov DP, Theory</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 class="sub">Overview Topics 2</h1>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Topic</th>
+<th>Themes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>9.</td>
+<td></td>
+<td>Deep RL</td>
+</tr>
+<tr class="even">
+<td>10.</td>
+<td></td>
+<td>Partial observability, POMDP</td>
+</tr>
+<tr class="odd">
+<td>11.</td>
+<td>Evolutionary Algorithms</td>
+<td>Drawbacks of Optimization</td>
+</tr>
+<tr class="even">
+<td>12.</td>
+<td>Reproducibility</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>13.</td>
+<td>Active Learning</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>14.</td>
+<td>Theory Frameworks</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 class="unnumbered biblio">References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-Jaquier2019LearningFD">
+<p>Jaquier, Noémie, David Ginsbourger, and Sylvain Calinon. 2019. “Learning from Demonstration with Model-Based Gaussian Process.” <em>ArXiv</em> abs/1910.05005.</p>
+</div>
+<div id="ref-rasmussen2016">
+<p>Rasmussen, Carl Edward. 2016. “Probabilistic Machine Learning.” Lecture Notes, University of Cambridge.</p>
+</div>
+<div id="ref-rasmussen2006">
+<p>Rasmussen, CE., and CKI. Williams. 2006. <em>Gaussian Processes for Machine Learning</em>. Adaptive Computation and Machine Learning. Cambridge, MA, USA: Biologische Kybernetik; Max-Planck-Gesellschaft; MIT Press.</p>
+</div>
+</div>
+<!-- The previous line must be left aligned! -->
+
+                              <hr>
+          <address>
+                        <p class="author"> Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
+                      </address>
+        </div>
+      </div>
+    </div>
+  </body>
+
+
+  </html>
