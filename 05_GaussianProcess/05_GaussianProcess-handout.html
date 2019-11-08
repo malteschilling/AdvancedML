@@ -79,6 +79,113 @@
 <!-- body must not be indented or code blocks render badly -->
 <!-- The following line must be left aligned! -->
 <hr />
+<h1>Goals for Today</h1>
+<p>Understanding …</p>
+<div class="incremental">
+<ul class="incremental">
+<li>Probability Distribution for Parameters</li>
+<li>and how this induces probability distributions over functions.</li>
+<li>Gaussian Processes as an (infinite) Collection of random variables</li>
+<li>and doing tractable inference on a finite subset that is Gaussian distributed as well.</li>
+</ul>
+</div>
+<hr />
+<h1>Adapted Overview Topics</h1>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Topic</th>
+<th>Themes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Today</td>
+<td>Introduction</td>
+<td>Types of ML</td>
+</tr>
+<tr class="even">
+<td>2.</td>
+<td>Representation Learning</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>3.</td>
+<td>Dynamic Representation</td>
+<td>Reservoir Computing</td>
+</tr>
+<tr class="even">
+<td>4.</td>
+<td>Summary Representation</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>5.</td>
+<td>Gaussian Process</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>6.</td>
+<td>Bayesian Models</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>7.</td>
+<td>Combining Learners</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>8.</td>
+<td>Reinforcement Learning</td>
+<td>Markov DP, Theory</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 class="sub">Overview Topics 2</h1>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Topic</th>
+<th>Themes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>9.</td>
+<td></td>
+<td>Deep RL</td>
+</tr>
+<tr class="even">
+<td>10.</td>
+<td></td>
+<td>Partial observability, POMDP</td>
+</tr>
+<tr class="odd">
+<td>11.</td>
+<td>Evolutionary Algorithms</td>
+<td>Drawbacks of Optimization</td>
+</tr>
+<tr class="even">
+<td>12.</td>
+<td>Reproducibility</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>13.</td>
+<td>Active Learning</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>14.</td>
+<td>Theory Frameworks</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h1 class="section" data-background-color="#2CA02C">Recap - Probabilities and Bayesian Reasoning</h1>
 <hr />
 <h1 data-layout="columns">Recap – Gaussian (normal) distribution</h1>
@@ -102,6 +209,43 @@ p(X = x) = \mathcal{N} (x | \mu, \sigma^2) = \frac{1}{\sqrt{2\pi \sigma^2}} e^{-
 <div>
 <figure><img src="../data/05/rasmussen_gaussian.svg" style="height:auto;width:400px;" alt="Gaussian distributions" title="fig:"><figcaption>Gaussian distributions</figcaption></figure>
 </div>
+</div>
+</div>
+</div>
+<hr />
+<h1 class="sub" data-layout="columns">Marginalization over Gaussian Distributions</h1>
+<div class="single-column-row">
+<div class="box top">
+<h2 class="top"></h2>
+<div>
+<figure><img src="../data/05/rasmussen_conditional_example.svg" style="height:auto;width:800px;" alt="Gaussian distributions" title="fig:"><figcaption>Gaussian distributions</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>Both the conditionals <span class="math inline">\(p(x|y)\)</span> and the marginals <span class="math inline">\(p(x)\)</span> of a joint Gaussian <span class="math inline">\(p(x, y)\)</span> are again Gaussian.</p>
+<div class="biblio">
+<p><span class="citation" data-cites="rasmussen2006">(Rasmussen and Williams 2006)</span></p>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><span class="math display">\[\begin{align*} 
+
+p(\vec{x}, \vec{y}) &amp;= \mathcal{N} (
+\left[\begin{array}{c} \vec{a} \\ \vec{b}
+\end{array}\right], 
+\left[\begin{array}{cc} \mathbf{A} &amp; \mathbf{B} \\ \mathbf{B}^T &amp; \mathbf{C}
+\end{array}\right] ) \\
+
+&amp;\Rightarrow p(\vec{x}) = \mathcal{N}(\vec{a}, \mathbf{A})
+\end{align*}\]</span></p>
+<p>This works irrespectively of the size of <span class="math inline">\(\vec{y}\)</span></p>
 </div>
 </div>
 </div>
@@ -168,8 +312,8 @@ f(\vec{x}) = \vec{x}^T \vec{w}, \ y = f(\vec{x}) + \varepsilon,
 <div class="box fragment">
 <h2></h2>
 <p>Likelihood: <span class="math display">\[\begin{align*}
-p (\vec{y} | \mathbf{X}, \vec{w} ) &amp;= \prod_{i=1}^n p( y_i | \vec{x}_i, \vec{w}) = \prod_{i=1}^n \frac{1}{\sqrt{2 \pi}\sigma_n} e^{- \frac{(y_i - \vec{x}^T \vec{w})^2}{2\sigma_n^2}} \\
-&amp;= \frac{1}{(2 \pi\sigma_n^2)^{n/2}} e^{- \frac{1}{2\sigma_n^2} |\vec{y} - \vec{x}^T \vec{w}|^2} = \mathcal{N} ( \mathbf{X}^T\vec{w}, \sigma_n^2 \mathbf{I})
+p (\vec{y} | \mathbf{X}, \vec{w} ) &amp;= \prod_{i=1}^n p( y_i | \vec{x}_i, \vec{w}) = \prod_{i=1}^n \frac{1}{\sqrt{2 \pi}\sigma_n} e^{- \frac{(y_i - \vec{x}_i^T \vec{w})^2}{2\sigma_n^2}} \\
+&amp;= \frac{1}{(2 \pi\sigma_n^2)^{n/2}} e^{- \frac{1}{2\sigma_n^2} |\vec{y} - \mathbf{X}^T \vec{w}|^2} = \mathcal{N} ( \mathbf{X}^T\vec{w}, \sigma_n^2 \mathbf{I})
 \end{align*}\]</span></p>
 </div>
 <hr />
@@ -694,102 +838,6 @@ K_{ij} = k_{ij} = \sigma_1 e^{-\frac{|| \vec{x}_i - \vec{x}_j ||^2}{2 l^2}} \col
 <p><img src="../data/05/jaquier_fig_3.svg" style="height:auto;width:1200px;"></p>
 <hr />
 <h1 class="sub"><figure class="" style=""><div style="position:relative;padding-top:25px;padding-bottom:56.25%;height:0;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" width="560" height="315" src="https://www.youtube.com/embed/jnkHfYN72Bk?iv_load_policy=3&amp;disablekb=1&amp;rel=0&amp;modestbranding=1&amp;autohide=1&amp;start=0" frameborder="0" allowfullscreen=""><p></p></iframe></div></figure></h1>
-<hr />
-<h1>Adapted Overview Topics</h1>
-<table>
-<thead>
-<tr class="header">
-<th></th>
-<th>Topic</th>
-<th>Themes</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Today</td>
-<td>Introduction</td>
-<td>Types of ML</td>
-</tr>
-<tr class="even">
-<td>2.</td>
-<td>Representation Learning</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>3.</td>
-<td>Dynamic Representation</td>
-<td>Reservoir Computing</td>
-</tr>
-<tr class="even">
-<td>4.</td>
-<td>Summary Representation</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>5.</td>
-<td>Gaussian Process</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>6.</td>
-<td>Bayesian Models</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>7.</td>
-<td>Combining Learners</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>8.</td>
-<td>Reinforcement Learning</td>
-<td>Markov DP, Theory</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h1 class="sub">Overview Topics 2</h1>
-<table>
-<thead>
-<tr class="header">
-<th></th>
-<th>Topic</th>
-<th>Themes</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>9.</td>
-<td></td>
-<td>Deep RL</td>
-</tr>
-<tr class="even">
-<td>10.</td>
-<td></td>
-<td>Partial observability, POMDP</td>
-</tr>
-<tr class="odd">
-<td>11.</td>
-<td>Evolutionary Algorithms</td>
-<td>Drawbacks of Optimization</td>
-</tr>
-<tr class="even">
-<td>12.</td>
-<td>Reproducibility</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>13.</td>
-<td>Active Learning</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>14.</td>
-<td>Theory Frameworks</td>
-<td></td>
-</tr>
-</tbody>
-</table>
 <hr />
 <h1 class="unnumbered biblio">References</h1>
 <div id="refs" class="references" role="doc-bibliography">

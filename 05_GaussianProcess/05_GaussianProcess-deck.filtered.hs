@@ -1,4 +1,67 @@
 [HorizontalRule
+,Header 1 ("",[],[]) [Str "Goals",Space,Str "for",Space,Str "Today"]
+,Para [Str "Understanding",Space,Str "\8230"]
+,Div ("",["incremental"],[])
+ [BulletList
+  [[Plain [Str "Probability",Space,Str "Distribution",Space,Str "for",Space,Str "Parameters"]]
+  ,[Plain [Str "and",Space,Str "how",Space,Str "this",Space,Str "induces",Space,Str "probability",Space,Str "distributions",Space,Str "over",Space,Str "functions."]]
+  ,[Plain [Str "Gaussian",Space,Str "Processes",Space,Str "as",Space,Str "an",Space,Str "(infinite)",Space,Str "Collection",Space,Str "of",Space,Str "random",Space,Str "variables"]]
+  ,[Plain [Str "and",Space,Str "doing",Space,Str "tractable",Space,Str "inference",Space,Str "on",Space,Str "a",Space,Str "finite",Space,Str "subset",Space,Str "that",Space,Str "is",Space,Str "Gaussian",Space,Str "distributed",Space,Str "as",Space,Str "well."]]]]
+,HorizontalRule
+,Header 1 ("",[],[]) [Str "Adapted",Space,Str "Overview",Space,Str "Topics"]
+,Table [] [AlignDefault,AlignDefault,AlignDefault] [0.0,0.0,0.0]
+ [[]
+ ,[Plain [Str "Topic"]]
+ ,[Plain [Str "Themes"]]]
+ [[[Plain [Str "Today"]]
+  ,[Plain [Str "Introduction"]]
+  ,[Plain [Str "Types",Space,Str "of",Space,Str "ML"]]]
+ ,[[Plain [Str "2."]]
+  ,[Plain [Str "Representation",Space,Str "Learning"]]
+  ,[]]
+ ,[[Plain [Str "3."]]
+  ,[Plain [Str "Dynamic",Space,Str "Representation"]]
+  ,[Plain [Str "Reservoir",Space,Str "Computing"]]]
+ ,[[Plain [Str "4."]]
+  ,[Plain [Str "Summary",Space,Str "Representation"]]
+  ,[]]
+ ,[[Plain [Str "5."]]
+  ,[Plain [Str "Gaussian",Space,Str "Process"]]
+  ,[]]
+ ,[[Plain [Str "6."]]
+  ,[Plain [Str "Bayesian",Space,Str "Models"]]
+  ,[]]
+ ,[[Plain [Str "7."]]
+  ,[Plain [Str "Combining",Space,Str "Learners"]]
+  ,[]]
+ ,[[Plain [Str "8."]]
+  ,[Plain [Str "Reinforcement",Space,Str "Learning"]]
+  ,[Plain [Str "Markov",Space,Str "DP,",Space,Str "Theory"]]]]
+,HorizontalRule
+,Header 1 ("",["sub"],[]) [Str "Overview",Space,Str "Topics",Space,Str "2"]
+,Table [] [AlignDefault,AlignDefault,AlignDefault] [0.0,0.0,0.0]
+ [[]
+ ,[Plain [Str "Topic"]]
+ ,[Plain [Str "Themes"]]]
+ [[[Plain [Str "9."]]
+  ,[]
+  ,[Plain [Str "Deep",Space,Str "RL"]]]
+ ,[[Plain [Str "10."]]
+  ,[]
+  ,[Plain [Str "Partial",Space,Str "observability,",Space,Str "POMDP"]]]
+ ,[[Plain [Str "11."]]
+  ,[Plain [Str "Evolutionary",Space,Str "Algorithms"]]
+  ,[Plain [Str "Drawbacks",Space,Str "of",Space,Str "Optimization"]]]
+ ,[[Plain [Str "12."]]
+  ,[Plain [Str "Reproducibility"]]
+  ,[]]
+ ,[[Plain [Str "13."]]
+  ,[Plain [Str "Active",Space,Str "Learning"]]
+  ,[]]
+ ,[[Plain [Str "14."]]
+  ,[Plain [Str "Theory",Space,Str "Frameworks"]]
+  ,[]]]
+,HorizontalRule
 ,Header 1 ("",["section"],[("data-background-color","#2CA02C")]) [Str "Recap",Space,Str "-",Space,Str "Probabilities",Space,Str "and",Space,Str "Bayesian",Space,Str "Reasoning"]
 ,HorizontalRule
 ,Header 1 ("",[],[("layout","columns")]) [Str "Recap",Space,Str "\8211",Space,Str "Gaussian",Space,Str "(normal)",Space,Str "distribution"]
@@ -16,6 +79,25 @@
    ,Div ("",[],[])
     [Plain [RawInline (Format "html") "<figure>",RawInline (Format "html") "<img data-src=\"../data/05/rasmussen_gaussian.svg\" style=\"height:auto;width:400px;\" alt=\"Gaussian distributions\" title=\"fig:\">",RawInline (Format "html") "<figcaption>",Str "Gaussian",Space,Str "distributions",RawInline (Format "html") "</figcaption>",RawInline (Format "html") "</figure>"]]]]]
 ,HorizontalRule
+,Header 1 ("",["sub"],[("layout","columns")]) [Str "Marginalization",Space,Str "over",Space,Str "Gaussian",Space,Str "Distributions"]
+,Div ("",["single-column-row"],[])
+ [Div ("",["box","top"],[])
+  [Header 2 ("",["top"],[]) []
+  ,Div ("",[],[])
+   [Plain [RawInline (Format "html") "<figure>",RawInline (Format "html") "<img data-src=\"../data/05/rasmussen_conditional_example.svg\" style=\"height:auto;width:800px;\" alt=\"Gaussian distributions\" title=\"fig:\">",RawInline (Format "html") "<figcaption>",Str "Gaussian",Space,Str "distributions",RawInline (Format "html") "</figcaption>",RawInline (Format "html") "</figure>"]]]]
+,Div ("",["multi-column-row","multi-column-row-3"],[])
+ [Div ("",["grow-1","column","column-1"],[])
+  [Div ("",["box","left"],[])
+   [Header 2 ("",["left"],[]) []
+   ,Para [Str "Both",Space,Str "the",Space,Str "conditionals",Space,Math InlineMath "p(x|y)",Space,Str "and",Space,Str "the",Space,Str "marginals",Space,Math InlineMath "p(x)",Space,Str "of",Space,Str "a",Space,Str "joint",Space,Str "Gaussian",Space,Math InlineMath "p(x, y)",Space,Str "are",Space,Str "again",Space,Str "Gaussian."]
+   ,Div ("",["biblio"],[])
+    [Para [Cite [Citation {citationId = "rasmussen2006", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 1}] [Str "(Rasmussen",Space,Str "and",Space,Str "Williams",Space,Str "2006)"]]]]]
+ ,Div ("",["grow-1","column","column-3"],[])
+  [Div ("",["box","right"],[])
+   [Header 2 ("",["right"],[]) []
+   ,Para [RawInline (Format "tex") "\\begin{align*} \n\np(\\vec{x}, \\vec{y}) &= \\mathcal{N} (\n\\left[\\begin{array}{c} \\vec{a} \\\\ \\vec{b}\n\\end{array}\\right], \n\\left[\\begin{array}{cc} \\mathbf{A} & \\mathbf{B} \\\\ \\mathbf{B}^T & \\mathbf{C}\n\\end{array}\\right] ) \\\\\n\n&\\Rightarrow p(\\vec{x}) = \\mathcal{N}(\\vec{a}, \\mathbf{A})\n\\end{align*}"]
+   ,Para [Str "This",Space,Str "works",Space,Str "irrespectively",Space,Str "of",Space,Str "the",Space,Str "size",Space,Str "of",Space,Math InlineMath "\\vec{y}"]]]]
+,HorizontalRule
 ,Header 1 ("",[],[]) [Str "Recap",Space,Str "\8211",Space,Str "Bayes\8217",Space,Str "rule"]
 ,Para [Str "\8230",Space,Str "tells",Space,Str "us",Space,Str "how",Space,Str "to",Space,Str "invert",Space,Str "conditional",Space,Str "probabilities:"]
 ,Para [RawInline (Format "tex") "\\begin{align*}\n\np(A,B) &= p(A|B)p(B) = p(B|A) p(A) \\\\\n\\Rightarrow p(B|A) &= \\frac{p(A|B) p(B)}{p(A)}\n\\end{align*}"]
@@ -32,7 +114,7 @@
 ,Para [Str "Our",Space,Str "training",Space,Str "set",Space,Math InlineMath "\\mathcal{D}",Space,Str "consists",Space,Str "of",Space,Math InlineMath "n",Space,Str "observations:",SoftBreak,Math DisplayMath " \\mathcal{D} = \\{ (\\vec{x}_i, y_i) | i = 1,...,n \\}\n"]
 ,Para [Str "which",Space,Str "we",Space,Str "can",Space,Str "collect",Space,Str "in",Space,Str "the",Space,Str "design",Space,Str "matrix."]
 ,Div ("",["biblio"],[])
- [Para [Cite [Citation {citationId = "rasmussen2006", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 1}] [Str "(Rasmussen",Space,Str "and",Space,Str "Williams",Space,Str "2006)"]]]
+ [Para [Cite [Citation {citationId = "rasmussen2006", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 2}] [Str "(Rasmussen",Space,Str "and",Space,Str "Williams",Space,Str "2006)"]]]
 ,HorizontalRule
 ,Header 1 ("",[],[]) [Str "A",Space,Str "prior",Space,Str "on",Space,Str "parameters"]
 ,Para [Str "In",Space,Str "a",Space,Str "parametric",Space,Str "model",Space,Math InlineMath "\\mathcal{M}",Str ",",Space,Str "the",Space,Str "model",Space,Str "is",Space,Str "defined",Space,Str "by",Space,Str "the",Space,Str "structure",Space,Str "and",Space,Str "the",Space,Str "parameters:"]
@@ -59,7 +141,7 @@
 ,Para [Str "Reminder",Space,Str "\8211",Space,Str "Gaussian",Space,Str "probability",Space,Str "distribution:",Space,Math DisplayMath " g(x) = \\frac{1}{\\sqrt{2 \\pi}\\sigma} e^{-\\frac{1}{2\\sigma^2}(x-\\mu)^2}, \\mathcal{N} ( \\mu, \\sigma^2) "]
 ,Div ("",["box","fragment"],[])
  [Header 2 ("",[],[]) []
- ,Para [Str "Likelihood:",SoftBreak,RawInline (Format "tex") "\\begin{align*}\np (\\vec{y} | \\mathbf{X}, \\vec{w} ) &= \\prod_{i=1}^n p( y_i | \\vec{x}_i, \\vec{w}) = \\prod_{i=1}^n \\frac{1}{\\sqrt{2 \\pi}\\sigma_n} e^{- \\frac{(y_i - \\vec{x}^T \\vec{w})^2}{2\\sigma_n^2}} \\\\\n&= \\frac{1}{(2 \\pi\\sigma_n^2)^{n/2}} e^{- \\frac{1}{2\\sigma_n^2} |\\vec{y} - \\vec{x}^T \\vec{w}|^2} = \\mathcal{N} ( \\mathbf{X}^T\\vec{w}, \\sigma_n^2 \\mathbf{I})\n\\end{align*}"]]
+ ,Para [Str "Likelihood:",SoftBreak,RawInline (Format "tex") "\\begin{align*}\np (\\vec{y} | \\mathbf{X}, \\vec{w} ) &= \\prod_{i=1}^n p( y_i | \\vec{x}_i, \\vec{w}) = \\prod_{i=1}^n \\frac{1}{\\sqrt{2 \\pi}\\sigma_n} e^{- \\frac{(y_i - \\vec{x}_i^T \\vec{w})^2}{2\\sigma_n^2}} \\\\\n&= \\frac{1}{(2 \\pi\\sigma_n^2)^{n/2}} e^{- \\frac{1}{2\\sigma_n^2} |\\vec{y} - \\mathbf{X}^T \\vec{w}|^2} = \\mathcal{N} ( \\mathbf{X}^T\\vec{w}, \\sigma_n^2 \\mathbf{I})\n\\end{align*}"]]
 ,HorizontalRule
 ,Header 1 ("",[],[("layout","columns")]) [Str "Setting",Space,Str "the",Space,Str "prior"]
 ,Div ("",["multi-column-row","multi-column-row-3"],[])
@@ -208,7 +290,7 @@
   [Div ("",["box","right"],[])
    [Header 2 ("",["right"],[]) []
    ,Para [RawInline (Format "html") "<img data-src=\"../data/04/rasmussen2016_sample_posterior.svg\" style=\"height:auto;width:400px;\">"]
-   ,Para [Str "Sample",Space,Str "from",Space,Str "the",Space,Str "posterior",Space,Cite [Citation {citationId = "rasmussen2016", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 2}] [Str "(Rasmussen",Space,Str "2016)"]]]]]
+   ,Para [Str "Sample",Space,Str "from",Space,Str "the",Space,Str "posterior",Space,Cite [Citation {citationId = "rasmussen2016", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 3}] [Str "(Rasmussen",Space,Str "2016)"]]]]]
 ,Div ("",["single-column-row"],[])
  [Div ("",["box","bottom"],[])
   [Header 2 ("",["bottom"],[]) []
@@ -219,7 +301,7 @@
 ,HorizontalRule
 ,Header 1 ("",[],[]) [Str "Drawback",Space,Str "of",Space,Str "polynomials",Space,Str "as",Space,Str "priors",Space,Str "for",Space,Str "functions"]
 ,Para [RawInline (Format "html") "<img data-src=\"../data/04/rasmussen2016_polynomial_samples.svg\" style=\"height:auto;width:800px;\">"]
-,Para [Str "Shown",Space,Str "are",Space,Str "samples",Space,Str "for",Space,Str "parameters",Space,Str "for",Space,Str "polynomial",Space,Str "functions",Space,Str "of",Space,Str "different",Space,Str "order",Space,Cite [Citation {citationId = "rasmussen2016", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 3}] [Str "(Rasmussen",Space,Str "2016)"],Str "."]
+,Para [Str "Shown",Space,Str "are",Space,Str "samples",Space,Str "for",Space,Str "parameters",Space,Str "for",Space,Str "polynomial",Space,Str "functions",Space,Str "of",Space,Str "different",Space,Str "order",Space,Cite [Citation {citationId = "rasmussen2016", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 4}] [Str "(Rasmussen",Space,Str "2016)"],Str "."]
 ,HorizontalRule
 ,Header 1 ("",["sub"],[]) [Str "Drawback",Space,Str "of",Space,Str "sampling",Space,Str "over",Space,Str "parameters"]
 ,Div ("",["incremental"],[])
@@ -239,7 +321,7 @@
 ,Div ("",["box","bottom"],[])
  [Header 2 ("",["bottom"],[]) []
  ,Div ("",["biblio"],[])
-  [Para [Str "We",Space,Str "are",Space,Str "following",Space,Cite [Citation {citationId = "rasmussen2006", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 4}] [Str "(Rasmussen",Space,Str "and",Space,Str "Williams",Space,Str "2006)"],Space,Str "and",Space,Cite [Citation {citationId = "rasmussen2016", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 5}] [Str "(Rasmussen",Space,Str "2016)"],Str "."]]]
+  [Para [Str "We",Space,Str "are",Space,Str "following",Space,Cite [Citation {citationId = "rasmussen2006", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 5}] [Str "(Rasmussen",Space,Str "and",Space,Str "Williams",Space,Str "2006)"],Space,Str "and",Space,Cite [Citation {citationId = "rasmussen2016", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 6}] [Str "(Rasmussen",Space,Str "2016)"],Str "."]]]
 ,HorizontalRule
 ,Header 1 ("",["columns"],[]) [Str "Bayesian",Space,Str "Perspectives",Space,Str "on",Space,Str "Functions"]
 ,Div ("",["single-column-row"],[])
@@ -316,7 +398,7 @@
 ,Para [Str "We",Space,Str "can",Space,Str "plot",Space,Str "the",Space,Str "coordinates",Space,Str "of",Space,Str "f",Space,Str "as",Space,Str "a",Space,Str "function",Space,Str "of",Space,Str "the",Space,Str "corresponding",Space,Math InlineMath "x",Space,Str "values."]
 ,Para [RawInline (Format "html") "<img data-src=\"../data/05/rasmussen_random_functions.svg\" style=\"height:auto;width:720px;\">"]
 ,Div ("",["biblio"],[])
- [Para [Cite [Citation {citationId = "rasmussen2016", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 6}] [Str "(Rasmussen",Space,Str "2016)"],Str "."]]
+ [Para [Cite [Citation {citationId = "rasmussen2016", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 7}] [Str "(Rasmussen",Space,Str "2016)"],Str "."]]
 ,HorizontalRule
 ,Header 1 ("",[],[]) [Str "Squared",Space,Str "Exponential",Space,Str "as",Space,Str "Covariance",Space,Str "function"]
 ,Para [Str "The",Space,Str "squared",Space,Str "exponential",Space,Str "(radial",Space,Str "basis",Space,Str "functions)",Space,Str "is",Space,Str "commonly",Space,Str "used",Space,Str "as",Space,Str "a",Space,Str "covariance",Space,Str "function.",Space,Str "The",Space,Str "kernel",Space,Str "function",Space,Str "is",Space,Str "defined",Space,Str "as"]
@@ -368,7 +450,7 @@
 ,Div ("",["single-column-row"],[])
  [Div ("",["box","bottom"],[])
   [Header 2 ("",["bottom"],[]) []
-  ,Para [Str "Further",Space,Str "reading:",Space,Cite [Citation {citationId = "rasmussen2006", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 7}] [Str "(Rasmussen",Space,Str "and",Space,Str "Williams",Space,Str "2006)"],Str "."]]]
+  ,Para [Str "Further",Space,Str "reading:",Space,Cite [Citation {citationId = "rasmussen2006", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 8}] [Str "(Rasmussen",Space,Str "and",Space,Str "Williams",Space,Str "2006)"],Str "."]]]
 ,HorizontalRule
 ,Header 1 ("",[],[]) [Str "Example",Space,Str "1:",Space,Str "Comparison",Space,Str "control",Space,Str "of",Space,Str "robotic",Space,Str "arm"]
 ,BulletList
@@ -381,7 +463,7 @@
   ,[Plain [Str "inputs",Space,Str "were",Space,Str "linearly",Space,Str "rescaled",Space,Str "(zero",Space,Str "mean",Space,Str "and",Space,Str "unit",Space,Str "variance",Space,Str "on",Space,Str "the",Space,Str "training",Space,Str "set)"]]
   ,[Plain [Str "The",Space,Str "outputs",Space,Str "were",Space,Str "centered",Space,Str "so",Space,Str "as",Space,Str "to",Space,Str "have",Space,Str "zero",Space,Str "mean",Space,Str "on",Space,Str "the",Space,Str "training",Space,Str "set."]]]]
 ,Div ("",["biblio"],[])
- [Para [Cite [Citation {citationId = "rasmussen2006", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 8}] [Str "(Rasmussen",Space,Str "and",Space,Str "Williams",Space,Str "2006)"]]]
+ [Para [Cite [Citation {citationId = "rasmussen2006", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 9}] [Str "(Rasmussen",Space,Str "and",Space,Str "Williams",Space,Str "2006)"]]]
 ,HorizontalRule
 ,Header 1 ("",["sub","columns"],[]) [Str "Example",Space,Str "1:",Space,Str "Results"]
 ,Div ("",["multi-column-row","multi-column-row-3"],[])
@@ -402,66 +484,12 @@
 ,Para [Str "Leveraging",Space,Str "the",Space,Str "generative",Space,Str "nature",Space,Str "of",Space,Str "GP",Space,Str "models,",Space,Str "our",Space,Str "approach",Space,Str "can",Space,Str "efficiently",Space,Str "modulate",Space,Str "trajectories",Space,Str "towards",Space,Str "new",Space,Str "start-,",Space,Str "via-",Space,Str "or",Space,Str "end-points",Space,Str "defined",Space,Str "by",Space,Str "the",Space,Str "task."]
 ,Para [Str "Our",Space,Str "framework",Space,Str "allows",Space,Str "the",Space,Str "robot",Space,Str "to",Space,Str "precisely",Space,Str "track",Space,Str "via-points",Space,Str "while",Space,Str "being",Space,Str "compliant",Space,Str "in",Space,Str "regions",Space,Str "of",Space,Str "high",Space,Str "variability.",Space,Str "We",Space,Str "illustrate",Space,Str "the",Space,Str "proposed",Space,Str "approach",Space,Str "in",Space,Str "simulated",Space,Str "examples",Space,Str "and",Space,Str "validate",Space,Str "it",Space,Str "in",Space,Str "a",Space,Str "real-robot",Space,Str "experiment.\""]
 ,Div ("",["biblio"],[])
- [Para [Cite [Citation {citationId = "Jaquier2019LearningFD", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 9}] [Str "(Jaquier,",Space,Str "Ginsbourger,",Space,Str "and",Space,Str "Calinon",Space,Str "2019)"]]]
+ [Para [Cite [Citation {citationId = "Jaquier2019LearningFD", citationPrefix = [], citationSuffix = [], citationMode = NormalCitation, citationNoteNum = 0, citationHash = 10}] [Str "(Jaquier,",Space,Str "Ginsbourger,",Space,Str "and",Space,Str "Calinon",Space,Str "2019)"]]]
 ,HorizontalRule
 ,Header 1 ("",["sub"],[]) [Str "Example",Space,Str "2:",Space,Str "Learning",Space,Str "from",Space,Str "demonstration",Space,Str "with",Space,Str "Gaussian",Space,Str "processes"]
 ,Para [RawInline (Format "html") "<img data-src=\"../data/05/jaquier_fig_3.svg\" style=\"height:auto;width:1200px;\">"]
 ,HorizontalRule
 ,Header 1 ("",["sub"],[]) [RawInline (Format "html") "<figure class=\"\" style=\"\"><div style=\"position:relative;padding-top:25px;padding-bottom:56.25%;height:0;\"><iframe style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/jnkHfYN72Bk?iv_load_policy=3&amp;disablekb=1&amp;rel=0&amp;modestbranding=1&amp;autohide=1&amp;start=0\" frameborder=\"0\" allowfullscreen=\"\"><p></p></iframe></div></figure>"]
-,HorizontalRule
-,Header 1 ("",[],[]) [Str "Adapted",Space,Str "Overview",Space,Str "Topics"]
-,Table [] [AlignDefault,AlignDefault,AlignDefault] [0.0,0.0,0.0]
- [[]
- ,[Plain [Str "Topic"]]
- ,[Plain [Str "Themes"]]]
- [[[Plain [Str "Today"]]
-  ,[Plain [Str "Introduction"]]
-  ,[Plain [Str "Types",Space,Str "of",Space,Str "ML"]]]
- ,[[Plain [Str "2."]]
-  ,[Plain [Str "Representation",Space,Str "Learning"]]
-  ,[]]
- ,[[Plain [Str "3."]]
-  ,[Plain [Str "Dynamic",Space,Str "Representation"]]
-  ,[Plain [Str "Reservoir",Space,Str "Computing"]]]
- ,[[Plain [Str "4."]]
-  ,[Plain [Str "Summary",Space,Str "Representation"]]
-  ,[]]
- ,[[Plain [Str "5."]]
-  ,[Plain [Str "Gaussian",Space,Str "Process"]]
-  ,[]]
- ,[[Plain [Str "6."]]
-  ,[Plain [Str "Bayesian",Space,Str "Models"]]
-  ,[]]
- ,[[Plain [Str "7."]]
-  ,[Plain [Str "Combining",Space,Str "Learners"]]
-  ,[]]
- ,[[Plain [Str "8."]]
-  ,[Plain [Str "Reinforcement",Space,Str "Learning"]]
-  ,[Plain [Str "Markov",Space,Str "DP,",Space,Str "Theory"]]]]
-,HorizontalRule
-,Header 1 ("",["sub"],[]) [Str "Overview",Space,Str "Topics",Space,Str "2"]
-,Table [] [AlignDefault,AlignDefault,AlignDefault] [0.0,0.0,0.0]
- [[]
- ,[Plain [Str "Topic"]]
- ,[Plain [Str "Themes"]]]
- [[[Plain [Str "9."]]
-  ,[]
-  ,[Plain [Str "Deep",Space,Str "RL"]]]
- ,[[Plain [Str "10."]]
-  ,[]
-  ,[Plain [Str "Partial",Space,Str "observability,",Space,Str "POMDP"]]]
- ,[[Plain [Str "11."]]
-  ,[Plain [Str "Evolutionary",Space,Str "Algorithms"]]
-  ,[Plain [Str "Drawbacks",Space,Str "of",Space,Str "Optimization"]]]
- ,[[Plain [Str "12."]]
-  ,[Plain [Str "Reproducibility"]]
-  ,[]]
- ,[[Plain [Str "13."]]
-  ,[Plain [Str "Active",Space,Str "Learning"]]
-  ,[]]
- ,[[Plain [Str "14."]]
-  ,[Plain [Str "Theory",Space,Str "Frameworks"]]
-  ,[]]]
 ,HorizontalRule
 ,Header 1 ("",["unnumbered","biblio"],[]) [Str "References"]
 ,Div ("refs",["references"],[])
