@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<!-- This is the pandoc 2.7.3 template for reveal.js output modified for decker. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">
+  <title>07 Graphical Models</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reset.css">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reveal.css">
+  <link rel="stylesheet" href="../support/css/thebelab.css">
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="../support/css/decker.css">
+  <link rel="stylesheet" href="../mschilling.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? '../support/vendor/reveal/css/print/pdf.css' : '../support/vendor/reveal/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script type="text/x-thebe-config">
+  {
+      bootstrap: false,
+      requestKernel: false,
+      predefinedOutput: false,
+      binderOptions: {
+          repo: "malteschilling/advml_binder",
+          ref: "master",
+          binderUrl: "https://mybinder.org",
+          repoProvider: "github",
+      },
+      kernelOptions: {
+          name: "python3"
+      },
+      selector: "[data-executable]",
+      mathjaxUrl: false,
+      codeMirrorConfig: {
+          mode: "python3"
+      }
+  }
+  </script>
+  <script src="https://unpkg.com/thebelab@0.4.0/lib/index.js"></script> 
+  <!-- <script src="../support/vendor/thebelab/index.js"></script> -->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+ <!-- standard settings -->
+  <h1 class="title">07 Graphical Models</h1>
+  <p class="subtitle">Advanced Machine Learning</p>
+  <p class="author">Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
+
+</section>
+
+<section class="slide level1">
+<h1>Bayesian View on Probabilities</h1>
+<p>In a Bayesian View a probability is a summary of an opinion:</p>
+<ul>
+<li>An individual who assigns a belief of 0 to an event has no confidence that the event will occur.</li>
+<li>Conversely, assigning a belief of 1 implies that the individual is absolutely certain of an event occurring.</li>
+<li>Beliefs between 0 and 1 allow for weightings of other outcomes.</li>
+</ul>
+<div class="box fragment">
+<h2></h2>
+<p>Important:  This probability (the belief) is not describing a fact,  but is connected to an individual.</p>
+</div>
+<div class="box fragment">
+<h2></h2>
+<p>It therefore allows to assign different beliefs about the occurrence of an event to different people. It does not say anything about who or that anybody is wrong.</p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Bayesian interpretation of probability</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>Probabilities = distribution over all possible   outcomes (states) of an event as subjective  „degree of belief“ in this event</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/07/Verteilung.png" style="height:auto;width:400px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>Use probability theory to model <em>how degrees of beliefs dynamically change</em>:</p>
+<ul>
+<li>conditional probability <span class="math inline">\(P(A|B)\)</span> = posterior probability of <span class="math inline">\(A\)</span>,</li>
+<li>unconditional probability <span class="math inline">\(P(A)\)</span> = prior probability of <span class="math inline">\(A\)</span>, without any evidence whatsoever conditioned on evidence about <span class="math inline">\(B\)</span></li>
+<li>conditional probability <span class="math inline">\(P(B|A)\)</span> = likelihood of <span class="math inline">\(B\)</span> given <span class="math inline">\(A\)</span></li>
+</ul>
+</div>
+<div class="box fragment">
+<h2></h2>
+<p>➔ use this to describe the fundamental organization of human knowledge where an event is always measured against or correlated with a context of its occurrence.</p>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Probabilistic Representation</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Gaussian Probability Distribution</h2>
+<p>GPD provides an example for a continuous probability distribution. They are characterized by a mean value and the covariance.</p>
+<div>
+<figure><img data-src="../data/05/rasmussen_gaussian.svg" style="height:auto;width:400px;" alt="Gaussian distributions" title="fig:"><figcaption>Gaussian distributions</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right fragment">
+<h2 class="right">Discrete Probabilities</h2>
+<p>A Normal Distribution is an assumption on our data – we assume the form of our distribution. In many cases this has to be established.</p>
+<p>As the typical example for a discrete probability distribution: a dice has a number of outcomes which is usually setup as a table:</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Face</th>
+<th style="text-align: center;">1</th>
+<th style="text-align: center;">2</th>
+<th style="text-align: center;">3</th>
+<th style="text-align: center;">4</th>
+<th style="text-align: center;">5</th>
+<th style="text-align: center;">6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Count</td>
+<td style="text-align: center;">17</td>
+<td style="text-align: center;">16</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">20</td>
+<td style="text-align: center;">18</td>
+<td style="text-align: center;">15</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: Probabilities in Basketball</h1>
+<p>In many sports advanced statistics are used (especially in the U.S.). One example is basketball which helps illustrate different aspects of probability values.</p>
+<p>Consider two players and we are looking at their free throw percentages: The percentage gives us a good probability estimate for how likely he will score when attempting a free throw.</p>
+<div class="box fragment">
+<h2></h2>
+<p><img data-src="../data/07/basketball_statistics.png" style="height:auto;width:1000px;"></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Probabilities in Basketball 2</h1>
+<p>Looking at other values gets more tricky — considering another player for comparison, the second player seems much better in two point shots (FG).</p>
+<p>In basketball such probabilities are used for decision making = to whom should I give the ball? Who will make the shot?</p>
+<p>Importantly, here again pooling all field goal attempts together is not a good idea. The outcome of the attempt depends on many other factors.</p>
+<p><img data-src="../data/07/basketball_statistics_2.png"></p>
+</section>
+<section class="slide level1 columns">
+<h1>Example: Conditional Probabilities in Basketball</h1>
+<div class="single-column-row">
+<div class="box top">
+<h2 class="top"></h2>
+<p>Their shooting depends on the place on the field.</p>
+</div>
+</div>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/07/droppedImage-1.tiff" style="height:auto;width:480px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/07/droppedImage.tiff" style="height:auto;width:480px;"></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Recap: Conditional probabilities</h1>
+<div class="box">
+<h2>Unconditional probability: <span class="math inline">\(P(A=a)\)</span></h2>
+<ul>
+<li>probability of <span class="math inline">\(A\)</span> being in state <span class="math inline">\(a\)</span> regardless of anything</li>
+</ul>
+</div>
+<div class="box">
+<h2>Conditional probability: <span class="math inline">\(P(A=a|B=b)\)</span></h2>
+<ul>
+<li>probability of <span class="math inline">\(A\)</span> being in state <span class="math inline">\(a\)</span> under the constraint that <span class="math inline">\(B\)</span> is in state <span class="math inline">\(b\)</span></li>
+</ul>
+</div>
+<div class="box">
+<h2>Central rule for relating both:</h2>
+<ul>
+<li>Product rule: <span class="math inline">\(P(A,B) = P(A|B)\times⋅ \times P(B) = P(B|A) \times ⋅ \times P(A)\)</span></li>
+<li>relates the unconditional joint probability of two events „<em>A and B“</em> to the (un-)conditional probabilities of the single events</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Prior, Likelihood and Posterior</h1>
+<p>For data <span class="math inline">\(D\)</span> and variable <span class="math inline">\(\theta\)</span>, Bayes’ rule tells us how to update our prior beliefs about the variable <span class="math inline">\(\theta\)</span> in light of the data to a posterior belief: <span class="math display">\[
+\underbrace{p(\theta | D)}_\text{posterior} = \frac{\overbrace{p{D|\theta)}}^\text{likelihood} \ \overbrace{p{\theta}}^\text{prior}}{\underbrace{p{(D)}}_\text{evidence, marginal likelihood}}
+\]</span> The term likelihood is used for the probability that a model generates observed data.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>We follow with examples the (open access) book by <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Prior, Likelihood and Posterior</h1>
+<p>More fully, if we condition on the model <span class="math inline">\(M\)</span>, we have <span class="math display">\[
+p(\theta|D, M) =\frac{p(D|\theta, M) p(\theta | M)}{p(D | M)}
+\]</span></p>
+<p>where we see the role of the likelihood <span class="math inline">\(p(D|\theta,M)\)</span> and marginal likelihood <span class="math inline">\(p(D|M)\)</span>.</p>
+<div class="box fragment">
+<h2>The MAP assignment</h2>
+<p>The Most probable A Posteriori (MAP) setting is that which maximises the posterior, <span class="math display">\[
+\theta_* = \text{argmax}_{\theta} p(\theta | D, M) = \text{argmax}_{\theta} p(\theta, D| M)
+\]</span></p>
+</div>
+<div class="box fragment">
+<h2>The Max Likelihood assignment, <span class="math inline">\(p(\theta | M)\)</span> = const.</h2>
+<p><span class="math display">\[
+\theta_* = \text{argmax}_{\theta} p(\theta, D| M) =  \text{argmax}_{\theta} p( D | \theta, M)
+\]</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: Bayes — Throwing Darts</h1>
+<p>The probability of event <span class="math inline">\(x\)</span> conditioned on knowing event <span class="math inline">\(y\)</span> (or more shortly, the probability of <span class="math inline">\(x\)</span> given <span class="math inline">\(y\)</span>) is defined as <span class="math display">\[
+p(x|y) = \frac{p(x,y)}{p(y)}=\frac{p(y|x) p(x)}{p(y)}
+\]</span></p>
+<p><span class="math display">\[
+p(\text{region 5}|\text{not region 20}) = \frac{p(\text{region 5, not region 20})}{p(\text{not region 20})}
+= \frac{1/20}{19/20}= \frac{1}{19}
+\]</span></p>
+<h3>Interpretation</h3>
+<p>$ p(A = a|B = b)$ should not be interpreted as <em>Given the event <span class="math inline">\(B = b\)</span> has occurred, <span class="math inline">\(p(A = a|B = b)\)</span> is the probability of the event <span class="math inline">\(A = a\)</span> is occurring’.</em></p>
+<p>The correct interpretation should be <span class="math inline">\(p(A = a|B = b)\)</span> is the probability of <span class="math inline">\(A\)</span> being in state <span class="math inline">\(a\)</span> under the constraint that <span class="math inline">\(B\)</span> is in state <span class="math inline">\(b\)</span>.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Example from <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Probability tables</h1>
+<p>The a priori probability that a randomly selected Great British person would live in England, Scotland or Wales, is <span class="math inline">\(0.88, 0.08\)</span> and <span class="math inline">\(0.04\)</span> respectively.</p>
+<p>We can write this as a vector (or probability table) : <span class="math display">\[
+\left(  
+\begin{array}{ccc}
+p(Cnt = E)\\
+p(Cnt = S)\\
+p(Cnt = W)\end{array}
+\right)
+= \left(  
+\begin{array}{ccc}
+0.88\\
+0.08\\
+0.04\end{array}
+\right)
+\]</span> whose component values sum to 1.</p>
+<p>The ordering of the components in this vector is arbitrary, as long as it is consistently applied.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Example from <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Probability tables</h1>
+<p>We assume that only three Mother Tongue languages exist: English (Eng), Scottish (Scot) and Welsh (Wel), with conditional probabilities given the country of residence, England (E), Scotland (S) and Wales (W). Using the state ordering: <span class="math display">\[
+MT=[\text{Eng, Scot, Wel}]; Cnt=[\text{E, S, W}]
+\]</span> We can setup a conditional probability table: <span class="math display">\[
+p(MT | Cnt) = 
+\left(  
+\begin{array}{ccc}
+0.95 &amp; 0.7 &amp; 0.6\\
+0.04 &amp; 0.3 &amp; 0.0\\
+0.01 &amp; 0.0 &amp; 0.4\end{array}\right)
+\]</span></p>
+</section>
+<section class="slide level1">
+<h1>Marginalization</h1>
+<p>The distribution <span class="math inline">\(p(Cnt,MT) = p(MT|Cnt)p(Cnt)\)</span> can be written as a <span class="math inline">\(3 \times 3\)</span> matrix with rows indexed by country and columns indexed by Mother Tongue: <span class="math display">\[
+\left(  
+\begin{array}{ccc}
+0.95 \times 0.88 &amp; 0.7 \times 0.08 &amp; 0.6 \times 0.04 \\
+0.04 \times 0.88 &amp; 0.3 \times 0.08 &amp; 0.0 \times 0.04\\
+0.01 \times 0.88 &amp; 0.0 \times 0.08 &amp; 0.4 \times 0.04
+\end{array}\right)
+= \left(  
+\begin{array}{ccc}
+0.836 &amp; 0.056 &amp; 0.024 \\
+0.0352 &amp; 0.024 &amp; 0.\\
+0.0088 &amp; 0.0 &amp; 0.016
+\end{array}\right)
+\]</span> By summing the columns or rows, we get the marginal <span class="math display">\[
+p(Cnt) = \left(  
+\begin{array}{c}
+0.88 \\ 0.08 \\ 0.04
+\end{array}\right), 
+p(MT) = \left(  
+\begin{array}{c}
+0.916 \\ 0.0592 \\ 0.0248
+\end{array}\right)
+\]</span></p>
+</section>
+<section class="slide level1">
+<h1>Probability tables</h1>
+<div class="box">
+<h2>Large numbers of variables</h2>
+<p>For joint distributions over a larger number of variables, <span class="math inline">\(x_i, i = 1, . . . , D\)</span>, with each variable <span class="math inline">\(x_i\)</span> taking <span class="math inline">\(K_i\)</span> states, the table describing the joint distribution produces an array with a large number of entries: <span class="math display">\[ \prod_{i=1}^D K_i\]</span></p>
+<p>Explicitly storing tables therefore requires space exponential in the number of variables, which rapidly becomes impractical for a large number of variables.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Probability tables</h1>
+<div class="box">
+<h2>Indexing</h2>
+<p>A probability distribution assigns a value to each of the joint states of the variables. For this reason, <span class="math inline">\(p(T,J,R,S)\)</span> is considered equivalent to <span class="math inline">\(p(J,S,R,T)\)</span> (or any such reordering of the variables), since in each case the joint setting of the variables is simply a different index to the same probability.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Independence</h1>
+<p>Variables <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> are independent if knowing one event gives no extra information about the other event. Mathematically, this is expressed by <span class="math display">\[
+p(x, y) = p(x)p(y)
+\]</span></p>
+<div class="box fragment">
+<h2></h2>
+<p>Independence of x and y is equivalent to <span class="math display">\[
+p(x|y) = p(x) \Leftrightarrow p(y|x) = p(y)
+\]</span></p>
+</div>
+<div class="box fragment">
+<h2></h2>
+<p>If <span class="math inline">\(p(x|y) = p(x)\)</span> for all states of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, then the variables <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> are said to be independent. We write then <span class="math inline">\(x \perp\!\!\!\perp y\)</span>.</p>
+</div>
+<div class="box fragment">
+<h2>Interpretation</h2>
+<p>Note that <span class="math inline">\(x \perp\!\!\!\perp y\)</span> doesn’t mean that, given <span class="math inline">\(y\)</span>, we have no information about <span class="math inline">\(x\)</span>. It means the only information we have about <span class="math inline">\(x\)</span> is contained in <span class="math inline">\(p(x)\)</span>.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Conditional Independence</h1>
+<p><span class="math display">\[X \perp\!\!\!\perp Y | Z\]</span> denotes that the two sets of variables <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are independent of each other given the state of the set of variables <span class="math inline">\(Z\)</span>.</p>
+<div class="box fragment">
+<h2></h2>
+<p>This means that <span class="math inline">\(p(X,Y|Z) = p(X|Z)p(Y|Z)\)</span> and <span class="math inline">\(p(X|Y,Z) = p(X|Z)\)</span> for all states of <span class="math inline">\(X,Y,Z\)</span>.</p>
+</div>
+<div class="box fragment">
+<h2></h2>
+<p>In case the conditioning set is empty we may also write <span class="math inline">\(X \perp\!\!\!\perp Y\)</span> for <span class="math inline">\(X \perp\!\!\!\perp Y | \{\}\)</span>, in which case <span class="math inline">\(X\)</span> is (unconditionally) independent of <span class="math inline">\(Y\)</span>.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Conditional Independence example</h1>
+<p>Based on a survey of households in which the husband and wife each own a car:</p>
+<p>wife’s car type <span class="math inline">\(\perp\!\!\!\perp\)</span> husband’s car type | family income, <span class="math inline">\(p(inc = low) = 0.9\)</span></p>
+<p>There are 4 car types, the first two being ‘cheap’ and the last two being ‘expensive’. Using <span class="math inline">\(w\)</span> for the wife’s car type and <span class="math inline">\(h\)</span> for the husband’s: <span class="math display">\[
+p(w | inc = \text{low}) = \left(  
+\begin{array}{c}
+0.7 \\ 0.3 \\ 0 \\ 0
+\end{array}\right),
+p(w | inc = \text{high}) = \left(  
+\begin{array}{c}
+0.2 \\ 0.1 \\ 0.4 \\ 0.3
+\end{array}\right)
+\]</span></p>
+<p><span class="math display">\[
+p(h | inc = \text{low}) = \left(  
+\begin{array}{c}
+0.2 \\ 0.8 \\ 0 \\ 0
+\end{array}\right),
+p(h | inc = \text{high}) = \left(  
+\begin{array}{c}
+0 \\ 0 \\ 0.3 \\ 0.7
+\end{array}\right)
+\]</span></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Example from <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Conditional Independence example</h1>
+<p>Then the marginal distribution <span class="math inline">\(p(w, h)\)</span> is <span class="math display">\[
+p(w, h) = \sum_{inc} p(w|inc)p(h|inc)p(inc) 
+\]</span></p>
+<div class="box fragment">
+<h2></h2>
+<p><span class="math display">\[
+p(w, h) = \left(  
+\begin{array}{c}
+0.126 &amp; 0.504 &amp; 0.006 &amp; 0.014\\ 
+0.054 &amp; 0.216 &amp; 0.003 &amp; 0.007\\ 
+0     &amp; 0     &amp; 0.012 &amp; 0.028\\ 
+0     &amp; 0.    &amp; 0.009 &amp; 0.021
+\end{array}\right)
+\]</span> From this we can find the marginals and calculate (for comparison) <span class="math display">\[
+p(w)p(h) = \left(  
+\begin{array}{c}
+0.117 &amp; 0.468 &amp; 0.0195 &amp; 0.0455\\ 
+0.0504 &amp; 0.2016 &amp; 0.0084 &amp; 0.0196\\ 
+0.0072 &amp; 0.0288 &amp; 0.0012 &amp; 0.0028\\ 
+0.0054 &amp; 0.0216 &amp; 0.0009 &amp; 0.0021
+\end{array}\right)
+\]</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Conditional Independence example</h1>
+<p>This shows that whilst <span class="math inline">\(w \perp\!\!\!\perp h|inc\)</span>, it is not true that <span class="math inline">\(w \perp\!\!\!\perp h\)</span>. For example, even if we don’t know the family income, if we know that the husband has a cheap car then his wife must also have a cheap car – these variables are therefore dependent.</p>
+</section>
+<section class="slide level1">
+<h1>Example 2: Inspector Clouseau</h1>
+<p>Inspector Clouseau arrives at the scene of a crime. The Butler (<span class="math inline">\(B\)</span>) and Maid (<span class="math inline">\(M\)</span>) are his main suspects.</p>
+<div class="box fragment">
+<h2></h2>
+<p>The inspector has a prior belief of <span class="math inline">\(0.6\)</span> that the Butler is the murderer, and a prior belief of <span class="math inline">\(0.2\)</span> that the Maid is the murderer. These probabilities are independent in the sense that <span class="math inline">\(p(B,M) = p(B)p(M)\)</span>. (It is possible that both the Butler and the Maid murdered the victim or neither).</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Example from <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example 2: Inspector Clouseau</h1>
+<p>The inspector’s prior criminal knowledge can be formulated mathematically as follows:</p>
+<p><span class="math display">\[\begin{align}
+&amp;dom(B) = dom(M) = \{\text{murderer,not murderer} \} \\
+&amp;dom(K) = \{\text{knife used, knife not used} \} \\
+&amp;p(B = \text{murderer}) = 0.6, p(M = \text{murderer}) = 0.2 \\
+&amp;p(\text{knife used}|B = \text{not murderer}, M = \text{not murderer}) = 0.3 \\
+&amp;p(\text{knife used}|B = \text{not murderer}, M = \text{murderer}) = 0.2 \\
+&amp;p(\text{knife used}|B = \text{murderer}, M = \text{not murderer}) = 0.6 \\
+&amp;p(\text{knife used}|B = \text{murderer}, M = \text{murderer}) = 0.1
+\end{align}\]</span></p>
+<p>The victim lies dead in the room and the inspector quickly finds the murder weapon, a Knife (<span class="math inline">\(K\)</span>). What is the probability that the Butler is the murderer? (Remember that it might be that neither is the murderer).</p>
+</section>
+<section class="slide level1">
+<h1>Inspector Clouseau</h1>
+<p>Using <span class="math inline">\(b\)</span> for the two states of <span class="math inline">\(B\)</span> and <span class="math inline">\(m\)</span> for the two states of <span class="math inline">\(M\)</span>, we are searching for <span class="math inline">\(p(B|K)\)</span>:</p>
+<div class="box fragment">
+<h2></h2>
+<p><span class="math display">\[
+p(B | K) = \sum_m p(B, m |K) = \sum_m \frac{p(B, m, K)}{p(K)} = \frac{p(B)\sum_m p(K | B,m) p(m)}{\sum_b p(b) \sum_m p(K|b,m)p(m)}
+\]</span></p>
+</div>
+<div class="box fragment">
+<h2></h2>
+<p>Plugging in the values we have</p>
+<p><span class="math display">\[\begin{align*}
+p(B = \text{murderer} | \text{knife}) &amp;= \frac{0.6 (0.2 \times 0.1 + 0.8 \times 0.6)}{0.6 (0.2 \times 0.1 + 0.8 \times 0.6) + 0.4 (0.2 \times 0.2 + 0.8 \times 0.3)} \\ 
+&amp;\approx 0.73
+\end{align*}\]</span></p>
+</div>
+<div class="box fragment">
+<h2></h2>
+<p>Hence knowing that the knife was the murder weapon strengthens our belief that the butler did it.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Inspector Clouseau - Clarification</h1>
+<p>The role of <span class="math inline">\(p(\text{knife used})\)</span> in the Inspector Clouseau example can cause some confusion. In the above, <span class="math display">\[
+p(\text{knife used}) = \sum_b p(b) \sum_m p(\text{knife used}|b, m)p(m) 
+\]</span> is computed to be <span class="math inline">\(0.456\)</span>. But surely, <span class="math inline">\(p(\text{knife used}) = 1\)</span>, since this is given in the question!</p>
+<p>Note that the quantity <span class="math inline">\(p(\text{knife used})\)</span> relates to the prior probability the model assigns to the knife being used (in the absence of any other information). If we know that the knife is used, then the posterior is of course 1.</p>
+</section>
+<section class="slide level1">
+<h1>Why is independence so important?</h1>
+<p>It allows one to decompose (factorize) a joint distribution:</p>
+<ul>
+<li><span class="math inline">\(p(\text{Cavity,Catch,Toothache})\)</span> ➔ <span class="math inline">\(2^3=8\)</span> worlds needed for full state of beliefs</li>
+</ul>
+<div class="box fragment">
+<h2></h2>
+<p>But when we apply the product rule: <span class="math display">\[\begin{align*}
+&amp;= p(\text{Toothache, Catch | Cavity}) p(\text{Cavity}) \text{ – product rule}\\
+&amp;= p(\text{Toothache | Cavity}) p(\text{Catch | Cavity}) p(\text{Cavity}) \\ &amp; \ \ \text{ cond. independence given cavity}
+\end{align*}\]</span> This reduces the number of possible worlds.</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Example from <span class="citation" data-cites="pearl2009">(Pearl 2009)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Indepence – simplifies probabilities</h1>
+<p>If a cause directly implies multiple effects, all of which are conditionally independent given the cause, then: <span class="math display">\[
+P(\text{Cause}, E_1, ..., E_n) = P(\text{Cause}) \prod_i (E_i|\text{Cause})
+\]</span></p>
+<ul>
+<li>the cause sufficiently “explains” each effect, knowing about other effects doesn‘t change the belief in it anymore</li>
+<li>Naive Bayes model (also called Bayesian classifier):  Bayes rule + presumed independence where there may be none</li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Joint Distribution:</h1>
+<p>Explicit representation of joint distribution becomes unmanageable for realistic scenarios.</p>
+<div>
+<ul>
+<li class="fragment">computationally expensive,</li>
+<li class="fragment">involves a huge number which is too large
+<ul>
+<li class="fragment">to estimate by a human expert,</li>
+<li class="fragment">or even to store in memory,</li>
+</ul></li>
+<li class="fragment">would require large amounts of data and samples for robust estimation,</li>
+<li class="fragment">probabilities itself would be very small numbers hindering computation,</li>
+<li class="fragment">and rare events might not be captured which would negatively affect generalization.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>The need for structure</h1>
+<div>
+<ul>
+<li class="fragment"><p>We often want to describe many objects (features in a data set for many individuals).</p></li>
+<li class="fragment"><p>Unfortunately, often the representational and computational cost of probabilistic models grows exponentially with the number of objects represented.</p></li>
+<li class="fragment"><p>Therefore, ‘simpler’ alternatives (e.g. fuzzy logic) were introduced to avoid some of these diculties.</p></li>
+</ul>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Graphical Models</h1>
+</section>
+<section class="slide level1">
+<h1>Graphical Models</h1>
+<div>
+<ul>
+<li class="fragment"><p>We can use graphs to represent interaction between objects.</p></li>
+<li class="fragment"><p>Graphical Models combine Graph and Probability theory.</p></li>
+<li class="fragment"><p>Many of the quantities that we would like to compute in a probability distribution can then be related to operations on the graph.</p></li>
+<li class="fragment"><p>The computational complexity of operations can often be related to the structure of the graph.</p></li>
+<li class="fragment"><p>Graphical Models are now used as a standard framework in Engineering, Statistics and Computer Science.</p></li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Graphical Models</h1>
+<p><img data-src="../data/07/barber_graph.png" style="height:auto;width:400px;"></p>
+<div class="box definition">
+<h2 class="definition">Graph</h2>
+<p>A graph consists of nodes (vertices) and undirected or directed links (edges) between nodes.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Graphical Models</h1>
+<p><img data-src="../data/07/barber_graph.png" style="height:auto;width:400px;"></p>
+<div class="box">
+<h2>Path</h2>
+<p>A path from <span class="math inline">\(X_i\)</span> to <span class="math inline">\(X_j\)</span> is a sequence of connected nodes starting at <span class="math inline">\(X_i\)</span> and ending at <span class="math inline">\(X_j\)</span>.</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Following <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Directed Graphs</h1>
+<p>All edges are directed:</p>
+<p><img data-src="../data/07/barber_dag.png" style="height:auto;width:600px;"></p>
+<div class="box">
+<h2>Directed Acyclic Graph</h2>
+<p>Graph in which by following the direction of the arrows a node will never be visited more than once.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Directed Graphs</h1>
+<p><img data-src="../data/07/barber_dag.png" style="height:auto;width:480px;"></p>
+<div class="box">
+<h2>Parents and Children</h2>
+<p><span class="math inline">\(X_i\)</span> is a parent of <span class="math inline">\(X_j\)</span> if there is a link from <span class="math inline">\(X_i\)</span> to <span class="math inline">\(X_j\)</span>. <span class="math inline">\(X_i\)</span> is a child of <span class="math inline">\(X_j\)</span> if there is a link from <span class="math inline">\(X_j\)</span> to <span class="math inline">\(X_i\)</span>.</p>
+</div>
+<div class="box">
+<h2>Ancestors and Descendants</h2>
+<p>The ancestors of a node <span class="math inline">\(X_i\)</span> are the nodes with a directed path ending at <span class="math inline">\(X_i\)</span>. The descendants of <span class="math inline">\(X_i\)</span> are the nodes with a directed path beginning at <span class="math inline">\(X_i\)</span>.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Undirected Graph - all the edges are undirected</h1>
+<p><img data-src="../data/07/barber_undirected_graph.png" style="height:auto;width:360px;"></p>
+<div class="box definition">
+<h2 class="definition">Clique</h2>
+<p>A clique is a fully connected subset of nodes. <span class="math inline">\((X_1,X_2,X_4)\)</span> forms a (non-maximal) clique.</p>
+</div>
+<div class="box">
+<h2>Maximal Clique</h2>
+<p>Clique which is not a subset of a larger clique. <span class="math inline">\((X_1, X_2, X_3, X_4)\)</span> and <span class="math inline">\((X_2, X_3, X_5)\)</span> are both maximal cliques.</p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Belief Networks (Bayesian Networks)</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>A belief network is a directed acyclic graph in which each node has associated the conditional probability of the node given its parents.</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/07/barber_belief_net.png" style="height:auto;width:400px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom fragment">
+<h2 class="bottom"></h2>
+<p>The joint distribution is obtained by taking the product of the conditional probabilities:</p>
+<p><span class="math display">\[
+p(A, B, C, D, E) = p(A)p(B)p(C|A, B)p(D|C)p(E|B, C)
+\]</span></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Example from <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Belief Networks (Bayesian Networks)</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/07/barber_belief_net.png" style="height:auto;width:400px;"></p>
+<p>Generally, a Bayesian Network is satisfied by one and only one probability distribution given by the chain rule for Bayesian networks.</p>
+<ul>
+<li>Structure = set of nodes and a set of edges</li>
+<li>Parametrization = set of conditional probabilities </li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example – Part 1</h1>
+<p>Sally’s burglar <strong>A</strong>larm is sounding. Has she been <strong>B</strong>urgled, or was the alarm triggered by an <strong>E</strong>arthquake? She turns the car <strong>R</strong>adio on for news of earthquakes.</p>
+<div class="box">
+<h2>Choosing an ordering</h2>
+<p>Without loss of generality, we can write</p>
+<p><span class="math display">\[\begin{align*}
+p(A, R, E, B) &amp;= p(A|R, E, B)p(R, E, B) \\
+ &amp;= p(A|R, E, B)p(R|E, B)p(E, B) \\
+&amp;= p(A|R, E, B)p(R|E, B)p(E|B)p(B) \\
+\end{align*}\]</span></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Example from <span class="citation" data-cites="Kim1987ConvinceAC">(Kim and Pearl 1987)</span> and <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example - Assumptions:</h1>
+<div>
+<ul>
+<li class="fragment">The alarm is not directly influenced by any report on the radio: <span class="math inline">\(p(A|R, E, B) = p(A|E, B)\)</span></li>
+<li class="fragment">The radio broadcast is not directly influenced by the burglar variable: <span class="math inline">\(p(R|E, B) = p(R|E)\)</span></li>
+<li class="fragment">Burglaries don’t directly ‘cause’ earthquakes, <span class="math inline">\(p(E|B) = p(E)\)</span></li>
+</ul>
+</div>
+<div class="box fragment">
+<h2></h2>
+<p>Therefore <span class="math inline">\(p(A, R, E, B) = p(A|E, B)p(R|E)p(E)p(B)\)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example 2</h1>
+<p><img data-src="../data/07/barber_earthquake.png" style="height:auto;width:800px;"></p>
+<p>The remaining tables are <span class="math inline">\(p(B = 1) = 0.01\)</span> and <span class="math inline">\(p(E = 1) = 0.000001\)</span>. The tables and graphical structure fully specify the distribution.</p>
+</section>
+<section class="slide level1">
+<h1>Example 3 – Inference</h1>
+<p>Initial Evidence: The alarm is sounding. Is there a burglar?</p>
+<div class="box fragment">
+<h2></h2>
+<p><span class="math display">\[\begin{align*}
+p(B = 1|A = 1) &amp;= \frac{\sum_{E,R} p(B = 1,E,A = 1,R)}{\sum_{B, E, R} p(B, E, A=1, R)} \\
+&amp;= \frac{\sum_{E,R} p(A=1 | B = 1,E) p(B=1)p(E)p(R|E)}{\sum_{A=1 |B, E} p(B) p(E) p(R|E)} \approx 0.99
+\end{align*}\]</span></p>
+</div>
+<div class="box fragment">
+<h2></h2>
+<p>Additional Evidence: The radio broadcasts an earthquake warning – a similar calculation now gives <span class="math inline">\(p(B = 1|A = 1, R = 1) \approx 0.01\)</span>.</p>
+</div>
+<div class="box fragment">
+<h2></h2>
+<p>Initially, because the alarm sounds, Sally thinks that she’s been burgled. However, this probability drops dramatically when she hears that there has been an earthquake.</p>
+<p>The earthquake ‘explains away’ to an extent the fact that the alarm is ringing.</p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Bayesian Networks – Causal Interpretation</h1>
+<div class="single-column-row">
+<div class="box top">
+<h2 class="top"></h2>
+<p>By way of its mathematical definition, the Bayesian Network represents a set of conditional independence assumptions: each node is conditionally independent of its non-descendants, given its parents</p>
+</div>
+</div>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>the parents of node <span class="math inline">\(X\)</span> are causally interpreted as causes of <span class="math inline">\(X\)</span>, descendants of <span class="math inline">\(X\)</span> as effects of <span class="math inline">\(X\)</span></li>
+<li>having information about the direct  causes of <span class="math inline">\(V\)</span>, the belief in <span class="math inline">\(X\)</span> is no longer  influenced by any other information,   except about the effects of <span class="math inline">\(X\)</span></li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/07/barber_causal.png" style="height:auto;width:400px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p>Following from <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Markov Blanket</h1>
+<div class="box definition">
+<h2 class="definition">Markov Blanket</h2>
+<p>A node‘s Markov blanket (MB) = all parents, children, and other parents of children of <span class="math inline">\(X\)</span>. Given its Markov Blanket, <em>X</em> is conditionally independent of all other nodes outside of the Markov Blanket.</p>
+</div>
+<div class="box fragment">
+<h2></h2>
+<p>The MB carries all information about X, or “insulating” <em>X</em> from any external informational influence </p>
+<p><img data-src="../data/07/barber_markov_blanket.png" style="height:auto;width:400px;"></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example revisited</h1>
+<p><em>"I’m at work, neighbor John calls to say my burglar alarm is ringing. Sometimes it’s set off by minor earthquakes. John sometimes confuses the alarm with a phone ringing. Real earthquakes usually are reported on radio.This would increase my belief in the alarm triggering and in receiving John‘s call.“</em></p>
+<p>Variables: <em>Burglary,Earthquake,Alarm,Call,Radio</em></p>
+<div class="box fragment">
+<h2></h2>
+<p>Network topology reflects believed causal structure of the domain:</p>
+<div>
+<ul>
+<li class="fragment">burglar and earthquake can set the alarm off</li>
+<li class="fragment">alarm can cause John to call</li>
+<li class="fragment">earthquake can cause a radio report</li>
+<li class="fragment">plus some independence assumptions</li>
+</ul>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Example revisited 2</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<div>
+<ul>
+<li class="fragment">given <em>Alarm, Call</em> is cond. indep. of <em>Earthquake, Burglary, Radio</em></li>
+<li class="fragment">given <em>Earthquake, Radio</em> is cond. indep. of <em>Alarm, Burglary, Call</em></li>
+<li class="fragment">given <em>Earthquake</em> and <em>Burglary</em>, <em>Alarm</em> is cond. indep. of <em>Radio</em></li>
+<li class="fragment">given no descendant, <em>Earthquake</em> and <em>Burglary</em> are indep.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/07/pearl_3-Figure1-1.png" style="height:auto;width:480px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p>Example from <span class="citation" data-cites="pearl2009">(Pearl 2009)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Independence in Belief Networks</h1>
+<p>Conditional independence is not always immediately clear. We would like to have a general algorithm for reading it from the graph.</p>
+<p>Consider the simplest case of the joint distribution <span class="math inline">\(p(x_1, x_2, x_3)\)</span></p>
+<ul>
+<li>no indep. assumption: six different factorisations <span class="math inline">\(P(x_{i1}|x_{i2},x_{i3})P(x_{i2}|x_{i3})P(x_{i3})\)</span> and different DAGs, representing the same distribution</li>
+<li>one indep. assumption: four possible graphs left - which ones are equivalent?</li>
+</ul>
+<p><img data-src="../data/07/barber_bayes_independent1.png" style="height:auto;width:800px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Following <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Independence in Belief Networks</h1>
+<p><img data-src="../data/07/barber_bayes_independent1b.png" style="height:auto;width:480px;"></p>
+<ul>
+<li>In (a), (b) and (c), <span class="math inline">\(A, B\)</span> are conditionally independent given <span class="math inline">\(C\)</span>.</li>
+</ul>
+<p><span class="math display">\[\begin{align*}
+(a) \  p(A, B|C) &amp;= \frac{p(A,B,C)}{p(C)} = \frac{p(A|C)p(B|C)p(C)}{p(C)} = p(A|C)p(B|C)\\
+(b) \  p(A, B|C) &amp;= \frac{p(A) p(C|A) p(B|C)}{p(C)} = \frac{p(A,C)p(B|C)}{p(C)} = p(A|C)p(B|C)\\
+(c) p(A, B|C) &amp;= \frac{p(A|C)p(C|B)p(B)}{p(C)} = \frac{p(A|C)p(B,C)p(C)}{p(C)} = p(A|C)p(B|C)
+\end{align*}\]</span></p>
+<div>
+<ul>
+<li class="fragment">In (d) the variables A,B are conditionally dependent given C, <span class="math inline">\(p(A, B|C) \propto p(C|A, B)p(A)p(B)\)</span>.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Independence in Belief Networks</h1>
+<p><img data-src="../data/07/barber_bayes_independent2.png" style="height:auto;width:800px;"></p>
+<ul>
+<li>In (a), (b) and (c), the variables A, B are marginally dependent.</li>
+<li>In (d) the variables A, B are marginally independent.</li>
+</ul>
+<p><span class="math display">\[
+p(A, B) = \sum_C p(A, B, C) = \sum_C p(A)p(B)p(C|A, B) = p(A)p(B) 
+\]</span></p>
+</section>
+<section class="slide level1">
+<h1>Different Formalisms</h1>
+<p>Why do we want to have different types of representation formalisms?</p>
+<ul>
+<li>They have different advantages/disadvantages – so we usually have to consider a tradeoff.</li>
+</ul>
+<div>
+<p>In particular, we are always concerned with two questions:</p>
+<ul>
+<li class="fragment"><p>constructing the model</p></li>
+<li class="fragment"><p>drawing inference in a model</p></li>
+</ul>
+<p>Individual models are differently specialized on these tasks – and as probabilistic inference easily gets quite expensive there are special models to deal with special types of inferences.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Reasoning with Bayesian networks</h1>
+<p>Bayesian Models.These are particular good in expressing directed dependencies and using causal explanations for those  e.g. when dealing with causes and effects.</p>
+<p>We can solve four general types of queries with Bayesian networks:</p>
+<div>
+<ul>
+<li class="fragment">probability of evidence: How likely is a complete variable instantiation <span class="math inline">\(E\)</span> ➔ <span class="math inline">\(p(E)=\)</span>?</li>
+<li class="fragment">prior and posterior marginals: How probable is an instantiation of a <em>limited set</em> of variables ➔ <span class="math inline">\(p(x_1,...,x_m)=\)</span>? or <span class="math inline">\(p(x_1,...,x_m| E)=\)</span>?</li>
+<li class="fragment"><strong>most probable explanation (MPE)</strong>: what is the most probable instantiation of all network variables given some evidence <span class="math inline">\(e\)</span> ➔ <span class="math inline">\(\vec{x}\)</span> with <span class="math inline">\(p(x_1,...,x_n|E)=max\)</span>?</li>
+<li class="fragment"><strong>maximum a posteriori hypothesis (MAP)</strong>:what is the most probable instantiation of a subset of <span class="math inline">\(m (m&lt;n)\)</span> variables given some evidence <span class="math inline">\(E\)</span> ➔ <span class="math inline">\(\vec{x}\)</span> with <span class="math inline">\(p(x_1,...,x_m|E)=max\)</span>?</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Construction of a Bayesian</h1>
+<div class="box fragment">
+<h2></h2>
+<ol type="1">
+<li>define network variables and their values
+<ul>
+<li>distinguish between <em>query</em>, <em>evidence</em>, and <em>intermediary</em> variables</li>
+<li>query and evidence variables usually determined from problem statement</li>
+<li>intermediary (a.k.a. <em>hidden</em> or <em>latent)</em> variables often less obvious</li>
+</ul></li>
+</ol>
+</div>
+<div class="box fragment">
+<h2></h2>
+<ol start="2" type="1">
+<li>define network structure
+<ul>
+<li>for each var <span class="math inline">\(X\)</span> answer the question: what set of variables are direct causes of <span class="math inline">\(X\)</span>?</li>
+</ul></li>
+</ol>
+</div>
+<div class="box fragment">
+<h2></h2>
+<ol start="3" type="1">
+<li>define network parameters (Conditional Probability Tables)
+<ul>
+<li>difficulty and objectivity depend on problem and available data</li>
+<li>often assuming a distribution (model) and estimate parameters</li>
+</ul></li>
+</ol>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: Constructing a Bayesian Network</h1>
+<p><em>"Flu is an acute disease characterized by fever, body aches, and pains, and can be associated with chilling and a sore throat.The cold is a bodily disorder popularly associated with chilling and can cause a soar throat. Tonsillitis is an inflammation of the tonsils that leads to a soar throat and can be associated with fever.“</em></p>
+<p>Variables:</p>
+<div class="box fragment">
+<h2></h2>
+<ul>
+<li>query: flu,cold,tonsillitis</li>
+<li>evidence: chilling, body ache and pain, sore throat, fever</li>
+<li>intermediary: /</li>
+<li>values:{true,false}</li>
+</ul>
+<p>Structure?</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: Constructing a Bayesian Network</h1>
+<p><img data-src="../data/07/pearl_illness.png" style="height:auto;width:600px;"></p>
+<p>CPTs normally obtained from experts (subjective beliefs, empirical data)</p>
+<ul>
+<li>problem of parameter estimation</li>
+<li>Example: Given <span class="math inline">\(N\)</span> patient records <span class="math inline">\(d_i\)</span> , find parametrization <span class="math inline">\(\theta\)</span> such that <span class="math inline">\(\prod_{i=1}^N p(d_i) = max\)</span></li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Example from <span class="citation" data-cites="pearl2009">(Pearl 2009)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Naive Bayes Structure</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>class variable <em>Condition</em> ∈ <em>{normal, cold, flu, tonsillitis}</em></li>
+<li>attributes <em>Chilling, Body Ache,</em> …</li>
+<li>single-fault assumption: only one cond. can hold at any time</li>
+<li>inconsistent with info: given <em>Cond.=Cold</em>, <em>Fever</em> and <em>Sore Throat</em> would become independent</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/07/pearl_naive_bayes.png" style="height:auto;width:480px;"></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Graphical Formalisms – Many different kinds</h1>
+<p><img data-src="../data/07/barber_graphical_formalisms.png" style="height:640px;width:auto;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>From <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Graphical Models</h1>
+<p>Graphical Models are graph based representations of various factorisation assumptions of distributions. These factorisations are typically equivalent to independence statements amongst (sets of) variables in the distribution.</p>
+<div>
+<ul>
+<li class="fragment">Belief Network: Each factor is a conditional distribution.  Generative models, AI, statistics. Corresponds to a DAG.</li>
+<li class="fragment">Markov Network: Each factor corresponds to a potential (non negative function).  Related to the strength of relationship between variables, but not directly related to dependence.  Useful for collective phenomena such as image processing. Corresponds to an undirected graph.</li>
+<li class="fragment">Chain Graph: A marriage of BNs and MNs. Contains both directed and undirected links.</li>
+<li class="fragment">Factor Graph: A barebones representation of the factorisation of a distribution. Often used for efficient computation and deriving message passing algorithms.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Summary: Structured Probability Distributions</h1>
+<p>Not all probability densities can be well described by Gaussians.</p>
+<p>Graphical models offer a different way of working with structured PDFs such that computational simplifications become possible:</p>
+<div>
+<ul>
+<li class="fragment">A general PDF with <span class="math inline">\(k\)</span> n-ary variables requires <span class="math inline">\(n^{k − 1}\)</span> parameters for its complete specification.</li>
+<li class="fragment">Graphical models offer a scheme to describe structured PDFs that require fewer parameters for the same number of variables.</li>
+<li class="fragment">the scheme is based on a graph expressing dependencies among variables leading to a factorization of the PDF into lower-parameter factors.</li>
+<li class="fragment">The graph is formed by representing each variable of the PDF as a node receiving arrows from other variables (“causes”).</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Summary - Bayes Net</h1>
+<p>Allows for concise specification of structured PDFs.</p>
+<p>Bayes nets help to simplify the following basic learning tasks (ascending order of computational complexity):</p>
+<div>
+<ul>
+<li class="fragment">inference: given values for some nodes in the graph, what is the PDF of the remaining nodes?</li>
+<li class="fragment">parameter learning: factorized PDFs are parametrized and the task is to find optimal parameter values, given some data.</li>
+<li class="fragment">model selection: parameter learning for a number of competing graph structures and chooses the model that gives the maximal likelihood</li>
+<li class="fragment">model inference: infer the graphical model structure from the given data. Usually requires additional constraints, with model selection as a maximal simplification.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1 unnumbered biblio">
+<h1>References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-barber2012">
+<p>Barber, David. 2012. <em>Bayesian Reasoning and Machine Learning</em>. New York, NY, USA: Cambridge University Press.</p>
+</div>
+<div id="ref-Kim1987ConvinceAC">
+<p>Kim, Jin H., and Judea Pearl. 1987. “Convince: A Conversational Inference Consolidation Engine.” <em>IEEE Transactions on Systems, Man, and Cybernetics</em> 17: 120–32.</p>
+</div>
+<div id="ref-pearl2009">
+<p>Pearl, Judea. 2009. <em>Causality: Models, Reasoning and Inference</em>. 2nd ed. New York, NY, USA: Cambridge University Press.</p>
+</div>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="../support/vendor/reveal/js/reveal.js"></script>
+  <script src="../support/vendor/jquery.js"></script>
+  <script src="../support/vendor/piklor.js"></script>
+
+ <!-- standard setting -->
+
+  <script>
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        pdfMaxPagesPerSlide: 1,
+        pdfSeparateFragments: false,
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Display the page number of the current slide
+        slideNumber: false,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: false,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Loop the presentation
+        loop: false,
+        // Change the presentation direction to be RTL
+        rtl: false,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: false,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: false,
+        mouseWheel: false,
+        hideAddressBar: false,
+        previewLinks: false,
+        // Transition style
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'none', // none/fade/slide/convex/concave/zoom
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+        height: 800,
+        thebelab: true,
+        math: {
+          mathjax: "../support/vendor/mathjax/MathJax.js",
+          TeX: {
+              Macros: {
+              R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+              laplace: "{\\Delta}",
+              grad: "{\\nabla}",
+              T: "^{\\mathsf{T}}",
+  
+              norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+              iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+              vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              set: ['\\mathcal{#1}', 1],
+              func: ['\\mathrm{#1}', 1],
+              trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+              matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+              vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+              of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+              diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+              pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+  
+              vc: ['\\mathbf{#1}', 1],
+              abs: ['\\lvert#1\\rvert', 1],
+              norm: ['\\lVert#1\\rVert', 1],
+              det: ['\\lvert#1\\rvert', 1],
+              qt: ['\\hat{\\vc {#1}}', 1],
+              mt: ['\\boldsymbol{#1}', 1],
+              pt: ['\\boldsymbol{#1}', 1],
+              textcolor: ['\\color{#1}', 1]
+              }
+          },
+        },
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '../support/vendor/reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: '../support/vendor/reveal/plugin/zoom-js/zoom.js', async: true },
+          { src: '../support/vendor/whiteboard/whiteboard.js'},
+          //{ src: '../support/vendor/reveal/plugin/math/math.js', async: true },
+          { src: '../support/vendor/math/math.js' },
+          { src: '../support/js/thebelab.js', async: true },
+          { src: '../support/vendor/reveal/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+
+
+    <script src="../support/js/quiz.js" type="text/javascript"></script>
+    <script src="../support/js/decker.js" type="text/javascript"></script>
+
+    <!-- Reload on change machinery -->
+    <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+      window.location.reload(true);
+      };
+    </script>
+
+    </body>
+</html>
