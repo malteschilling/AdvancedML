@@ -202,30 +202,24 @@
 </section>
 <section class="slide level1">
 <h1>Recap: Conditional probabilities</h1>
-<div class="box">
-<h2>Unconditional probability: <span class="math inline">\(P(A=a)\)</span></h2>
+<h3>Unconditional probability: <span class="math inline">\(P(A=a)\)</span></h3>
 <ul>
 <li>probability of <span class="math inline">\(A\)</span> being in state <span class="math inline">\(a\)</span> regardless of anything</li>
 </ul>
-</div>
-<div class="box">
-<h2>Conditional probability: <span class="math inline">\(P(A=a|B=b)\)</span></h2>
+<h3>Conditional probability: <span class="math inline">\(P(A=a|B=b)\)</span></h3>
 <ul>
 <li>probability of <span class="math inline">\(A\)</span> being in state <span class="math inline">\(a\)</span> under the constraint that <span class="math inline">\(B\)</span> is in state <span class="math inline">\(b\)</span></li>
 </ul>
-</div>
-<div class="box">
-<h2>Central rule for relating both:</h2>
+<h3>Central rule for relating both:</h3>
 <ul>
-<li>Product rule: <span class="math inline">\(P(A,B) = P(A|B)\times⋅ \times P(B) = P(B|A) \times ⋅ \times P(A)\)</span></li>
-<li>relates the unconditional joint probability of two events „<em>A and B“</em> to the (un-)conditional probabilities of the single events</li>
+<li>Product rule: <span class="math inline">\(P(A,B) = P(A|B) P(B) = P(B|A) P(A)\)</span></li>
+<li>relates unconditional joint probability of two events to the (un-)conditional probabilities of the single events</li>
 </ul>
-</div>
 </section>
 <section class="slide level1">
 <h1>Prior, Likelihood and Posterior</h1>
 <p>For data <span class="math inline">\(D\)</span> and variable <span class="math inline">\(\theta\)</span>, Bayes’ rule tells us how to update our prior beliefs about the variable <span class="math inline">\(\theta\)</span> in light of the data to a posterior belief: <span class="math display">\[
-\underbrace{p(\theta | D)}_\text{posterior} = \frac{\overbrace{p{D|\theta)}}^\text{likelihood} \ \overbrace{p{\theta}}^\text{prior}}{\underbrace{p{(D)}}_\text{evidence, marginal likelihood}}
+\underbrace{p(\theta | D)}_\text{posterior} = \frac{\overbrace{p{(D|\theta)}}^\text{likelihood} \ \overbrace{p{(\theta)}}^\text{prior}}{\underbrace{p{(D)}}_\text{evidence, marginal likelihood}}
 \]</span> The term likelihood is used for the probability that a model generates observed data.</p>
 <div class="box footer">
 <h2 class="footer"></h2>
@@ -235,21 +229,17 @@
 <section class="slide level1">
 <h1>Prior, Likelihood and Posterior</h1>
 <p>More fully, if we condition on the model <span class="math inline">\(M\)</span>, we have <span class="math display">\[
-p(\theta|D, M) =\frac{p(D|\theta, M) p(\theta | M)}{p(D | M)}
+p(\theta|D, M) =\frac{ p ( D|\theta, M) p(\theta | M)}{p(D | M)}
 \]</span></p>
 <p>where we see the role of the likelihood <span class="math inline">\(p(D|\theta,M)\)</span> and marginal likelihood <span class="math inline">\(p(D|M)\)</span>.</p>
-<div class="box fragment">
-<h2>The MAP assignment</h2>
-<p>The Most probable A Posteriori (MAP) setting is that which maximises the posterior, <span class="math display">\[
+<h3 class="fragment">The Most probable A Posteriori (MAP) assignment</h3>
+<p>The MAP setting is that which maximises the posterior, <span class="math display">\[
 \theta_* = \text{argmax}_{\theta} p(\theta | D, M) = \text{argmax}_{\theta} p(\theta, D| M)
 \]</span></p>
-</div>
-<div class="box fragment">
-<h2>The Max Likelihood assignment, <span class="math inline">\(p(\theta | M)\)</span> = const.</h2>
+<h3 class="fragment">The Max Likelihood assignment, <span class="math inline">\(p(\theta | M)\)</span> = const.</h3>
 <p><span class="math display">\[
 \theta_* = \text{argmax}_{\theta} p(\theta, D| M) =  \text{argmax}_{\theta} p( D | \theta, M)
 \]</span></p>
-</div>
 </section>
 <section class="slide level1">
 <h1>Example: Bayes — Throwing Darts</h1>
@@ -374,7 +364,7 @@ p(x|y) = p(x) \Leftrightarrow p(y|x) = p(y)
 </div>
 <div class="box fragment">
 <h2></h2>
-<p>In case the conditioning set is empty we may also write <span class="math inline">\(X \perp\!\!\!\perp Y\)</span> for <span class="math inline">\(X \perp\!\!\!\perp Y | \{\}\)</span>, in which case <span class="math inline">\(X\)</span> is (unconditionally) independent of <span class="math inline">\(Y\)</span>.</p>
+<p>In case the conditioning set is empty we may also write <span class="math inline">\(X \perp\!\!\!\perp Y\)</span> for <span class="math inline">\(X \perp\!\!\!\perp Y | \emptyset\)</span>, in which case <span class="math inline">\(X\)</span> is (unconditionally) independent of <span class="math inline">\(Y\)</span>.</p>
 </div>
 </section>
 <section class="slide level1">
@@ -962,7 +952,8 @@ p(A, B) = \sum_C p(A, B, C) = \sum_C p(A)p(B)p(C|A, B) = p(A)p(B)
 </section>
 <section class="slide level1">
 <h1>Graphical Formalisms – Many different kinds</h1>
-<p><img data-src="../data/07/barber_graphical_formalisms.png" style="height:640px;width:auto;"></p>
+<p><img data-src="../data/07/barber_graphical_formalisms.png" style="height:480px;width:auto;"></p>
+<p>Graphical Models are graph based representations of various factorisation assumptions of distributions. These factorisations are typically equivalent to independence statements amongst (sets of) variables in the distribution.</p>
 <div class="box footer">
 <h2 class="footer"></h2>
 <p>From <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
@@ -970,7 +961,6 @@ p(A, B) = \sum_C p(A, B, C) = \sum_C p(A)p(B)p(C|A, B) = p(A)p(B)
 </section>
 <section class="slide level1">
 <h1>Graphical Models</h1>
-<p>Graphical Models are graph based representations of various factorisation assumptions of distributions. These factorisations are typically equivalent to independence statements amongst (sets of) variables in the distribution.</p>
 <div>
 <ul>
 <li class="fragment">Belief Network: Each factor is a conditional distribution.  Generative models, AI, statistics. Corresponds to a DAG.</li>
@@ -983,12 +973,12 @@ p(A, B) = \sum_C p(A, B, C) = \sum_C p(A)p(B)p(C|A, B) = p(A)p(B)
 <section class="slide level1">
 <h1>Summary: Structured Probability Distributions</h1>
 <p>Not all probability densities can be well described by Gaussians.</p>
-<p>Graphical models offer a different way of working with structured PDFs such that computational simplifications become possible:</p>
+<p>Graphical models offer a way of working with structured PDFs that allow for computational simplification:</p>
 <div>
 <ul>
 <li class="fragment">A general PDF with <span class="math inline">\(k\)</span> n-ary variables requires <span class="math inline">\(n^{k − 1}\)</span> parameters for its complete specification.</li>
-<li class="fragment">Graphical models offer a scheme to describe structured PDFs that require fewer parameters for the same number of variables.</li>
-<li class="fragment">the scheme is based on a graph expressing dependencies among variables leading to a factorization of the PDF into lower-parameter factors.</li>
+<li class="fragment">Graphical models allow to describe structured PDFs that require fewer parameters for the same number of variables.</li>
+<li class="fragment">The scheme is based on a graph expressing dependencies among variables leading to a factorization of the PDF.</li>
 <li class="fragment">The graph is formed by representing each variable of the PDF as a node receiving arrows from other variables (“causes”).</li>
 </ul>
 </div>
@@ -996,13 +986,13 @@ p(A, B) = \sum_C p(A, B, C) = \sum_C p(A)p(B)p(C|A, B) = p(A)p(B)
 <section class="slide level1">
 <h1>Summary - Bayes Net</h1>
 <p>Allows for concise specification of structured PDFs.</p>
-<p>Bayes nets help to simplify the following basic learning tasks (ascending order of computational complexity):</p>
+<p>Bayes nets help to simplify the following basic learning tasks:</p>
 <div>
 <ul>
 <li class="fragment">inference: given values for some nodes in the graph, what is the PDF of the remaining nodes?</li>
 <li class="fragment">parameter learning: factorized PDFs are parametrized and the task is to find optimal parameter values, given some data.</li>
-<li class="fragment">model selection: parameter learning for a number of competing graph structures and chooses the model that gives the maximal likelihood</li>
-<li class="fragment">model inference: infer the graphical model structure from the given data. Usually requires additional constraints, with model selection as a maximal simplification.</li>
+<li class="fragment">model selection: parameter learning for competing graph structures – chooses model that gives the maximal likelihood.</li>
+<li class="fragment">model inference: infer graphical model structure from given data. Usually requires additional constraints.</li>
 </ul>
 </div>
 </section>
