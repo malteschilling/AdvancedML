@@ -76,6 +76,7 @@ var RevealWhiteboard = (function(){
     var penCursor;
     var currentCursor;
     var penColor  = "red";
+    var color = [ "red", "black" ]; // old color handling
 
     // canvas for dynamic cursor generation
     var cursorCanvas = document.createElement( 'canvas' );
@@ -464,13 +465,13 @@ var RevealWhiteboard = (function(){
         if (tool)
         {
             container.style.border = "1px solid " + penColor;
-            drawingCanvas[mode].canvas.style.pointerEvents = "auto";
         }
         else
         {
             container.style.border = "1px solid transparent";
-            drawingCanvas[mode].canvas.style.pointerEvents = "none";
         }
+        drawingCanvas[mode].canvas.style.pointerEvents = (tool || laser) ? "auto" : "none";
+
     }
 
     /*
@@ -786,7 +787,7 @@ var RevealWhiteboard = (function(){
      */
     function annotationURL()
     {
-        var url = location.href;
+        var url = location.origin + location.pathname;
         var basename = url.substring(0, url.lastIndexOf("."));
 
         // decker filenames vs. Mario filenames
@@ -1729,6 +1730,21 @@ var RevealWhiteboard = (function(){
             return false;
         }
     }, true );
+
+
+    // bind to undo event (CTRL-Z or CMD-Z).
+    // doesn't work with Reveal's key bindings,
+    // probably due to CTRL/CMD key and the 
+    // missing preventDefault.
+    window.addEventListener('keydown', function(evt) 
+    { 
+        if ((evt.ctrlKey || evt.metaKey) && (!evt.shiftKey) &&
+            String.fromCharCode(evt.which).toLowerCase() == 'z') 
+        {
+            evt.preventDefault();
+            drawUndo();
+        }
+    });
 
 
 
