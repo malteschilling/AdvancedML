@@ -14,22 +14,36 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
  * GLOBAL STYLES
  *********************************************/
 
-body {
-  background: #ffffff;
-  background-color: #ffffff;
-}
-
 .reveal {
   font-family: "Source Sans Pro", Helvetica, sans-serif;
   font-size: 36px;
   font-weight: normal;
   color: #222; }
 
+#title-slide {
+  top: 225px;
+}
 
-/*::selection {
-  color: #fff;
-  background: #98bdef;
-  text-shadow: none; }
+.reveal .slides {
+  background: url('../data/UniBI_transparenzen.png') no-repeat bottom left; 
+  background-size:144px 36px;
+  background-position: 0px 760px;
+  margin-left:40px;
+}
+
+.reveal .slide-number {
+    font-family: "Source Sans Pro", Helvetica, sans-serif;
+    font-weight: normal;
+    color: #2CA02C;
+    width: 83px;
+    height: 31px;
+    position:   absolute;
+    text-align: centered;
+    padding:    0px;
+    font-size:  0.5em;
+    right:      20px;
+    bottom:     20px;
+}
 
 /* do not require section to be immediate child of .slides, since
 * this will not be the case for PDF export! */
@@ -39,6 +53,7 @@ body {
   font-weight: inherit;
   padding: 0; /* MARIO: prevent 20px at top/bottom by reveal.css */
   min-height: 100%; /* MARIO: slides should be full height for footer to be positioned correctly */
+  text-align: left;
 }
 
 .reveal .biblio {
@@ -68,6 +83,8 @@ body {
 .reveal .w80 { margin-left: auto; margin-right: auto; width:80%; }
 .reveal .w90 { margin-left: auto; margin-right: auto; width:90%; }
 
+.reveal .col2 { float:left; width:2.5%; }
+.reveal .col5 { float:left; width:5%; }
 .reveal .col10 { float:left; width:10%; }
 .reveal .col20 { float:left; width:20%; }
 .reveal .col25 { float:left; width:25%; }
@@ -376,20 +393,25 @@ body {
   background: rgba(0, 0, 0, 0.2);
   color: #2CA02C; }
 
-/*.reveal .progress span {
+.reveal .progress span {
   -webkit-transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985);
   -moz-transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985);
   transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985); }
-*/
+
 
 
 /*********************************************
  * MARIO: TITLE SLIDE
  *********************************************/
+.white-on-blue {
+    color: #000;
+    background-color: transparent;
+}
 
 .reveal .title {
-    margin-left:  40px;
-    padding:     40px;
+    margin-left: 120px;
+    margin-top: 40px;
+    padding:     40px 0 0 0;
     font-weight: bold;
     font-style:  normal;
     font-size:   1.5em;
@@ -397,9 +419,12 @@ body {
 }
 
 .reveal .subtitle {
-    margin-left:      80px;
+    margin-left: 120px;
+    padding:     0px 0 0 0;
     font-style:  italic;
     font-size:   1.3em;
+    text-align:  left;
+    color: #000;
 }
 /*
 .reveal .teaser img {
@@ -410,8 +435,9 @@ body {
 }
 */
 .reveal .author {
-    margin-left:      80px;
+    margin-left:      120px;
     font-size:   1.0em;
+    text-align:  left;
 }
 /*
 .reveal .affiliation {
@@ -430,9 +456,10 @@ body {
 .reveal .section h1 {
     /* green-on-white */
     color: #FFFFFF;
+    background-color: transparent;
 
     /* large top margin -> vertical centering */
-    margin:      250px auto;
+    margin:      320px auto;
     padding:      50px;
 
     /* large bold font */
@@ -455,7 +482,7 @@ body {
  * MARIO: COMMENT BUBBLES
  *********************************************/
 
-/*.reveal .bubble {
+.reveal .bubble {
     display: inline-block;
     font-size: 0.7em;
     color: #ffffff;
@@ -463,17 +490,19 @@ body {
     padding: 10px;
     margin: auto;
     border-radius:5px;
-    box-shadow: 0px 0px 30px 0px rgba(0,0,0,0.35);
+    box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.35);
 }
 
 .reveal .comment {
     color: #ffffff;
     background-color: #2a9ddf;
-    position:absolute;
+position: fixed;
+  bottom: 0;
+  
     padding:10px;
     border-radius:5px;
     font-size: 0.5em;
-    box-shadow: 0px 0px 30px 0px rgba(0,0,0,0.35);
+    box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.35);
 }
 
 .reveal .comment-left {
@@ -483,7 +512,7 @@ body {
     padding:5px;
     font-size: 80%;
     border-radius:20px 20px 0px 20px;
-    box-shadow: 0px 0px 30px 0px rgba(0,0,0,0.35);
+    box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.35);
 }
 
 .reveal .comment-right {
@@ -493,7 +522,7 @@ body {
     padding:5px;
     font-size: 80%;
     border-radius:20px 20px 20px 0px;
-    box-shadow: 0px 0px 30px 0px rgba(0,0,0,0.35);
+    box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.35);
 }
 
 .reveal .comment-big {
@@ -501,9 +530,9 @@ body {
     background-color: #2a9ddf;
     padding:10px;
     border-radius:5px;
-    box-shadow: 0px 0px 30px 0px rgba(0,0,0,0.35);
+    box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.35);
 }
-*/
+
 
 /*********************************************
  * MARIO: FOOTER COMMENTS
@@ -529,21 +558,4 @@ body {
 .reveal .footer p {
 	margin:  0px;
     padding: 0px;
-}
-
-
-/*********************************************
- * MARIO: margin: auto
- *********************************************/
-
-.reveal .automargin {
-    margin: 10px auto;
-}
-
-.reveal .neg80 {
-    margin-top: -80px;
-}
-
-.reveal .neg60 {
-    margin-top: -60px;
 }
