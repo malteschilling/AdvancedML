@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<!-- This is the pandoc 2.7.3 template for reveal.js output modified for decker. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">
+  <title>08 Markov Models</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reset.css">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reveal.css">
+  <link rel="stylesheet" href="../support/css/thebelab.css">
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="../support/css/decker.css">
+  <link rel="stylesheet" href="../mschilling.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? '../support/vendor/reveal/css/print/pdf.css' : '../support/vendor/reveal/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script type="text/x-thebe-config">
+  {
+      bootstrap: false,
+      requestKernel: false,
+      predefinedOutput: false,
+      binderOptions: {
+          repo: "malteschilling/advml_binder",
+          ref: "master",
+          binderUrl: "https://mybinder.org",
+          repoProvider: "github",
+      },
+      kernelOptions: {
+          name: "python3"
+      },
+      selector: "[data-executable]",
+      mathjaxUrl: false,
+      codeMirrorConfig: {
+          mode: "python3"
+      }
+  }
+  </script>
+  <script src="https://unpkg.com/thebelab@0.4.0/lib/index.js"></script> 
+  <!-- <script src="../support/vendor/thebelab/index.js"></script> -->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+ <!-- standard settings -->
+  <h1 class="title">08 Markov Models</h1>
+  <p class="subtitle">Advanced Machine Learning</p>
+  <p class="author">Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
+
+</section>
+
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Graphical Models</h1>
+</section>
+<section class="slide level1">
+<h1>Recap - Graphical Models</h1>
+<div>
+<ul>
+<li class="fragment"><p>We can use graphs to represent interaction between objects.</p></li>
+<li class="fragment"><p>Graphical Models combine Graph and Probability theory.</p></li>
+<li class="fragment"><p>Many of the quantities that we would like to compute in a probability distribution can then be related to operations on the graph.</p></li>
+<li class="fragment"><p>The computational complexity of operations can often be related to the structure of the graph.</p></li>
+<li class="fragment"><p>Graphical Models are now used as a standard framework in Engineering, Statistics and Computer Science.</p></li>
+</ul>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Recap - Belief Networks (Bayesian Networks)</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>A belief network is a directed acyclic graph in which each node has associated the conditional probability of the node given its parents.</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/07/barber_belief_net.png" style="height:auto;width:400px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>The joint distribution is obtained by taking the product of the conditional probabilities:</p>
+<p><span class="math display">\[
+p(A, B, C, D, E) = p(A)p(B)p(C|A, B)p(D|C)p(E|B, C)
+\]</span></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Example from <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example revisited</h1>
+<p><em>"I’m at work, neighbor John calls to say my burglar alarm is ringing. Sometimes it’s set off by minor earthquakes. John sometimes confuses the alarm with a phone ringing. Real earthquakes usually are reported on radio.This would increase my belief in the alarm triggering and in receiving John‘s call.“</em></p>
+<p>Variables: <em>Burglary,Earthquake,Alarm,Call,Radio</em></p>
+<div class="box fragment">
+<h2></h2>
+<p>Network topology reflects believed causal structure of the domain:</p>
+<div>
+<ul>
+<li class="fragment">burglar and earthquake can set the alarm off</li>
+<li class="fragment">alarm can cause John to call</li>
+<li class="fragment">earthquake can cause a radio report</li>
+<li class="fragment">plus some independence assumptions</li>
+</ul>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Example revisited 2</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<div>
+<ul>
+<li class="fragment">given <em>Alarm, Call</em> is cond. indep. of <em>Earthquake, Burglary, Radio</em></li>
+<li class="fragment">given <em>Earthquake, Radio</em> is cond. indep. of <em>Alarm, Burglary, Call</em></li>
+<li class="fragment">given <em>Earthquake</em> and <em>Burglary</em>, <em>Alarm</em> is cond. indep. of <em>Radio</em></li>
+<li class="fragment">given no descendant, <em>Earthquake</em> and <em>Burglary</em> are indep.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/07/pearl_3-Figure1-1.png" style="height:auto;width:480px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p>Example from <span class="citation" data-cites="pearl2009">(Pearl 2009)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Different Formalisms</h1>
+<p>Why do we want to have different types of representation formalisms?</p>
+<ul>
+<li>They have different advantages/disadvantages – so we usually have to consider a tradeoff.</li>
+</ul>
+<div>
+<p>In particular, we are always concerned with two questions:</p>
+<ul>
+<li class="fragment"><p>constructing the model</p></li>
+<li class="fragment"><p>drawing inference in a model</p></li>
+</ul>
+<p>Individual models are differently specialized on these tasks – and as probabilistic inference easily gets quite expensive there are special models to deal with special types of inferences.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Reasoning with Bayesian networks</h1>
+<p>Bayesian Models.These are particular good in expressing directed dependencies and using causal explanations for those  e.g. when dealing with causes and effects.</p>
+<p>We can solve four general types of queries with Bayesian networks:</p>
+<div>
+<ul>
+<li class="fragment">prob. of evidence: How likely is a complete variable instantiation <span class="math inline">\(E\)</span> ➔ <span class="math inline">\(p(E)=\)</span>?</li>
+<li class="fragment">prior and posterior marginals: How probable is an instantiation of a <em>limited set</em> of variables ➔ <span class="math inline">\(p(x_1,...,x_m)=\)</span>? or <span class="math inline">\(p(x_1,...,x_m| E)=\)</span>?</li>
+<li class="fragment"><strong>most probable explanation (MPE)</strong>: what is the most probable instantiation of all network variables given some evidence <span class="math inline">\(e\)</span> ➔ <span class="math inline">\(\vec{x}\)</span> with <span class="math inline">\(p(x_1,...,x_n|E)=max\)</span>?</li>
+<li class="fragment"><strong>maximum a posteriori hypoth. (MAP)</strong>: what is the most probable instantiation of a subset of <span class="math inline">\(m (m&lt;n)\)</span> variables for some evidence <span class="math inline">\(E\)</span> ➔ <span class="math inline">\(\vec{x}\)</span> with <span class="math inline">\(p(x_1,...,x_m|E)=max\)</span>?</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Construction of a Bayesian</h1>
+<div class="box fragment">
+<h2></h2>
+<ol type="1">
+<li>define network variables and their values
+<ul>
+<li>distinguish between <em>query</em>, <em>evidence</em>, and <em>intermediary</em> variables</li>
+<li>query and evidence variables usually determined from problem statement</li>
+<li>intermediary (a.k.a. <em>hidden</em> or <em>latent)</em> variables often less obvious</li>
+</ul></li>
+</ol>
+</div>
+<div class="box fragment">
+<h2></h2>
+<ol start="2" type="1">
+<li>define network structure
+<ul>
+<li>for each var <span class="math inline">\(X\)</span> answer the question: what set of variables are direct causes of <span class="math inline">\(X\)</span>?</li>
+</ul></li>
+</ol>
+</div>
+</section>
+<section class="slide level1">
+<h1>Construction of a Bayesian 2</h1>
+<div class="box fragment">
+<h2></h2>
+<ol start="3" type="1">
+<li>define network parameters (Conditional Probability Tables)
+<ul>
+<li>difficulty and objectivity depend on problem and available data</li>
+<li>often assuming a distribution (model) and estimate parameters</li>
+</ul></li>
+</ol>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: Constructing a Bayesian Network</h1>
+<p><em>"Flu is an acute disease characterized by fever, body aches, and pains, and can be associated with chilling and a sore throat.The cold is a bodily disorder popularly associated with chilling and can cause a soar throat. Tonsillitis is an inflammation of the tonsils that leads to a soar throat and can be associated with fever.“</em></p>
+<p>Variables:</p>
+<div class="box fragment">
+<h2></h2>
+<ul>
+<li>query: flu,cold,tonsillitis</li>
+<li>evidence: chilling, body ache and pain, sore throat, fever</li>
+<li>intermediary: /</li>
+<li>values:{true,false}</li>
+</ul>
+<p>Structure?</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: Constructing a Bayesian Network</h1>
+<p><img data-src="../data/07/pearl_illness.png" style="height:auto;width:600px;"></p>
+<p>CPTs normally obtained from experts (subjective beliefs, empirical data)</p>
+<ul>
+<li>problem of parameter estimation</li>
+<li>Example: Given <span class="math inline">\(N\)</span> patient records <span class="math inline">\(d_i\)</span> , find parametrization <span class="math inline">\(\theta\)</span> such that <span class="math inline">\(\prod_{i=1}^N p(d_i) = max\)</span></li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Example from <span class="citation" data-cites="pearl2009">(Pearl 2009)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Naive Bayes Structure</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>class variable <em>Condition</em> ∈ <em>{normal, cold, flu, tonsillitis}</em></li>
+<li>attributes <em>Chilling, Body Ache,</em> …</li>
+<li>single-fault assumption: only one cond. can hold at any time</li>
+<li>inconsistent with info: given <em>Cond.=Cold</em>, <em>Fever</em> and <em>Sore Throat</em> would become independent</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/07/pearl_naive_bayes.png" style="height:auto;width:480px;"></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Graphical Formalisms – Many different kinds</h1>
+<p><img data-src="../data/07/barber_graphical_formalisms.png" style="height:480px;width:auto;"></p>
+<p>Graphical Models are graph based representations of various factorisation assumptions of distributions. These factorisations are typically equivalent to independence statements amongst (sets of) variables in the distribution.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>From <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Graphical Models</h1>
+<div>
+<ul>
+<li class="fragment">Belief Network: Each factor is a conditional distribution.  Generative models, AI, statistics. Corresponds to a DAG.</li>
+<li class="fragment">Markov Network: Each factor corresponds to a potential (non negative function).  Related to the strength of relationship between variables, but not directly related to dependence.  Useful for collective phenomena such as image processing. Corresponds to an undirected graph.</li>
+<li class="fragment">Chain Graph: A marriage of BNs and MNs. Contains both directed and undirected links.</li>
+<li class="fragment">Factor Graph: A barebones representation of the factorisation of a distribution. Often used for efficient computation and deriving message passing algorithms.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Summary: Structured Probability Distributions</h1>
+<p>Not all probability densities can be well described by Gaussians.</p>
+<p>Graphical models offer a way of working with structured PDFs that allow for computational simplification:</p>
+<div>
+<ul>
+<li class="fragment">A general PDF with <span class="math inline">\(k\)</span> n-ary variables requires <span class="math inline">\(n^{k − 1}\)</span> parameters for its complete specification.</li>
+<li class="fragment">Graphical models allow to describe structured PDFs that require fewer parameters for the same number of variables.</li>
+<li class="fragment">The scheme is based on a graph expressing dependencies among variables leading to a factorization of the PDF.</li>
+<li class="fragment">The graph is formed by representing each variable of the PDF as a node receiving arrows from other variables (“causes”).</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Summary - Bayes Net</h1>
+<p>Allows for concise specification of structured PDFs.</p>
+<p>Bayes nets help to simplify the following basic learning tasks:</p>
+<div>
+<ul>
+<li class="fragment">inference: given values for some nodes in the graph, what is the PDF of the remaining nodes?</li>
+<li class="fragment">parameter learning: factorized PDFs are parametrized and the task is to find optimal parameter values, given some data.</li>
+<li class="fragment">model selection: parameter learning for competing graph structures – chooses model that gives the maximal likelihood.</li>
+<li class="fragment">model inference: infer graphical model structure from given data. Usually requires additional constraints.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>A Graphical Model for a Gaussian Process</h1>
+<p><img data-src="../data/08/murphy_15_1_gp.png" style="height:auto;width:600px;"></p>
+<p>A Gaussian process for 2 trainings and one test points, expressed as a graphical model representing <span class="math inline">\(p(\vec{y},\vec{f}|\vec{x}) = \mathcal{N}(\vec{f}|\vec{0},K(x)) \prod_i p(y_i|f_i)\)</span>. Hidden nodes represent the value of the function at each of the data points and they are fully interconnected by undirected edges, forming a Gaussian graphical model (if the test point <span class="math inline">\(x_∗\)</span> is similar to the training, then the predicted output <span class="math inline">\(y_∗\)</span> will be similar to <span class="math inline">\(y_1\)</span> and <span class="math inline">\(y_2\)</span>).</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="murphy2012">(Murphy 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Relational Inductive Biases</h1>
+<div>
+<ul>
+<li class="fragment"><p>Graphical models can represent complex joint distributions by making explicit random conditional independences among random variables.</p></li>
+<li class="fragment"><p>Explicitly expressing the sparse dependencies among variables provides for various efficient inference and reasoning algorithms that exploit localities within the graphical model.</p></li>
+<li class="fragment"><p>For learning: An inductive bias allows to prioritize one solution over others, independent of the observed data (Mitchell, 1980).</p></li>
+<li class="fragment"><p>In a Bayesian model, inductive biases are typically expressed through the choice and parameterization of the prior distribution</p></li>
+</ul>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="battaglia2018">(Battaglia et al. 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Relational Inductive Biases for Neural Networks</h1>
+<div>
+<figure><img data-src="../data/08/battaglia_2018_sparse.png" style="height:auto;width:1000px;" alt="Reuse and sharing in common deep learning building blocks." title="fig:"><figcaption>Reuse and sharing in common deep learning building blocks.</figcaption></figure>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="battaglia2018">(Battaglia et al. 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Relational Inductive Biases for Neural Networks</h1>
+<p><img data-src="../data/08/battaglia_2018_sparse.png" style="height:auto;width:400px;"></p>
+<table>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th>Entities</th>
+<th>Relations</th>
+<th>Rel.Ind. Bias</th>
+<th>Invariance</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fully connected</td>
+<td>Units</td>
+<td>All-to-all</td>
+<td>Weak</td>
+<td>/</td>
+</tr>
+<tr class="even">
+<td>Convolutional</td>
+<td>Grid Elements</td>
+<td>Local</td>
+<td>Locality</td>
+<td>Spatial translation</td>
+</tr>
+<tr class="odd">
+<td>Recurrent</td>
+<td>Timesteps.</td>
+<td>Sequential</td>
+<td>Sequentiality</td>
+<td>Time translation</td>
+</tr>
+<tr class="even">
+<td>Graph network</td>
+<td>Nodes.</td>
+<td>Edges</td>
+<td>Arbitrary</td>
+<td>Node, edge permutations</td>
+</tr>
+</tbody>
+</table>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="battaglia2018">(Battaglia et al. 2018)</span></p>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Markov Models</h1>
+</section>
+<section class="slide level1">
+<h1>Time-Series Representation</h1>
+<p>As a special case: a time-series is an ordered sequence of elements (discrete or continuous):</p>
+<p><span class="math display">\[
+x_{a:b} = \{x_a, x_{a+1}, ..., x_b\}
+\]</span></p>
+<p>We are interested in the probability of a time series for a given model:</p>
+<p><span class="math display">\[
+p(v_{1:T}) = \prod_{t=1}^T p(v_t | v_{1:t-1} ) \
+\text{with } p(v_1) \text{ given}.
+\]</span></p>
+</section>
+<section class="slide level1">
+<h1>Markov model</h1>
+<p>Markov models represent how much current data depends on data from the past.</p>
+<p><img data-src="../data/08/barber_markov_model.png" style="height:auto;width:600px;"></p>
+<div class="box definition">
+<h2 class="definition">Independence Assumption</h2>
+<p>It is often natural to assume that the influence of the immediate past is more relevant than the remote past and in Markov models only a limited number of previous observations are required to predict the future.</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Markov Chain</h1>
+<p>In a Markov Chain, only the recent past is considered (<span class="math inline">\(L\)</span> is the order of the Markov chain):</p>
+<p><span class="math display">\[
+p(v_t | v_1, ..., v_{t-1}) = p(v_t | v_{t-L}, ..., v_{t-1})
+\]</span></p>
+<p>The joint probability of a time series can now be expressed as a first order Markov chain: <span class="math display">\[
+p(v_{1:T}) = p(v_1) p( v_2 | v_1) ... p(v_T | v_{T-1})
+\]</span></p>
+<p>A chain is called stationary when the transitions between states are time-independent, i.e. <span class="math inline">\(p(v_t =s&#39;| v_{t-1} = s)\)</span> is equal to a function <span class="math inline">\(f(s, s&#39;)\)</span>.</p>
+<div>
+<figure><img data-src="../data/08/barber_markov_chains.png" style="height:auto;width:1000px;" alt="First (left) and second order (right) Markov chains." title="fig:"><figcaption>First (left) and second order (right) Markov chains.</figcaption></figure>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Markov Models as Statistical Language Models</h1>
+<p>Markov Models are widely used to represent probability distributions over sequences of letters or words.</p>
+<p>The state space is then defined as all the words in a language.</p>
+<p>N-gram Models represent probability distributions:</p>
+<ul>
+<li>Unigram statistics represent the prior of a word <span class="math inline">\(p(x_t = k)\)</span>.</li>
+<li>Bigram model equals a first-order Markov model: <span class="math inline">\(p(x_t = k| x_{t−1} = j)\)</span> and represents the probability for transitioning from <span class="math inline">\(j\)</span> to <span class="math inline">\(k\)</span>.</li>
+<li>N-gram models in general condition this transition on a longer history: <span class="math inline">\(p(x_t = k| x_{t−1} = j, ... x_{t−N} = i)\)</span></li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Markov Models as Statistical Language Models</h1>
+<p>Such Language Models are used:</p>
+<div>
+<ul>
+<li class="fragment">Sentence completion: predict the next word given the previous words in a sentence.</li>
+<li class="fragment">Data compression Any density model can be used to define an encoding scheme, by assigning short codewords to more probable strings. The more accurate the predictive model, the fewer the number of bits it requires to store the data.</li>
+<li class="fragment">Text classification: Any density model can be used as a class-conditional density and hence turned into a (generative) classifier. A 0-gram class-conditional density (i.e., only unigram statistics) would be equivalent to a naive Bayes classifier.</li>
+<li class="fragment">Automatic essay writing: One can sample from <span class="math inline">\(p(x_{1:t})\)</span> to generate artificial text.</li>
+</ul>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="murphy2012">(Murphy 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: Automated essay writing</h1>
+<p>Automated generation of text allows to assess the quality of the model.</p>
+<p>Example output from an 4-gram word model (trained on the Broadcast News corpus with 400 million words). First 4 words are specified by hand, the model generates the following text:</p>
+<blockquote>
+<p>SAYS IT’S NOT IN THE CARDS LEGENDARY RECONNAISSANCE BY ROLLIE DEMOCRACIES UNSUSTAINABLE COULD STRIKE REDLINING VISITS TO PROFIT BOOKING WAIT HERE AT MADISON SQUARE GARDEN COUNTY COURTHOUSE WHERE HE HAD BEEN DONE IN THREE ALREADY IN ANY WAY IN WHICH A TEACHER</p>
+</blockquote>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="murphy2012">(Murphy 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Transition Matrix</h1>
+<p>A first-order (stationary) Markov chain is described by a transition matrix - for each state there is a probability to stay in that state or to transition into a state.</p>
+<p>This is often as well visualized as a graph and is equivalent to a stochastic automaton.</p>
+<div>
+<figure><img data-src="../data/08/murphy_17_1_automation.png" style="height:auto;width:1000px;" alt="State transition diagrams for some simple Markov chains. Left: a 2-state chain. Right: a 3-state left-to-right chain." title="fig:"><figcaption>State transition diagrams for some simple Markov chains. Left: a 2-state chain. Right: a 3-state left-to-right chain.</figcaption></figure>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="murphy2012">(Murphy 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: Transition Matrix of Weather in the Land Oz</h1>
+<ul>
+<li>There are never two nice days in a row.</li>
+<li>After a nice day, it is as likely to have snow as rain the next day.</li>
+<li>After snow or rain, there is an even chance of having the same the next day or switch to one of the others.</li>
+</ul>
+<p><span class="math display">\[
+\mathbf{P(\text{Rain - Nice - Snow})} = 
+\left(  
+\begin{array}{ccc}
+0.5 &amp; 0.25 &amp; 0.25 \\
+0.5 &amp; 0. &amp; 0.5 \\
+0.25 &amp; 0.25 &amp; 0.5
+\end{array}
+\right)
+\]</span></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="grinstead2003">(Grinstead and Snell 2003)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Fitting a Markov Model – Learning Transition Matrix</h1>
+<p>Fitting a first-order stationary Markov chain by Maximum Likelihood corresponds to setting the transitions by counting the number of observed transitions in the sequence:</p>
+<p><span class="math display">\[ 
+p_{ij} = p(v_t = j | v_{t-1} = i) \propto \sum_{t=2}^T \mathbb{I} [v_t = j, v_{t-1}=i]
+\]</span></p>
+<p>For a set of time-series <span class="math inline">\(v^n_{1:T_n}, n = 1,...,N\)</span> the transition is given by counting all transitions across time and all data points.</p>
+</section>
+<section class="slide level1">
+<h1>Example: Unigram and Bigram Counts for Letters</h1>
+<div>
+<figure><img data-src="../data/08/murphy_17_2_bigram.png" style="height:auto;width:720px;" alt="Counts from Darwin’s On The Origin Of Species. Left: Prior of individual letter; right: a Hinton diagram of the joint distribution for two letter combinations." title="fig:"><figcaption>Counts from Darwin’s On The Origin Of Species. Left: Prior of individual letter; right: a Hinton diagram of the joint distribution for two letter combinations.</figcaption></figure>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="MacKay2003">(MacKay 2003)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Equilibrium Distribution</h1>
+<p>For a given Markov Chain, it is interesting to consider how the marginal probability changes over time. We might be interested in the probability of being in a specific state:</p>
+<p><span class="math display">\[ 
+p(x_t = i) = \sum_j \underbrace{p(x_t = i | x_{t-1} = j)}_{P_{ij}}p(x_{t-1} = j)
+\]</span></p>
+<p>When repeatedly sampling new states this leads to a probability distribution over all states: <span class="math display">\[ 
+\vec{p}_t = \mathbf{P}^{t-1} p(x_1)
+\]</span></p>
+<p>If, for <span class="math inline">\(t \rightarrow \infty\)</span>, <span class="math inline">\(\vec{p}_\infty\)</span> is independent of the initial distribution <span class="math inline">\(p(x_1)\)</span>, then <span class="math inline">\(p_\infty\)</span> is called the equilibrium distribution of the chain.</p>
+</section>
+<section class="slide level1 columns">
+<h1>Example: Weather in the Land Oz</h1>
+<div class="single-column-row">
+<div class="box top">
+<h2 class="top"></h2>
+<p>Long term weather in Oz: Powers of the Land of Oz transition matrix.</p>
+</div>
+</div>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/08/grinstead_inf_distribution_a.png" style="height:auto;width:480px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/08/grinstead_inf_distribution_b.png" style="height:auto;width:480px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="grinstead2003">(Grinstead and Snell 2003)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example Application: PageRank Algorithm for Websites</h1>
+<p>We define a Matrix that reflects connections between webpages: <span class="math inline">\(A_{ij}\)</span> is set to <span class="math inline">\(1\)</span> if website <span class="math inline">\(j\)</span> has a hyperlink to <span class="math inline">\(i\)</span> and it is set to <span class="math inline">\(0\)</span> otherwise.</p>
+<p>From this, we setup a Markov transition matrix with the elements:</p>
+<p><span class="math display">\[
+P_{ij} = \frac{A_{ij}}{\sum_{i&#39;}A_{i&#39;j}}
+\]</span></p>
+<div>
+<ul>
+<li class="fragment">When jumping from website to website, the equilibrium distribution component <span class="math inline">\(p_\infty (i)\)</span> is the relative number of times we will visit website i. This can be interpreted as the ‘importance’ of website <span class="math inline">\(i\)</span>.</li>
+<li class="fragment">For each website <span class="math inline">\(i\)</span>: collect a list of associated words associated with that website is collected. From this one can construct an inverse list for searching the web ranked by this importance.</li>
+</ul>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Hidden Markov Model</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<div>
+<ul>
+<li class="fragment">Even a second-order Markov assumption might not be sufficient to represent long-range temporal dependencies.</li>
+<li class="fragment">But for higher order models the number of parameters will blow up.</li>
+<li class="fragment">As an alternative: we assume an underlying hidden process that can be modeled by a first-order Markov chain, but the observation of the data is disturbed by noise.</li>
+<li class="fragment">Such a model is known as a Hidden Markov Model.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/08/barber_hmm.png" style="height:auto;width:480px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Hidden Markov Model</h1>
+<p>A HMM defines a Markov chain on hidden/ latent variables <span class="math inline">\(h_{1:T}\)</span>. The observed/ visible variables are dependent on the hidden variables through an emission probabilitu <span class="math inline">\(p(v_t|h_t)\)</span>. This defines a joint distribution</p>
+<p><span class="math display">\[
+p(h_{1:T}, v_{1:T}) = p(v_1 | h_1) p(h_1) \prod_{t=2}^T p(v_t|h_t) p(h_t | h_{t-1})
+\]</span></p>
+<p>For a stationary HMM the transition and emission probability distributions don’t change over time.</p>
+<p><img data-src="../data/08/barber_hmm.png" style="height:auto;width:480px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Hidden Markov Model Parameters</h1>
+<div class="box">
+<h2>Transition Distribution</h2>
+<p>THe transition distribution represents the probabilities of transitioning from one hidden state to another – this results in an <span class="math inline">\(H \times H\)</span> transition matrix.</p>
+</div>
+<div class="box">
+<h2>Emission Distribution</h2>
+<p>The emission distribution <span class="math inline">\(p(v_t | h_t)\)</span> describes in a matrix for each of the hidden states the probability of emitting one of <span class="math inline">\(V\)</span> observations. This results in a <span class="math inline">\(V \times H\)</span> matrix.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Application of Hidden Markov Models</h1>
+<div>
+<ul>
+<li class="fragment">HMMs can represent long-range dependencies between observations (in contrast to other Markov models) – importantly, the Markov property is not assumed for the observations themselves.</li>
+<li class="fragment">Therefore, HMMs are widely used as models on sequences.</li>
+<li class="fragment">For example, as complete black-box models for time-series prediction.</li>
+<li class="fragment">But more often, hidden states are associated with some given temporal structure and meaning.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Application of Hidden Markov Models</h1>
+<div>
+<ul>
+<li class="fragment">Automatic speech recognition: Observations represent features of the speech signal, and the hidden states represent the spoken word. The transition model represents a given language model, and the observation model represents an acoustic model.</li>
+<li class="fragment">Activity recognition: Observations represent features directly extracted from a video frame. The hidden state is an activity class the person was engaged in (e.g., running, walking, sitting, etc.).</li>
+</ul>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="murphy2012">(Murphy 2012)</span></p>
+</div>
+</section>
+<section class="slide level1 unnumbered biblio">
+<h1>References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-barber2012">
+<p>Barber, David. 2012. <em>Bayesian Reasoning and Machine Learning</em>. New York, NY, USA: Cambridge University Press.</p>
+</div>
+<div id="ref-battaglia2018">
+<p>Battaglia, Peter, Jessica Blake Chandler Hamrick, Victor Bapst, Alvaro Sanchez, Vinicius Zambaldi, Mateusz Malinowski, Andrea Tacchetti, et al. 2018. “Relational Inductive Biases, Deep Learning, and Graph Networks.” <em>arXiv</em>. <a href="https://arxiv.org/pdf/1806.01261.pdf">https://arxiv.org/pdf/1806.01261.pdf</a>.</p>
+</div>
+<div id="ref-grinstead2003">
+<p>Grinstead, Charles M., and J. Laurie Snell. 2003. <em>Introduction to Probability</em>. AMS; AMS.</p>
+</div>
+<div id="ref-MacKay2003">
+<p>MacKay, David J. C. 2003. <em>Information Theory, Inference, and Learning Algorithms</em>. Copyright Cambridge University Press.</p>
+</div>
+<div id="ref-murphy2012">
+<p>Murphy, Kevin P. 2012. <em>Machine Learning: A Probabilistic Perspective</em>. The MIT Press.</p>
+</div>
+<div id="ref-pearl2009">
+<p>Pearl, Judea. 2009. <em>Causality: Models, Reasoning and Inference</em>. 2nd ed. New York, NY, USA: Cambridge University Press.</p>
+</div>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="../support/vendor/reveal/js/reveal.js"></script>
+  <script src="../support/vendor/jquery.js"></script>
+  <script src="../support/vendor/piklor.js"></script>
+
+ <!-- standard setting -->
+
+  <script>
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        pdfMaxPagesPerSlide: 1,
+        pdfSeparateFragments: false,
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Display the page number of the current slide
+        slideNumber: false,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: false,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Loop the presentation
+        loop: false,
+        // Change the presentation direction to be RTL
+        rtl: false,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: false,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: false,
+        mouseWheel: false,
+        hideAddressBar: false,
+        previewLinks: false,
+        // Transition style
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'none', // none/fade/slide/convex/concave/zoom
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+        height: 800,
+        thebelab: true,
+        math: {
+          mathjax: "../support/vendor/mathjax/MathJax.js",
+          TeX: {
+              Macros: {
+              R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+              laplace: "{\\Delta}",
+              grad: "{\\nabla}",
+              T: "^{\\mathsf{T}}",
+  
+              norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+              iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+              vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              set: ['\\mathcal{#1}', 1],
+              func: ['\\mathrm{#1}', 1],
+              trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+              matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+              vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+              of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+              diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+              pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+  
+              vc: ['\\mathbf{#1}', 1],
+              abs: ['\\lvert#1\\rvert', 1],
+              norm: ['\\lVert#1\\rVert', 1],
+              det: ['\\lvert#1\\rvert', 1],
+              qt: ['\\hat{\\vc {#1}}', 1],
+              mt: ['\\boldsymbol{#1}', 1],
+              pt: ['\\boldsymbol{#1}', 1],
+              textcolor: ['\\color{#1}', 1]
+              }
+          },
+        },
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '../support/vendor/reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: '../support/vendor/reveal/plugin/zoom-js/zoom.js', async: true },
+          { src: '../support/vendor/whiteboard/whiteboard.js'},
+          //{ src: '../support/vendor/reveal/plugin/math/math.js', async: true },
+          { src: '../support/vendor/math/math.js' },
+          { src: '../support/js/thebelab.js', async: true },
+          { src: '../support/vendor/reveal/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+
+
+    <script src="../support/js/quiz.js" type="text/javascript"></script>
+    <script src="../support/js/decker.js" type="text/javascript"></script>
+
+    <!-- Reload on change machinery -->
+    <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+      window.location.reload(true);
+      };
+    </script>
+
+    </body>
+</html>

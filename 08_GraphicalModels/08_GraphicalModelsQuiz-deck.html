@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<!-- This is the pandoc 2.7.3 template for reveal.js output modified for decker. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">
+  <title>08 Markov Models</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reset.css">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reveal.css">
+  <link rel="stylesheet" href="../support/css/thebelab.css">
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="../support/css/mario.css">
+  <link rel="stylesheet" href="../support/vendor/mb-reveal-plugins/highlight/xcode.css">
+  <link rel="stylesheet" href="../mschilling.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? '../support/vendor/reveal/css/print/pdf.css' : '../support/vendor/reveal/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script type="text/x-thebe-config">
+  {
+      bootstrap: false,
+      requestKernel: false,
+      predefinedOutput: false,
+      binderOptions: {
+          repo: "malteschilling/advml_binder",
+          ref: "master",
+          binderUrl: "https://mybinder.org",
+          repoProvider: "github",
+      },
+      kernelOptions: {
+          name: "python3"
+      },
+      selector: "[data-executable]",
+      mathjaxUrl: false,
+      codeMirrorConfig: {
+          mode: "python3"
+      }
+  }
+  </script>
+  <script src="https://unpkg.com/thebelab@0.4.0/lib/index.js"></script> 
+  <!-- <script src="../support/vendor/thebelab/index.js"></script> -->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+ <!-- Mario settings -->
+    <div class="white-on-blue">
+        <div class="title"> 08 Markov Models </div>
+                <div class="subtitle"> Advanced Machine Learning </div>
+            </div>
+            <div class="author"> Malte Schilling, Neuroinformatics Group, Bielefeld University </div>
+        
+</section>
+
+<section class="slide level1">
+<h1>Quiz Setup</h1>
+<div id="quiz-qr" style="width:300px; margin:auto">
+
+</div>
+<p id="quiz-url">
+</p>
+</section>
+<section class="slide level1 quiz">
+<h1>Quiz: Classification using SVM</h1>
+<p>You are using a Linear Support Vector Machine classifier for classification into two classes (x and o’s). Removing which points will not affect the decision boundary?</p>
+<p><img class="" style="width:600px;" src="../data/08/recap_quiz_svm_largest_margin.png" style="width:600px;"></img></p>
+<ul>
+<li><input type="checkbox" disabled="" checked="" />
+  <span class="math inline">\(x_1\)</span> and <span class="math inline">\(o_3\)</span></li>
+<li><input type="checkbox" disabled="" />
+  <span class="math inline">\(x_2\)</span> and <span class="math inline">\(x_3\)</span></li>
+<li><input type="checkbox" disabled="" />
+  <span class="math inline">\(x_3\)</span> and <span class="math inline">\(o_2\)</span></li>
+<li><input type="checkbox" disabled="" />
+  You can’t remove any points.</li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Largest margin Separation</h1>
+<div class="col50">
+<ul>
+<li>this only involves some data points (support vectors)</li>
+<li>the constrained optimization can be solved through a Lagrange multiplier</li>
+<li>this leads to the hyperplane decision function <span class="math display">\[ \alpha_i \geq 0, \\
+f( \vec{x}) = sgn(\sum_{i=1}^m \alpha^{(i)} y^{(i)} \langle \vec{x}, \vec{x}^{(i)} \rangle + b \ )\]</span></li>
+</ul>
+</div>
+<div class="col50">
+<p><img class="" style="height:480px;" src="../data/02/two_classes_2.svg" style="height:480px;"></img></p>
+<p><span class="math display">\[ \max_{\vec{w}, b} \min \{ \norm{\vec{x} - \vec{x}^{(i)}} \} \\
+with \langle \vec{w}, \vec{x} \rangle + b = 0 \text{ defining the hyperplane}
+\]</span></p>
+</div>
+</section>
+<section class="slide level1 quiz">
+<h1>Quiz: Error in SVM</h1>
+<p>What do you mean by generalization error in terms of the SVM?</p>
+<ul>
+<li><input type="checkbox" disabled="" />
+  How far the hyperplane is from the support vectors</li>
+<li><input type="checkbox" disabled="" checked="" />
+  How accurately the SVM can predict outcomes for unseen data<ul>
+<li>Generalisation error in statistics is generally the out-of sample error which is the measure of how accurately a model can predict values for previously unseen data.</li>
+</ul></li>
+<li><input type="checkbox" disabled="" />
+  The threshold amount of error in an SVM</li>
+</ul>
+</section>
+<section class="slide level1 quiz">
+<h1>Quiz: Parameters of SVMs</h1>
+<p>When the C parameter is set to infinite, which of the following holds true?</p>
+<ul>
+<li><input type="checkbox" disabled="" checked="" />
+  The optimal hyperplane if exists, will be the one that completely separates the data<ul>
+<li>This sets a high level of misclassification penalty, might lead to overfitting.</li>
+</ul></li>
+<li><input type="checkbox" disabled="" />
+  The soft-margin classifier will separate the data</li>
+<li><input type="checkbox" disabled="" />
+  None of the above</li>
+</ul>
+</section>
+<section class="slide level1 quiz">
+<h1>Quiz: RBF SVM</h1>
+<p>Suppose you are using RBF kernel in SVM with a high Gamma value. What does this signify?</p>
+<ul>
+<li><input type="checkbox" disabled="" />
+  The model would consider even far away points from the hyperplane</li>
+<li><input type="checkbox" disabled="" checked="" />
+  The model would consider only the points close to the hyperplane<ul>
+<li>The gamma parameter in SVM tuning signifies the influence of points either near or far away from the hyperplane. For a low gamma, the model will be too constrained and include all points of the training dataset, without really capturing the shape. For a higher gamma, the model will capture the shape of the dataset well.</li>
+</ul></li>
+<li><input type="checkbox" disabled="" />
+  The model would not be affected by distance of points from hyperplane</li>
+<li><input type="checkbox" disabled="" />
+  None of the other</li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Summary: Support Vector Machine</h1>
+<p><img class="" style="height:260px;" src="../data/02/Kernel_Machine.png" style="height:260px;"></img></p>
+<ul>
+<li>Support vector machines implement the large margin principle.</li>
+<li>They apply non-linear mappings.</li>
+<li>Importantly, the scalar product is not computed explicitly in the feature space. using the Kernel Trick. This is much more efficient.</li>
+<li>The kernel function (weighted by multipliers) is applied wrt. the support vectors.</li>
+</ul>
+<div class="biblio">
+<p>SVMs go back to <span class="citation" data-cites="Vapnik1998">(Vapnik 1998)</span> , and a good tutorial can be found in <span class="citation" data-cites="Burges98atutorial">(Burges 1998)</span>.</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Part of the questions were taken from https://www.analyticsvidhya.com/blog/2017/10/svm-skilltest/ .</p>
+</div>
+</section>
+<section class="slide level1 quiz">
+<h1>Quiz: Features</h1>
+<p>Which of the presented approaches are based on transformation of the original features into a different feature space?</p>
+<ul>
+<li><input type="checkbox" disabled="" />
+  Support Vector Machines and Gaussian Processes,</li>
+<li><input type="checkbox" disabled="" />
+  Gaussian Processes and Echo State Networks,</li>
+<li><input type="checkbox" disabled="" />
+  Support Vector Machines and Echo State Networks,</li>
+<li><input type="checkbox" disabled="" checked="" />
+  all of these.</li>
+</ul>
+</section>
+<section class="slide level1 quiz">
+<h1>Quiz: Gaussian Process</h1>
+<p>Which of the following statements is NOT true about Gaussian processes?</p>
+<ul>
+<li><input type="checkbox" disabled="" />
+  A GP is a collection of random variables, any finite number of which have a joint Gaussian distribution.</li>
+<li><input type="checkbox" disabled="" />
+  A GP is completely specified by its mean function and covariance function.</li>
+<li><input type="checkbox" disabled="" />
+  A GP is usually specified with zero mean for simplicity.</li>
+<li><input type="checkbox" disabled="" checked="" />
+  A GP must be defined over time (the index set of the random variables is time).</li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Gaussian Process – Bayesian Perspectives on Functions</h1>
+<p>Create Gaussian Distribution for each variable – distribute these through your space.</p>
+<p>Informally such an infinite long vector constitutes a function.</p>
+<p>A Gaussian process is a collection of random variables, any finite number of which have (consistent) Gaussian distributions.</p>
+<div class="col50">
+<h2>Prior</h2>
+<p><img class="" style="width:450px;" src="../data/04/ritter_prior_samples.svg" style="width:450px;"></img></p>
+</div>
+<div class="col50">
+<h2>Posterior</h2>
+<p><img class="" style="width:450px;" src="../data/04/ritter_posterior_samples.svg" style="width:450px;"></img></p>
+</div>
+</section>
+<section class="slide level1 quiz">
+<h1>Quiz: Gaussian Process</h1>
+<p>Gaussian Proceeses are</p>
+<ul>
+<li><input type="checkbox" disabled="" checked="" />
+  non-parametric, but allow to specify noise over data points,</li>
+<li><input type="checkbox" disabled="" />
+  a parametric approach that approximates data points through mixture of Gaussians,</li>
+<li><input type="checkbox" disabled="" />
+  none of the above.</li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Gaussian Processes Overview</h1>
+<div class="col50">
+<ul>
+<li>aware of uncertainty of the fitted GP that increases away from the training data,</li>
+<li>let you incorporate expert knowledge,</li>
+<li>are non-parametric,</li>
+<li>need to take into account the whole training data for prediction.</li>
+</ul>
+</div>
+<div class="col50">
+<p><figure class="" style="width:480px;"><img  src="../data/03/sphx_glr_plot_gpr_noisy_targets_002.png" style="width:480px;"></img><figcaption>Three random function drawn from the posterior that includes example points.</figcaption></figure></p>
+</div>
+<p>Further reading: <span class="citation" data-cites="rasmussen2006">(Rasmussen and Williams 2006)</span>.</p>
+</section>
+<section class="slide level1 quiz">
+<h1>Quiz: Bayes Rule</h1>
+<p><span class="math display">\[\begin{align*}
+
+p(A,B) &amp;= p(A|B)p(B) = p(B|A) p(A) \\
+\Rightarrow p(B|A) &amp;= \frac{p(A|B) p(B)}{p(A)}
+\end{align*}\]</span></p>
+<p>Which of the following probabilities is hard to access and Bayes rule provides an easier factorization?</p>
+<ul>
+<li><input type="checkbox" disabled="" />
+  The likelihood.</li>
+<li><input type="checkbox" disabled="" checked="" />
+  The joint distribution.</li>
+<li><input type="checkbox" disabled="" />
+  Both.</li>
+</ul>
+</section>
+<section class="slide level1 sub">
+<h1>Bayes’ rule</h1>
+<p>… tells us how to invert conditional probabilities:</p>
+<p><span class="math display">\[\begin{align*}
+
+p(A,B) &amp;= p(A|B)p(B) = p(B|A) p(A) \\
+\Rightarrow p(B|A) &amp;= \frac{p(A|B) p(B)}{p(A)}
+\end{align*}\]</span></p>
+<p>Here,</p>
+<ul>
+<li><span class="math inline">\(p(B)\)</span> is the <em>a priory probability</em>, or the prior,</li>
+<li><span class="math inline">\(p(A|B)\)</span> is the <em>likelihood of <span class="math inline">\(B\)</span> for a fixed <span class="math inline">\(A\)</span></em>,</li>
+<li>and <span class="math inline">\(p(B|A)\)</span> is the <em>a posteriori probability</em> of <span class="math inline">\(B\)</span> given <span class="math inline">\(A\)</span>.</li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Solution: Joint Distribution</h1>
+<p>Explicit representation of joint distribution becomes unmanageable for realistic scenarios.</p>
+<ul>
+<li>computationally expensive,</li>
+<li>involves a huge number which is too large
+<ul>
+<li>to estimate by a human expert,</li>
+<li>or even to store in memory,</li>
+</ul></li>
+<li>would require large amounts of data and samples for robust estimation,</li>
+<li>probabilities itself would be very small numbers hindering computation,</li>
+<li>and rare events might not be captured which would negatively affect generalization.</li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Recap - The need for structure</h1>
+<ul>
+<li><p>We often want to describe many objects (features in a data set for many individuals).</p></li>
+<li><p>Unfortunately, often the representational and computational cost of probabilistic models grows exponentially with the number of objects represented.</p></li>
+<li><p>Therefore, ‘simpler’ alternatives (e.g. fuzzy logic) were introduced to avoid some of these diculties.</p></li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Independence in Belief Networks</h1>
+<p>Consider the simplest case of the joint distribution <span class="math inline">\(p(x_1, x_2, x_3)\)</span></p>
+<ul>
+<li>no indep. assumption: six different factorisations <span class="math inline">\(P(x_{i1}|x_{i2},x_{i3})P(x_{i2}|x_{i3})P(x_{i3})\)</span> and different DAGs, representing the same distribution</li>
+<li>one indep. assumption: four possible graphs left - which ones are equivalent?</li>
+</ul>
+<p><img class="" style="width:800px;" src="../data/07/barber_bayes_independent1.png" style="width:800px;"></img></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Following <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1 quiz">
+<h1>Quiz: Independence in Belief Networks</h1>
+<p>For the four possible graphs – which joint distribution <span class="math inline">\(p(A, B)\)</span> is independent?</p>
+<ul>
+<li><input type="checkbox" disabled="" />
+  a and d</li>
+<li><input type="checkbox" disabled="" />
+  a, b and c</li>
+<li><input type="checkbox" disabled="" checked="" />
+  d</li>
+<li><input type="checkbox" disabled="" />
+  b and c</li>
+</ul>
+<p><img class="" style="width:800px;" src="../data/07/barber_bayes_independent1.png" style="width:800px;"></img></p>
+</section>
+<section class="slide level1">
+<h1>Solution: Independence in Belief Networks</h1>
+<p><img class="" style="width:800px;" src="../data/07/barber_bayes_independent2.png" style="width:800px;"></img></p>
+<ul>
+<li>In (a), (b) and (c), the variables A, B are marginally dependent.</li>
+<li>In (d) the variables A, B are marginally independent.</li>
+</ul>
+<p><span class="math display">\[
+p(A, B) = \sum_C p(A, B, C) = \sum_C p(A)p(B)p(C|A, B) = p(A)p(B) 
+\]</span></p>
+</section>
+<section class="slide level1">
+<h1>Recap - Independence</h1>
+<p>Variables <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> are independent if knowing one event gives no extra information about the other event. Mathematically, this is expressed by <span class="math display">\[
+p(x, y) = p(x)p(y)
+\]</span></p>
+<div class="box">
+<h2></h2>
+<p>Independence of x and y is equivalent to <span class="math display">\[
+p(x|y) = p(x) \Leftrightarrow p(y|x) = p(y)
+\]</span></p>
+</div>
+<div class="box">
+<h2></h2>
+<p>If <span class="math inline">\(p(x|y) = p(x)\)</span> for all states of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, then the variables <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> are said to be independent. We write then <span class="math inline">\(x \perp\!\!\!\perp y\)</span>.</p>
+</div>
+<div class="box">
+<h2>Interpretation</h2>
+<p>Note that <span class="math inline">\(x \perp\!\!\!\perp y\)</span> doesn’t mean that, given <span class="math inline">\(y\)</span>, we have no information about <span class="math inline">\(x\)</span>. It means the only information we have about <span class="math inline">\(x\)</span> is contained in <span class="math inline">\(p(x)\)</span>.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Conditional Independence in Belief Networks</h1>
+<p>Conditional independence is not always immediately clear. We would like to have a general algorithm for reading it from the graph.</p>
+<p>Consider the simplest case of the joint distribution <span class="math inline">\(p(x_1, x_2, x_3)\)</span></p>
+<ul>
+<li>no indep. assumption: six different factorisations <span class="math inline">\(P(x_{i1}|x_{i2},x_{i3})P(x_{i2}|x_{i3})P(x_{i3})\)</span> and different DAGs, representing the same distribution</li>
+<li>one indep. assumption: four possible graphs left - which ones are equivalent?</li>
+</ul>
+<p><img class="" style="width:800px;" src="../data/07/barber_bayes_independent1.png" style="width:800px;"></img></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Following <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1 quiz">
+<h1>Quiz: Conditional Independence in Belief Networks</h1>
+<p>For the four possible graphs – which joint distribution is conditionally independent (given <span class="math inline">\(C\)</span>)?</p>
+<ul>
+<li><input type="checkbox" disabled="" />
+  a, b, c, d</li>
+<li><input type="checkbox" disabled="" checked="" />
+  a, b and c</li>
+<li><input type="checkbox" disabled="" />
+  only d</li>
+<li><input type="checkbox" disabled="" />
+  b and c</li>
+</ul>
+<p><img class="" style="width:800px;" src="../data/07/barber_bayes_independent1.png" style="width:800px;"></img></p>
+</section>
+<section class="slide level1">
+<h1>Solution: Cond. Independence in Belief Nets</h1>
+<p><img class="" style="width:480px;" src="../data/07/barber_bayes_independent1b.png" style="width:480px;"></img></p>
+<ul>
+<li>In (a), (b) and (c), <span class="math inline">\(A, B\)</span> are conditionally independent given <span class="math inline">\(C\)</span>.</li>
+</ul>
+<p><span class="math display">\[\begin{align*}
+(a) \  p(A, B|C) &amp;= \frac{p(A,B,C)}{p(C)} = \frac{p(A|C)p(B|C)p(C)}{p(C)} = p(A|C)p(B|C)\\
+(b) \  p(A, B|C) &amp;= \frac{p(A) p(C|A) p(B|C)}{p(C)} = \frac{p(A,C)p(B|C)}{p(C)} = p(A|C)p(B|C)\\
+(c) p(A, B|C) &amp;= \frac{p(A|C)p(C|B)p(B)}{p(C)} = \frac{p(A|C)p(B,C)p(C)}{p(C)} = p(A|C)p(B|C)
+\end{align*}\]</span></p>
+<div>
+<ul>
+<li class="fragment">In (d) the variables A,B are conditionally dependent given C, <span class="math inline">\(p(A, B|C) \propto p(C|A, B)p(A)p(B)\)</span>.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Conditional Independence</h1>
+<p><span class="math display">\[X \perp\!\!\!\perp Y | Z\]</span> denotes that the two sets of variables <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are independent of each other given the state of the set of variables <span class="math inline">\(Z\)</span>.</p>
+<div class="box">
+<h2></h2>
+<p>This means that <span class="math inline">\(p(X,Y|Z) = p(X|Z)p(Y|Z)\)</span> and <span class="math inline">\(p(X|Y,Z) = p(X|Z)\)</span> for all states of <span class="math inline">\(X,Y,Z\)</span>.</p>
+</div>
+<div class="box">
+<h2></h2>
+<p>In case the conditioning set is empty we may also write <span class="math inline">\(X \perp\!\!\!\perp Y\)</span> for <span class="math inline">\(X \perp\!\!\!\perp Y | \emptyset\)</span>, in which case <span class="math inline">\(X\)</span> is (unconditionally) independent of <span class="math inline">\(Y\)</span>.</p>
+</div>
+</section>
+<section class="slide level1 quiz">
+<h1>Quiz: Markov Blanket</h1>
+<div class="col60">
+<p>A node‘s Markov blanket (MB) are all parents, children, and other parents of children of <span class="math inline">\(X\)</span>.</p>
+</div>
+<div class="col40">
+<p><img class="" style="width:200px;" src="../data/07/barber_markov_blanket.png" style="width:200px;"></img></p>
+</div>
+<ul>
+<li><input type="checkbox" disabled="" />
+  <em>X</em> is conditionally independent of its Markov Blanket.</li>
+<li><input type="checkbox" disabled="" />
+  <em>X</em> is conditionally independent of all other nodes outside of the MB.</li>
+<li><input type="checkbox" disabled="" checked="" />
+  <em>X</em> is cond. independent of all other nodes outside of the MB given its MB.</li>
+<li><input type="checkbox" disabled="" />
+  None of the other.</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Following from <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Bayesian Networks – Causal Interpretation</h1>
+<p>The MB carries all information about X, or “insulating” <em>X</em> from any external informational influence.</p>
+<p>By way of its mathematical definition, the Bayesian Network represents a set of conditional independence assumptions: each node is conditionally independent of its non-descendants, given its parents</p>
+<div class="col50">
+<ul>
+<li>the parents of node <span class="math inline">\(X\)</span> are causally interpreted as causes of <span class="math inline">\(X\)</span>, descendants of <span class="math inline">\(X\)</span> as effects of <span class="math inline">\(X\)</span></li>
+<li>having information about the direct  causes of <span class="math inline">\(V\)</span>, the belief in <span class="math inline">\(X\)</span> is no longer  influenced by any other information,   except about the effects of <span class="math inline">\(X\)</span></li>
+</ul>
+</div>
+<div class="col50">
+<p><img class="" style="width:400px;" src="../data/07/barber_causal.png" style="width:400px;"></img></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Following from <span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-barber2012">
+<p>Barber, David. 2012. <em>Bayesian Reasoning and Machine Learning</em>. New York, NY, USA: Cambridge University Press.</p>
+</div>
+<div id="ref-Burges98atutorial">
+<p>Burges, Christopher J. C. 1998. “A Tutorial on Support Vector Machines for Pattern Recognition.” <em>Data Mining and Knowledge Discovery</em> 2: 121–67.</p>
+</div>
+<div id="ref-rasmussen2006">
+<p>Rasmussen, CE., and CKI. Williams. 2006. <em>Gaussian Processes for Machine Learning</em>. Adaptive Computation and Machine Learning. Cambridge, MA, USA: Biologische Kybernetik; Max-Planck-Gesellschaft; MIT Press.</p>
+</div>
+<div id="ref-Vapnik1998">
+<p>Vapnik, Vladimir N. 1998. <em>Statistical Learning Theory</em>. Wiley-Interscience.</p>
+</div>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="../support/vendor/reveal/js/reveal.js"></script>
+  <script src="../support/vendor/jquery.js"></script>
+  <script src="../support/vendor/piklor.js"></script>
+
+ <!-- Mario settings -->
+  <script>
+      Reveal.initialize({
+      
+          // reveal settings
+          controls:     false,
+          progress:     false,
+          slideNumber:  true,
+          history:      true,
+          center:       false,
+          transition:   'none',
+          viewDistance: 2, // otherwise videos start early
+          width:          1280  ,
+          height:        800 ,
+          minScale:     0.2,
+          maxScale:     5,
+          pdfMaxPagesPerSlide: 1,
+          pdfSeparateFragments: true,
+          hideInactiveCursor: true,
+          hideCursorTime: 3000,
+
+          // setup reveal-menu
+          menu: {
+              side:              'right',
+              numbers:           true,
+              titleSelector:     'h1',
+              hideMissingTitles: false,
+              markers:           false,
+              custom:            false,
+              themes:            false,
+              transitions:       false,
+              openButton:        false,
+              openSlideNumber:   true,
+              keyboard:          true,
+              loadIcons:         false
+          },
+
+          // math macros
+          math: {
+              mathjax: "../support/vendor/mathjax/MathJax.js",
+              TeX: {
+                  Macros: {
+                      R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+                      laplace: "{\\Delta}",
+                      grad: "{\\nabla}",
+                      T: "^{\\mathsf{T}}",
+                      abs: ['\\left\\lvert #1 \\right\\rvert', 1],
+                      norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+                      iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+                      vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+                      mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+                      set: ['\\mathcal{#1}', 1],
+                      func: ['\\mathrm{#1}', 1],
+                      trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+                      matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+                      vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+                      of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+                      diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+                      pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2]
+                  }
+              },
+          },
+
+          // setup charts
+          chart: {
+              defaults: {
+                  global: {
+                      "defaultFontFamily": "Lato",
+                      "defaultFontColor": "black",
+                      "defaultFontSize": 20,
+                      title: {
+                          "fontFamily": "Lato",
+                          "fontSize": 30,
+                      },
+                      legend: { position: "bottom" },
+                      plugins: { colorschemes: { scheme: "tableau.Tableau10" } }
+                  },
+                  responsive: "false"
+              },
+              bar:   { borderWidth: "1" },
+              line:  { borderWidth: "2" },
+              radar: { borderWidth: "2" }
+          },
+
+          thebelab: true,
+
+
+
+          // plugins
+          dependencies: [
+              { src: '../support/vendor/mb-reveal-plugins/charts/Chart.js'},
+              { src: '../support/vendor/mb-reveal-plugins/charts/plugin-colorschemes.js'},
+              { src: '../support/vendor/mb-reveal-plugins/charts/plugin-errorbars.js'},
+              { src: '../support/vendor/mb-reveal-plugins/charts/csv2chart.js'},
+              { src: '../support/vendor/reveal/plugin/notes/notes.js' },
+              { src: '../support/vendor/mb-reveal-plugins/math/math.js' },
+              { src: '../support/vendor/mb-reveal-plugins/whiteboard/whiteboard.js' }, 
+              { src: '../support/vendor/mb-reveal-plugins/quiz/quiz.js' },
+              { src: '../support/vendor/mb-reveal-plugins/footer/footer.js' },
+              { src: '../support/vendor/mb-reveal-plugins/highlight/highlight.js' },
+              { src: '../support/vendor/mb-reveal-plugins/zoom/zoom.js', async: true },
+              { src: '../support/vendor/mb-reveal-plugins/search/search.js', async: true },
+              { src: '../support/vendor/mb-reveal-plugins/menu/menu.js', async: true }
+             ,{ src: '../support/js/thebelab.js', async: true }
+          ]
+      });
+  </script>
+
+
+
+    <script src="../support/js/quiz.js" type="text/javascript"></script>
+    <script src="../support/js/decker.js" type="text/javascript"></script>
+
+    <!-- Reload on change machinery -->
+    <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+      window.location.reload(true);
+      };
+    </script>
+
+    </body>
+</html>
