@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<!-- This is the pandoc 2.7.3 template for reveal.js output modified for decker. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">
+  <title>09 Combining Learning Modules</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reset.css">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reveal.css">
+  <link rel="stylesheet" href="../support/css/thebelab.css">
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="../support/css/decker.css">
+  <link rel="stylesheet" href="../mschilling.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? '../support/vendor/reveal/css/print/pdf.css' : '../support/vendor/reveal/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script type="text/x-thebe-config">
+  {
+      bootstrap: false,
+      requestKernel: false,
+      predefinedOutput: false,
+      binderOptions: {
+          repo: "malteschilling/advml_binder",
+          ref: "master",
+          binderUrl: "https://mybinder.org",
+          repoProvider: "github",
+      },
+      kernelOptions: {
+          name: "python3"
+      },
+      selector: "[data-executable]",
+      mathjaxUrl: false,
+      codeMirrorConfig: {
+          mode: "python3"
+      }
+  }
+  </script>
+  <script src="https://unpkg.com/thebelab@0.4.0/lib/index.js"></script> 
+  <!-- <script src="../support/vendor/thebelab/index.js"></script> -->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+ <!-- standard settings -->
+  <h1 class="title">09 Combining Learning Modules</h1>
+  <p class="subtitle">Advanced Machine Learning</p>
+  <p class="author">Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
+
+</section>
+
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Markov Models</h1>
+</section>
+<section class="slide level1">
+<h1>Recap - Markov Chain</h1>
+<p>In a Markov Chain, only the recent past is considered (<span class="math inline">\(L\)</span> is the order of the Markov chain):</p>
+<p><span class="math display">\[
+p(v_t | v_1, ..., v_{t-1}) = p(v_t | v_{t-L}, ..., v_{t-1})
+\]</span></p>
+<p>The joint probability of a time series can now be expressed as a first order Markov chain: <span class="math display">\[
+p(v_{1:T}) = p(v_1) p( v_2 | v_1) ... p(v_T | v_{T-1})
+\]</span></p>
+<p>A chain is called stationary when the transitions between states are time-independent, i.e. <span class="math inline">\(p(v_t =s&#39;| v_{t-1} = s)\)</span> is equal to a function <span class="math inline">\(f(s, s&#39;)\)</span>.</p>
+<div>
+<figure><img data-src="../data/08/barber_markov_chains.png" style="height:auto;width:1000px;" alt="First (left) and second order (right) Markov chains." title="fig:"><figcaption>First (left) and second order (right) Markov chains.</figcaption></figure>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Equilibrium Distribution</h1>
+<p>For a given Markov Chain, it is interesting to consider how the marginal probability changes over time. We might be interested in the probability of being in a specific state:</p>
+<p><span class="math display">\[ 
+p(x_t = i) = \sum_j \underbrace{p(x_t = i | x_{t-1} = j)}_{P_{ij}}p(x_{t-1} = j)
+\]</span></p>
+<p>When repeatedly sampling new states this leads to a probability distribution over all states: <span class="math display">\[ 
+\vec{p}_t = \mathbf{P}^{t-1} p(x_1)
+\]</span></p>
+<p>If, for <span class="math inline">\(t \rightarrow \infty\)</span>, <span class="math inline">\(\vec{p}_\infty\)</span> is independent of the initial distribution <span class="math inline">\(p(x_1)\)</span>, then <span class="math inline">\(p_\infty\)</span> is called the equilibrium distribution of the chain.</p>
+</section>
+<section class="slide level1">
+<h1>Example (Recap): Transition Matrix of Weather in the Land Oz</h1>
+<ul>
+<li>There are never two nice days in a row.</li>
+<li>After a nice day, it is as likely to have snow as rain the next day.</li>
+<li>After snow or rain, there is an even chance of having the same the next day or switch to one of the others.</li>
+</ul>
+<p><span class="math display">\[
+\mathbf{P(\text{Rain - Nice - Snow})} = 
+\left(  
+\begin{array}{ccc}
+0.5 &amp; 0.25 &amp; 0.25 \\
+0.5 &amp; 0. &amp; 0.5 \\
+0.25 &amp; 0.25 &amp; 0.5
+\end{array}
+\right)
+\]</span></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="grinstead2003">(Grinstead and Snell 2003)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Example: Weather in the Land Oz</h1>
+<div class="single-column-row">
+<div class="box top">
+<h2 class="top"></h2>
+<p>Long term weather in Oz: Powers of the Land of Oz transition matrix.</p>
+</div>
+</div>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/08/grinstead_inf_distribution_a.png" style="height:auto;width:480px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/08/grinstead_inf_distribution_b.png" style="height:auto;width:480px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="grinstead2003">(Grinstead and Snell 2003)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example Application: PageRank Algorithm for Websites</h1>
+<p>We define a Matrix that reflects connections between webpages: <span class="math inline">\(A_{ij}\)</span> is set to <span class="math inline">\(1\)</span> if website <span class="math inline">\(j\)</span> has a hyperlink to <span class="math inline">\(i\)</span> and it is set to <span class="math inline">\(0\)</span> otherwise.</p>
+<p>From this, we setup a Markov transition matrix with the elements: $ P_{ij} =  $</p>
+<div>
+<ul>
+<li class="fragment">When jumping from website to website, the equilibrium distribution component <span class="math inline">\(p_\infty (i)\)</span> is the relative number of times we will visit website <span class="math inline">\(i\)</span>. This can be interpreted as the ‘importance’ of website <span class="math inline">\(i\)</span>.</li>
+<li class="fragment">For each website <span class="math inline">\(i\)</span>: collect a list of associated words associated with that website. From this one can construct an inverse list for searching the web ranked by importance.</li>
+</ul>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Markov Assumption</h1>
+<p>General idea is that only the recent past is important.</p>
+<div class="box definition">
+<h2 class="definition">Markov Assumption</h2>
+<p>The Markov Assumption makes this explicit for the probabilities of a sequence: when predicting the future, only the present matters, but not the past.</p>
+<p><span class="math display">\[ P(x_t = i| x_1 ... x_{t−1}) = P(x_t = i| x_{t−1})\]</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Hidden Markov Model</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>Even a second-order Markov assumption might not be sufficient to represent long-range temporal dependencies.</li>
+<li>But for higher order models the number of parameters will blow up.</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/08/barber_hmm.png" style="height:auto;width:480px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<ul>
+<li>As an alternative: we assume an underlying hidden process that can be modeled by a first-order Markov chain, but the observation of the data is disturbed by noise.</li>
+<li>Such a model is known as a Hidden Markov Model.</li>
+</ul>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Hidden Markov Model</h1>
+<p>A HMM <span class="math inline">\(\lambda\)</span> defines a Markov chain on hidden/ latent variables <span class="math inline">\(h_{1:T}\)</span>. The observed/ visible variables are dependent on the hidden variables through an emission probability <span class="math inline">\(p(v_t|h_t)\)</span>. This defines a joint distribution</p>
+<p><span class="math display">\[
+p(h_{1:T}, v_{1:T}) = p(v_1 | h_1) p(h_1) \prod_{t=2}^T p(v_t|h_t) p(h_t | h_{t-1})
+\]</span></p>
+<p>For a stationary HMM the transition and emission probability distributions don’t change over time.</p>
+<p><img data-src="../data/08/barber_hmm.png" style="height:auto;width:480px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="barber2012">(Barber 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Hidden Markov Model Parameters</h1>
+<div class="box">
+<h2>Transition Distribution</h2>
+<p>The transition distribution represents the probabilities of transitioning from one hidden state to another – this results in an <span class="math inline">\(H \times H\)</span> transition matrix.</p>
+<p>The probability of a state depends only on the previous state (Markov Assumption).</p>
+</div>
+<div class="box">
+<h2>Emission Distribution</h2>
+<p>The emission distribution <span class="math inline">\(p(v_t | h_t)\)</span> describes in a matrix for each of the hidden states the probability of emitting one of <span class="math inline">\(V\)</span> observations. This results in a <span class="math inline">\(V \times H\)</span> matrix.</p>
+<p>The probability of an output observation depends only on the hidden state at that point in time.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: Ice Cream Season</h1>
+<p>We want to infer the weather of a past summer from Jason Eisner’s diary in which he reported how much ice cream he ate a particular day.</p>
+<p>There are only hot or cold days - and he at least ate one ice cream and at most three. The numbers of ice cream (observations) are dependent on how the temperature (hidden state) was that day.</p>
+<div class="col70">
+<p><img data-src="../data/09/eisner_icecream_example.svg" style="height:auto;width:800px;"></p>
+</div>
+<div class="col30">
+<p><img data-src="../data/09/icecream_greentea.jpg" style="height:auto;width:300px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="eisner-2002-interactive">(Eisner 2002)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Characteristic Problems for HMMs</h1>
+<div class="box">
+<h2>Problem 1 (Likelihood)</h2>
+<p>Given an HMM <span class="math inline">\(\lambda = (\mathbf{T}, \mathbf{E})\)</span> and an observation sequence <span class="math inline">\(\vec{o}\)</span>, determine the likelihood <span class="math inline">\(P(\vec{o}| \lambda )\)</span>.</p>
+</div>
+<div class="box fragment">
+<h2>Problem 2 (Decoding)</h2>
+<p>Given an observation sequence <span class="math inline">\(\vec{o}\)</span> and an HMM <span class="math inline">\(\lambda = (\mathbf{T}, \mathbf{E})\)</span>, discover the best hidden state sequence <span class="math inline">\(\vec{q}\)</span>.</p>
+</div>
+<div class="box fragment">
+<h2>Problem 3 (Learning)</h2>
+<p>Given an observation sequence <span class="math inline">\(\vec{o}\)</span> and the set of states in the HMM, learn the HMM parameters <span class="math inline">\(\mathbf{T}\)</span> and <span class="math inline">\(\mathbf{E}\)</span>.</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="rabiner1993">(Rabiner and Juang 1993)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Computation of the Likelihood</h1>
+<div class="single-column-row">
+<div class="box top">
+<h2 class="top"></h2>
+<p>Task: Given an HMM <span class="math inline">\(\lambda = (\mathbf{T}, \mathbf{E})\)</span> and <span class="math inline">\(\vec{o}\)</span>, determine the likelihood <span class="math inline">\(P(\vec{o}| \lambda )\)</span>.</p>
+<p>Example: Observations are he ate <span class="math inline">\(3\)</span> ice creams, the next day <span class="math inline">\(1\)</span> and a third day <span class="math inline">\(3\)</span>.</p>
+</div>
+<div class="box">
+<h2></h2>
+<div class="col50">
+<p><img data-src="../data/09/jurafsky_icecream_fwd_1_trivial.svg" style="height:200px;width:auto;"></p>
+<p>Knowing the weather simplifies this to:</p>
+<p><span class="math display">\[
+P(\vec{o} | \vec{q}) = \prod_{i=1}^{T} P(o_i | q_i) %= P (3 |\text{hot}) \times P (1 |\text{hot}) \times P (3 |\text{cold})
+\]</span></p>
+</div>
+<div class="col50">
+<p><img data-src="../data/09/jurafsky_icecream_fwd_2_joint_single.svg" style="height:200px;width:auto;"></p>
+<p>We don’t know the hidden sequence – and have to weight this by the probability of a weather sequence which gives us the joint probability:</p>
+<p><span class="math display">\[
+P(\vec{o}, \vec{q}) = \prod_{i=1}^{T} P(o_i | q_i) \times \prod_{i=1}^{T} P(q_i | q_{i-1})
+\]</span></p>
+</div>
+</div>
+</div>
+<div class="multi-column-row multi-column-row-3">
+
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="jurafsky2000">(Jurafsky and Martin 2000)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Likelihood Computation</h1>
+<p>The likelihood of a certain observation sequence can now be calculated as the weighted sum of the probabilities of observing that particular observation sequence when following that particular hidden state sequences.</p>
+<p><span class="math display">\[
+P ( \vec{o}) = \sum_{\vec{q}} P(\vec{o}, \vec{q}) = \sum_{\vec{q}} P(\vec{o} | \vec{q}) P(\vec{q})
+\]</span></p>
+<div class="box fragment">
+<h2></h2>
+<p>Unfortunately, for <span class="math inline">\(N\)</span> hidden states and <span class="math inline">\(T\)</span> time steps this approach leads to <span class="math inline">\(N^T\)</span> possible hidden sequences which is usually not feasible to compute.</p>
+</div>
+<div class="box fragment">
+<h2></h2>
+<p>The forward algorithm is an efficient approach with a complexity of <span class="math inline">\(O(N^2 T)\)</span> as it stores intermediate values.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Likelihood Computation: The Forward Algorithm</h1>
+<p><img data-src="../data/09/jurafsky_icecream_fwd_3.svg" style="height:auto;width:800px;"></p>
+<p>The forward algorithm is not computing all possible paths individually. Instead, it efficiently folds all the path leading into a state into what is called a forward trellis <span class="math inline">\(\alpha_t\)</span>:</p>
+<p><span class="math display">\[
+\alpha_t(j) = \sum_{i=1}^N \alpha_{t-1}(i) T_{ij} E_j(o_t)
+\]</span></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="jurafsky2000">(Jurafsky and Martin 2000)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Likelihood Computation: The Forward Algorithm</h1>
+<div class="col40">
+<p><img data-src="../data/09/jurafsky_icecream_fwd_4_general.svg" style="height:auto;width:480px;"></p>
+</div>
+<div class="col60">
+<p><img data-src="../data/09/jurafsky_fwd_algorithm.svg" style="height:auto;width:720px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="jurafsky2000">(Jurafsky and Martin 2000)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Decoding: Finding the Most Probable Sequence</h1>
+<p>Task: Given an observation sequence <span class="math inline">\(\vec{o}\)</span> and an HMM <span class="math inline">\(\lambda = (\mathbf{T}, \mathbf{E})\)</span>, discover the most probable sequence of hidden states <span class="math inline">\(\vec{q}\)</span>.</p>
+<p><img data-src="../data/09/jurafsky_icecream_viterbi_1.svg" style="height:auto;width:800px;"></p>
+<p>Again, trying out all possible hidden state sequences is too costly. But we can use a similar approach to the forward algorithm – and first compute a forward pass trellis.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="jurafsky2000">(Jurafsky and Martin 2000)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Decoding: Viterbi Algorithm</h1>
+<p>But now we as well keep track of the best state sequence that landed us in a given state (as a back pointer):</p>
+<p><img data-src="../data/09/jurafsky_icecream_viterbi_2_back.svg" style="height:auto;width:800px;"></p>
+<p>The only difference to the forward algorithm is: instead of summing, the Viterbi algorithm takes the max over the previous path probabilities.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="jurafsky2000">(Jurafsky and Martin 2000)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: The unfair casino</h1>
+<p>While most of time the casino uses a fair dice, sometimes it briefly switches to a loaded dice with a distribution skewed towards face 6.</p>
+<p><img data-src="../data/09/murphy_17_09_loadedDie.svg" style="height:auto;width:480px;"></p>
+<p>When sampling, we may observe data such as the following and want to decide which dice was used over time.</p>
+<p><img data-src="../data/09/murphy_17_results.svg" style="height:auto;width:1000px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="murphy2012">(Murphy 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: The unfair casino</h1>
+<p><img data-src="../data/09/murphy_17_10_samples.svg" style="height:auto;width:1000px;"></p>
+<p>Vertical gray bars denote the samples that were generated using a loaded die.</p>
+<p>Left: Filtered estimate of probability of using a loaded dice.</p>
+<p>Right shows a smoothed estimates.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="murphy2012">(Murphy 2012)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Inference Tasks for HMMs</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>Filtering (Inferring the present) <span class="math inline">\(P(q_t | o_{1:t})\)</span></li>
+<li>Prediction (Inferring the future) <span class="math inline">\(P(q_t | o_{1:s}), t \gt s\)</span></li>
+<li>Smoothing (Inferring the past) <span class="math inline">\(P(q_t | o_{1:u}), t &lt; u\)</span></li>
+<li>Likelihood <span class="math inline">\(P(o_{1:T})\)</span></li>
+<li>Most likely Hidden path (Viterbi alignment) <span class="math inline">\(\text{argmax}_{q_{1:T}} P(q_{1:T} | o_{1:T})\)</span></li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/murphy_17_11_hmm_inferences.svg" style="height:auto;width:600px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="barber2012 murphy2012">(Barber 2012; Murphy 2012)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Application of Hidden Markov Models</h1>
+<div>
+<ul>
+<li class="fragment">HMMs can represent long-range dependencies between observations (in contrast to other Markov models) – importantly, the Markov property is not assumed for the observations themselves.</li>
+<li class="fragment">Therefore, HMMs are widely used as models on sequences.</li>
+<li class="fragment">For example, as complete black-box models for time-series prediction.</li>
+<li class="fragment">But more often, hidden states are associated with some given temporal structure and meaning.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Application of Hidden Markov Models</h1>
+<div>
+<ul>
+<li class="fragment">Automatic speech recognition: Observations represent features of the speech signal, and the hidden states represent the spoken word. The transition model represents a given language model, and the observation model represents an acoustic model.</li>
+<li class="fragment">Activity recognition: Observations represent features directly extracted from a video frame. The hidden state is an activity class the person was engaged in (e.g., running, walking, sitting, etc.).</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Hidden Markov Models Summary</h1>
+<ul>
+<li>HMMs are a way of relating a sequence of observations to a sequence of hidden states that explain these.</li>
+<li>Discovering the sequence of hidden states, given the sequence of observations, is called decoding/inference.</li>
+<li>The Viterbi algorithm is commonly used for decoding.</li>
+<li>The parameters of an HMM are the transition probability matrix and the emission/observation likelihood matrix. Both can be trained with the Baum-Welch or forward-backward algorithm.</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="murphy2012">(Murphy 2012)</span></p>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Combining Learners</h1>
+</section>
+<section class="slide level1">
+<h1>Combining Learners</h1>
+<p>Modularisation is an important basic principle in Computer Science and Intelligent Systems:</p>
+<ul>
+<li>find a decomposition of a given complex task into more manageable subtasks,</li>
+<li>and build the overall solution from the solution of the subtasks.</li>
+</ul>
+<p>This principle is also applicable to learning.</p>
+</section>
+<section class="slide level1">
+<h1>Simple Learners</h1>
+<p>for example, decision trees or even decision stumps, naïve Bayes, logistic regression have one huge advantage: They usually don’t overfit.</p>
+<div>
+<ul>
+<li class="fragment">positive: these learners show a low variance</li>
+<li class="fragment">negative: but can have high bias</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Ensemble Method</h1>
+<p>Learn many weak local models that are good in different parts of the input space.</p>
+<p>Combine these into a single classifier.</p>
+<p>Weighting of individual classifiers depends on input space – where a classifier is sure about its performance.</p>
+<p>This allows for combination of Different Methods with different strenght, e.g. using different algorithms, parameters …</p>
+<p>But this leads to the problem of how to combine these?</p>
+</section>
+<section class="slide level1">
+<h1>Boosting</h1>
+<p>General idea: use a weak learner, run it multiple times. But during each training run reweight the training data. In the end, let the learned classifiers vote.</p>
+<p>For each iteration:</p>
+<div>
+<ul>
+<li class="fragment">Weight training examples – in a way that puts more attention on incorrectly classified data</li>
+<li class="fragment">Train weak classifier generating a weak hypothesis <span class="math inline">\(h_t\)</span></li>
+<li class="fragment">Calculate a strength measurement for this hypothesis: <span class="math inline">\(\alpha_t\)</span></li>
+</ul>
+</div>
+<p>Final classifier is integration of the different weak classifiers:</p>
+<p><span class="math display">\[
+H(\vec{x}) = sign( \sum_t \alpha_t h_t(\vec{x}))
+\]</span></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="schapire2012">(Schapire and Freund 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Boosting - Schematic of Algorithm</h1>
+<div class="col70">
+<p><img data-src="../data/09/bishop_14_1.svg" style="height:auto;width:760px;"></p>
+</div>
+<div class="col30">
+<p>Each base classifier <span class="math inline">\(y_m (\vec{x})\)</span> is trained on the weighted training set (blue arrows). Weights depend on the previous classification, putting attention on errors.</p>
+<p>In the end, all classifiers are combined through a weighted sum (depending on the performance).</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="bishop2006">(Bishop 2006)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>AdaBoost</h1>
+<p>Provides the most popular (and quite simple) boosting algorithm.</p>
+<p>Advantages:</p>
+<ul>
+<li>Adaboost provides insight which are the best “features”.</li>
+<li>… and what best parameters or thresholds.</li>
+<li>It tells how to combine the weak classifiers into a stronger classifier.</li>
+<li>Has good generalization properties and is quite robust to overfitting.</li>
+</ul>
+<p>Requirement: weak classifier must be better than chance (error <span class="math inline">\(&lt; 0.5\)</span> for binary problem).</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="freund1995 schapire1999">(Freund 1995; Schapire 1999)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>AdaBoost Algorithm</h1>
+<div class="box">
+<h2>Initially, Input given as <span class="math inline">\(N\)</span> examples <span class="math inline">\(S_N = \{ (\vec{x_1}, y_1), ..., (\vec{x_N}, y_N) \}\)</span>.</h2>
+<p>Use a weak base learner, in our case a decision stump.</p>
+<p>Initialize weightings of the examples equally: <span class="math inline">\(w_i = 1/N\)</span> for all <span class="math inline">\(i = 1 ... N\)</span></p>
+</div>
+<div class="box fragment">
+<h2>Iterate for <span class="math inline">\(t = 1 ... T\)</span></h2>
+<ul>
+<li>Train on weighted data set $ w_i $ and obtain a new hypothesis <span class="math inline">\(h_t(\vec{x};j_t,\theta_t)\)</span></li>
+<li>Compute hypothesis error <span class="math inline">\(\varepsilon_t\)</span> and hypothesis weight <span class="math inline">\(\alpha_t\)</span></li>
+<li>and update example weights <span class="math inline">\(w_{t+1}\)</span> which gives more weight to misclassifications</li>
+</ul>
+</div>
+<div class="box fragment">
+<h2>Output is a final hypothesis – linear combination of all <span class="math inline">\(h_t\)</span>.</h2>
+</div>
+</section>
+<section class="slide level1">
+<h1>Decision Stump as a Weak Classifier</h1>
+<div class="col60">
+<p>Decision stump</p>
+<ul>
+<li>Simple-most type of decision tree</li>
+<li>Equivalent to linear classifier defined by affine hyperplane</li>
+<li>Hyperplane is orthogonal to axis with which it intersects in threshold <span class="math inline">\(\theta\)</span></li>
+</ul>
+<p>Defined as:</p>
+<p><span class="math display">\[\begin{align}
+h(\vec{x};j,\theta)=\begin{cases}
+    +1, &amp; \text{if $x_j &gt; \theta$}.\\
+    -1, &amp; \text{otherwise}.
+  \end{cases}
+\end{align}\]</span></p>
+<p>where <span class="math inline">\(x\)</span> is (<span class="math inline">\(d\)</span>-dim.) training sample, <span class="math inline">\(j\)</span> is dimension</p>
+</div>
+<div class="col40">
+<p><img data-src="../data/09/burgard_lecture.svg" style="height:auto;width:480px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="freiburg_2018">(Arras et al. 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>AdaBoost: Train Decision Stump</h1>
+<div class="col60">
+<p>Train decision stump on the weighted data:</p>
+<ul>
+<li>first, for each dimension find a threshold <span class="math inline">\(\theta^*\)</span></li>
+<li>second, select dimension <span class="math inline">\(j^*\)</span> for which the error becomes minimal.</li>
+</ul>
+<p><span class="math display">\[
+(j^*, \theta^*) = argmin_{j, \theta} (\sum_{i=1}^D w_t(i) I(y_i \neq h_t(x_i)) )
+\]</span></p>
+</div>
+<div class="col40">
+<p><img data-src="../data/09/burgard_lecture.svg" style="height:auto;width:480px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="freiburg_2018">(Arras et al. 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>AdaBoost: Compute Voting Weight</h1>
+<div class="col40">
+<p>Compute the voting weight <span class="math inline">\(\alpha_t\)</span> for the new hypothesis classifier.</p>
+<p>This will be used to assign the importance for this classifier</p>
+<p><span class="math display">\[\begin{align}
+\varepsilon_t &amp;= \frac{\sum_{i=1}^N w_{t-1}(i) I(y_i \neq h_t(x_i)) }{ \sum_{i=1}^N w_{t-1}(i)} \\
+\alpha_t &amp;= 0.5 log((1-\varepsilon_t / \varepsilon_t)
+\end{align}\]</span></p>
+</div>
+<div class="col60">
+<p><img data-src="../data/09/burgard_adaboost_alpha.svg" style="height:auto;width:720px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="freiburg_2018">(Arras et al. 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>AdaBoost: Weight Update</h1>
+<ul>
+<li>Weights of correctly classified samples are decreased and</li>
+<li>weights of misclassified samples are increased.</li>
+</ul>
+<p>AdaBoost generates weak classifiers by training the next learner on the errors of the previous one.</p>
+<p><span class="math display">\[\begin{align}
+w_{t+1}(i) = w_t(i) exp(-\alpha_t y_i h_t(x_i)) / Z_t, \\
+exp(-\alpha_t y_i h_t(x_i))=\begin{cases}
+    &lt; 1, y_i = h_t(x_i)\\
+    &gt; 1, y_i \neq h_t(x_i)
+  \end{cases}
+\end{align}\]</span></p>
+<p><span class="math inline">\(Z_t\)</span> is a normalizer (making <span class="math inline">\(w_{t+1}\)</span> a probability distribution).</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="freiburg_2018">(Arras et al. 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>AdaBoost: Integrate into Strong Classifier</h1>
+<p>After training is completed, the different hypothesis classifiers are fixed and combined using their voting weights:</p>
+<p><span class="math display">\[
+H(\vec{x}) = sign( \sum_{t=1}^T \alpha_t h_t(\vec{x}) )
+\]</span></p>
+<p><img data-src="../data/09/bishop_14_1.svg" style="height:auto;width:480px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="freiburg_2018 bishop2006">(Arras et al. 2018; Bishop 2006)</span>]</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>AdaBoost: Example Step 1</h1>
+<p><img data-src="../data/09/schapire_1_1_stump_1.svg" style="height:auto;width:720px;"></p>
+<p>Simple toy problem with <span class="math inline">\(m = 10\)</span> examples, three time steps.</p>
+<p>Left box: distribution with the size of each example scaled in proportion to its weight under that distribution.</p>
+<p>Right box: shows the weak hypothesis <span class="math inline">\(h_t\)</span>. Examples that are misclassified by <span class="math inline">\(h_t\)</span> have been circled.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="schapire2012">(Schapire and Freund 2012)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>AdaBoost: Example Step 2 and 3</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/09/schapire_1_1_stump_2.svg" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/schapire_1_1_stump_3.svg" style="height:auto;width:600px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="schapire2012">(Schapire and Freund 2012)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>AdaBoost: Update weighting</h1>
+<div class="col70">
+<p><img data-src="../data/09/schapire_1_1_stump_table.svg" style="height:auto;width:800px;"></p>
+</div>
+<div class="col30">
+<p><img data-src="../data/09/schapire_1_1_stump_1.svg" style="height:auto;width:360px;"></p>
+<p><img data-src="../data/09/schapire_1_1_stump_2.svg" style="height:auto;width:360px;"></p>
+<p><img data-src="../data/09/schapire_1_1_stump_3.svg" style="height:auto;width:360px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="schapire2012">(Schapire and Freund 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>AdaBoost: Combined Classifier</h1>
+<p><img data-src="../data/09/schapire_1_1_stump_combined.svg" style="height:auto;width:720px;"></p>
+<p>The combined classifier for the toy example: the sign of the weighted sum of the three weak hypotheses. This is equivalent to the classifier shown at the bottom.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="schapire2012">(Schapire and Freund 2012)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>AdaBoost: Summary</h1>
+<p>AdaBoost achieves the construction of a “strong” classifier from a combination of “weak” classifiers.</p>
+<p>It combines weighting of data points to generate a diverse set of “weak” classifiers with their suitable combination into the desired “strong” classifier.</p>
+<ul>
+<li>Misclassified samples receive higher weight – have more attention of next learner.</li>
+<li>AdaBoost minimizes the upper bound of the training error instead of directly minimizing the training error. It chooses an optimal weak classifier and voting weight.</li>
+</ul>
+</section>
+<section class="slide level1 section" data-background-color="#FF6600">
+<h1>Data for DL and Privacy</h1>
+</section>
+<section class="slide level1 columns">
+<h1>Data for Machine Learning</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/09/federated_panel007_2x.png" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/federated_panel008_2x.png" style="height:auto;width:600px;" class="fragment"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="federate_cartoon_2019">(Bellwood and McCloud 2019)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Data for Machine Learning</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/09/federated_panel010_2x.png" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/federated_panel011_2x.png" style="height:auto;width:600px;" class="fragment"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="federate_cartoon_2019">(Bellwood and McCloud 2019)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Privacy concerns for Machine Learning Data</h1>
+<div class="col30">
+<p><img data-src="../data/Discussion.png" style="height:auto;width:300;"></p>
+</div>
+<div class="col70">
+<p>Availability of Big Data made current Machine Learning possible.</p>
+<p>But there are privacy concerns:</p>
+<ul>
+<li>What kind of your data are you willing to share?</li>
+<li>What are different possibilities of sharing (some) data?</li>
+<li>… or other ways of facilitating Machine Learning?</li>
+</ul>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Data for Machine Learning</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/09/federated_panel017_2x.png" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/federated_panel018_2x.png" style="height:auto;width:600px;" class="fragment"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="federate_cartoon_2019">(Bellwood and McCloud 2019)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Data for Machine Learning</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/09/federated_panel019_2x.png" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/federated_panel021_2x.png" style="height:auto;width:600px;" class="fragment"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="federate_cartoon_2019">(Bellwood and McCloud 2019)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Decentralized Learning</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/09/federated_panel022_2x.png" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/federated_panel023_2x.png" style="height:auto;width:600px;" class="fragment"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="federate_cartoon_2019">(Bellwood and McCloud 2019)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 unnumbered biblio">
+<h1>References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-freiburg_2018">
+<p>Arras, Kai, Cyrill Stachniss, Maren Bennewitz, and Wolfram Burgard. 2018. “Robotics 2 - Adaboost for People and Place Detection.” Lecture Notes, University of Freiburg.</p>
+</div>
+<div id="ref-barber2012">
+<p>Barber, David. 2012. <em>Bayesian Reasoning and Machine Learning</em>. New York, NY, USA: Cambridge University Press.</p>
+</div>
+<div id="ref-federate_cartoon_2019">
+<p>Bellwood, Lucy, and Scott McCloud. 2019. “Federated Learning.” 2019. <a href="https://federated.withgoogle.com">https://federated.withgoogle.com</a>.</p>
+</div>
+<div id="ref-bishop2006">
+<p>Bishop, Christopher M. 2006. <em>Pattern Recognition and Machine Learning</em>. Springer.</p>
+</div>
+<div id="ref-eisner-2002-interactive">
+<p>Eisner, Jason. 2002. “An Interactive Spreadsheet for Teaching the Forward-Backward Algorithm.” In <em>Proceedings of the ACL-02 Workshop on Effective Tools and Methodologies for Teaching Natural Language Processing and Computational Linguistics</em>, 10–18. Philadelphia, Pennsylvania, USA: Association for Computational Linguistics. <a href="https://doi.org/10.3115/1118108.1118110">https://doi.org/10.3115/1118108.1118110</a>.</p>
+</div>
+<div id="ref-freund1995">
+<p>Freund, Yoav. 1995. “Boosting a Weak Learning Algorithm by Majority.” <em>Inf. Comput.</em> 121 (2): 256–85. <a href="https://doi.org/10.1006/inco.1995.1136">https://doi.org/10.1006/inco.1995.1136</a>.</p>
+</div>
+<div id="ref-grinstead2003">
+<p>Grinstead, Charles M., and J. Laurie Snell. 2003. <em>Introduction to Probability</em>. AMS; AMS.</p>
+</div>
+<div id="ref-jurafsky2000">
+<p>Jurafsky, Daniel, and James H. Martin. 2000. <em>Speech and Language Processing: An Introduction to Natural Language Processing, Computational Linguistics, and Speech Recognition</em>. 1st ed. Upper Saddle River, NJ, USA: Prentice Hall PTR.</p>
+</div>
+<div id="ref-murphy2012">
+<p>Murphy, Kevin P. 2012. <em>Machine Learning: A Probabilistic Perspective</em>. The MIT Press.</p>
+</div>
+<div id="ref-rabiner1993">
+<p>Rabiner, Lawrence R., and Biing-Hwang Juang. 1993. <em>Fundamentals of Speech Recognition</em>. Prentice Hall Signal Processing Series. Prentice Hall.</p>
+</div>
+<div id="ref-schapire1999">
+<p>Schapire, Robert E. 1999. “A Brief Introduction to Boosting.” In <em>Proceedings of the 16th International Joint Conference on Artificial Intelligence - Volume 2</em>, 1401–6. IJCAI’99. San Francisco, CA, USA: Morgan Kaufmann Publishers Inc. <a href="http://dl.acm.org/citation.cfm?id=1624312.1624417">http://dl.acm.org/citation.cfm?id=1624312.1624417</a>.</p>
+</div>
+<div id="ref-schapire2012">
+<p>Schapire, Robert E., and Yoav Freund. 2012. <em>Boosting: Foundations and Algorithms</em>. The MIT Press.</p>
+</div>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="../support/vendor/reveal/js/reveal.js"></script>
+  <script src="../support/vendor/jquery.js"></script>
+  <script src="../support/vendor/piklor.js"></script>
+
+ <!-- standard setting -->
+
+  <script>
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        pdfMaxPagesPerSlide: 1,
+        pdfSeparateFragments: false,
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Display the page number of the current slide
+        slideNumber: false,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: false,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Loop the presentation
+        loop: false,
+        // Change the presentation direction to be RTL
+        rtl: false,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: false,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: false,
+        mouseWheel: false,
+        hideAddressBar: false,
+        previewLinks: false,
+        // Transition style
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'none', // none/fade/slide/convex/concave/zoom
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+        height: 800,
+        thebelab: true,
+        math: {
+          mathjax: "../support/vendor/mathjax/MathJax.js",
+          TeX: {
+              Macros: {
+              R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+              laplace: "{\\Delta}",
+              grad: "{\\nabla}",
+              T: "^{\\mathsf{T}}",
+  
+              norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+              iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+              vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              set: ['\\mathcal{#1}', 1],
+              func: ['\\mathrm{#1}', 1],
+              trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+              matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+              vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+              of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+              diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+              pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+  
+              vc: ['\\mathbf{#1}', 1],
+              abs: ['\\lvert#1\\rvert', 1],
+              norm: ['\\lVert#1\\rVert', 1],
+              det: ['\\lvert#1\\rvert', 1],
+              qt: ['\\hat{\\vc {#1}}', 1],
+              mt: ['\\boldsymbol{#1}', 1],
+              pt: ['\\boldsymbol{#1}', 1],
+              textcolor: ['\\color{#1}', 1]
+              }
+          },
+        },
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '../support/vendor/reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: '../support/vendor/reveal/plugin/zoom-js/zoom.js', async: true },
+          { src: '../support/vendor/whiteboard/whiteboard.js'},
+          //{ src: '../support/vendor/reveal/plugin/math/math.js', async: true },
+          { src: '../support/vendor/math/math.js' },
+          { src: '../support/js/thebelab.js', async: true },
+          { src: '../support/vendor/reveal/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+
+
+    <script src="../support/js/quiz.js" type="text/javascript"></script>
+    <script src="../support/js/decker.js" type="text/javascript"></script>
+
+    <!-- Reload on change machinery -->
+    <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+      window.location.reload(true);
+      };
+    </script>
+
+    </body>
+</html>
