@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<!-- This is the pandoc 2.7.3 template for reveal.js output modified for decker. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">
+  <title>10 Differentiable Neural Computers</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reset.css">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reveal.css">
+  <link rel="stylesheet" href="../support/css/thebelab.css">
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="../support/css/decker.css">
+  <link rel="stylesheet" href="../mschilling.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? '../support/vendor/reveal/css/print/pdf.css' : '../support/vendor/reveal/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script type="text/x-thebe-config">
+  {
+      bootstrap: false,
+      requestKernel: false,
+      predefinedOutput: false,
+      binderOptions: {
+          repo: "malteschilling/advml_binder",
+          ref: "master",
+          binderUrl: "https://mybinder.org",
+          repoProvider: "github",
+      },
+      kernelOptions: {
+          name: "python3"
+      },
+      selector: "[data-executable]",
+      mathjaxUrl: false,
+      codeMirrorConfig: {
+          mode: "python3"
+      }
+  }
+  </script>
+  <script src="https://unpkg.com/thebelab@0.4.0/lib/index.js"></script> 
+  <!-- <script src="../support/vendor/thebelab/index.js"></script> -->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+ <!-- standard settings -->
+  <h1 class="title">10 Differentiable Neural Computers</h1>
+  <p class="subtitle">Advanced Machine Learning</p>
+  <p class="author">Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
+
+</section>
+
+<section class="slide level1">
+<h1>Recap – AdaBoost</h1>
+<div class="col60">
+<p>AdaBoost achieves the construction of a “strong” classifier from a combination of “weak” classifiers.</p>
+<p>It combines weighting of data points to generate a diverse set of “weak” classifiers with their suitable combination into the desired “strong” classifier.</p>
+<ul>
+<li>Misclassified samples receive higher weight – have more attention of next learner.</li>
+<li>AdaBoost minimizes the upper bound of the training error instead of directly minimizing the training error. It chooses an optimal weak classifier and voting weight.</li>
+</ul>
+</div>
+<div class="col40">
+<p><img data-src="../data/09/bishop_14_1.svg" style="height:auto;width:480px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="bishop2006">(Bishop 2006)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Multi-class Classification -</h1>
+<ul>
+<li>use multiple binary classifiers that distinguish between pairs of classes</li>
+<li>Extension of AdaBoost to multi-class problems by <span class="citation" data-cites="Zhu09multi-classadaboost">(Zhu et al. 2009)</span>:</li>
+</ul>
+<blockquote>
+<p>we develop a new algorithm that directly extends the AdaBoost algorithm to the multi-class case without reducing it to multiple two-class problems. We show that the proposed multi-class AdaBoost algorithm is equivalent to a forward stagewise additive modeling algorithm that minimizes a novel exponential loss for multi-class classification.</p>
+</blockquote>
+<ul>
+<li>implemented in standard toolkits, e.g. scikit learn</li>
+</ul>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Combining Learners</h1>
+</section>
+<section class="slide level1 columns">
+<h1>Data for Machine Learning</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/09/federated_panel017_2x.png" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/federated_panel018_2x.png" style="height:auto;width:600px;" class="fragment"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="federate_cartoon_2019">(Bellwood and McCloud 2019)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Data for Machine Learning</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/09/federated_panel019_2x.png" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/federated_panel021_2x.png" style="height:auto;width:600px;" class="fragment"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="federate_cartoon_2019">(Bellwood and McCloud 2019)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Decentralized Learning</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/09/federated_panel022_2x.png" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/federated_panel023_2x.png" style="height:auto;width:600px;" class="fragment"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="federate_cartoon_2019">(Bellwood and McCloud 2019)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Federated Learning</h1>
+<p><img data-src="../data/09/wikimedia_Federated_learning_process_central_case.png" style="height:auto;width:800px;"></p>
+<p>Problem for centralized learning:</p>
+<ul>
+<li>Have to collect/upload large amounts of distributed data.</li>
+<li>Privacy issues.</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><a href="https://commons.wikimedia.org/w/index.php?title=User:Jeromemetronome&amp;action=edit&amp;redlink=1">Jeromemetronome - Own work</a></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Receiving only Adaptation of Model</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/09/federated_panel029_2x.png" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/federated_panel030_2x.png" style="height:auto;width:600px;" class="fragment"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="federate_cartoon_2019">(Bellwood and McCloud 2019)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Federated Learning</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>Federated learning:</p>
+<ul>
+<li>improve current model on device from local data</li>
+<li>summarizes the changes into a small focused update</li>
+<li>send this update back (encrypted) to server</li>
+<li>integrated into update through averaging and improve the shared model.</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/google_federated_learning_overview.png" style="height:auto;width:600px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="federated_learning_google_2017">(McMahan and Ramage 2017)</span></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Receiving only Adaptation of Model</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/09/federated_panel032_2x.png" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/federated_panel033_2x.png" style="height:auto;width:600px;" class="fragment"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="federate_cartoon_2019">(Bellwood and McCloud 2019)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Receiving only Adaptation of Model</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/09/federated_panel034_2x.png" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/federated_panel035_2x.png" style="height:auto;width:600px;" class="fragment"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="federate_cartoon_2019">(Bellwood and McCloud 2019)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Federated Learning</h1>
+<p><img data-src="../data/09/bonawitz_2019_federated_learning_protocol.svg" style="height:auto;width:1000px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="bonatwitz2019">(Bonawitz et al. 2019)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Combining Learners in Neural Networks - Recap</h1>
+<p>Standard form for evaluation of a NN: Train multiple (independent) models.</p>
+<p>During Testing: average their predictions.</p>
+<p>Performance slightly increases with number of models forming an ensemble.</p>
+<p>Approaches to variation of models:</p>
+<ul>
+<li>Same model – but different initializations.</li>
+<li>Apply cross-validation: find best hyperparameters and use set of best models to form an ensemble.</li>
+<li>Use average of parameters over time during training.</li>
+</ul>
+</section>
+<section class="slide level1 columns">
+<h1>Combining Learners in NN - Dropout</h1>
+<div class="single-column-row">
+<div class="box top">
+<h2 class="top"></h2>
+<p>During training: Dropout can be interpreted as sampling a Neural Network within the full Neural Network. Only parameters of the sampled network are updated.</p>
+<p>During testing: no dropout applied, but weights are scaled by p – this computes an averaged prediction across the ensembles of all sub-networks.</p>
+</div>
+</div>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>Forces the network to have a redundant representation.</li>
+<li>Trains multiple small (sub-)models that share parameters.</li>
+<li>Each selection (binary mask) defines one such model which is then trained.</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/09/srinivasta_dropout.png" style="height:auto;width:300px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="srivastava14dropout">(Srivastava et al. 2014)</span>.</p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Brief Recap: Generative Adversarial Networks</h1>
+<div class="col50">
+<div>
+<figure><img data-src="https://www.lyrn.ai/wp-content/uploads/2018/12/GANs-overview.png" style="height:480;width:auto;" alt="GAN architecture" title="fig:"><figcaption>GAN architecture</figcaption></figure>
+</div>
+</div>
+<div class="col50">
+<div>
+<figure><img data-src="https://www.lyrn.ai/wp-content/uploads/2018/12/ProGAN.gif" style="height:auto;width:600;" alt="ProGAN progressive training" title="fig:"><figcaption>ProGAN progressive training</figcaption></figure>
+</div>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Introduction to ProGAN <span class="citation" data-cites="wolf2018progan">(Wolf 2018)</span>.</p>
+</div>
+</section>
+<section class="slide level1 sub">
+<h1>Examples for GANs</h1>
+<p><img data-src="../data/09/goodfellow_gan.png" style="height:auto;width:1000px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="goodfellow2016">(Goodfellow, Bengio, and Courville 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Adversarial Networks</h1>
+<p>extend the use of deep networks to provide trainable generative models.</p>
+<p>Idea: two networks refine their capabilities through competing in complementary roles:</p>
+<div class="box">
+<h2>A discriminator network</h2>
+<p>classifies patterns sampled randomly from two sources: a data distribution PD(x) and a model distribution PM(x) (“originals” vs. “fakes”).</p>
+</div>
+<div class="box">
+<h2>A generator network</h2>
+<p>has the task to provide samples from the model distribution. Its goal is to make for the classifier network these “fakes” as undistinguishable from the original data as possible. This amounts to making PM(x) as similiar to PD(x) as possible.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Learning in GANs</h1>
+<p>Both networks are adaptive, but with complementary objectives:</p>
+<ul>
+<li>the classifier network adapts to minimize its classification error (true image vs. fake image)</li>
+<li>the generator network tries to adapt to make its images more and more indistinguishable from the originals; it tries to maximize the error of the classifier network on the images that it generates.</li>
+</ul>
+<p>Convergence is sensitive to many factors – but there are now stable architectures for training.</p>
+</section>
+<section class="slide level1 sub">
+<h1>Example: This person does not exist</h1>
+<p><iframe data-src="https://thispersondoesnotexist.com/index.html" style="height:600px;width:800px;">Browser does not support iframe.</iframe></p>
+</section>
+<section class="slide level1">
+<h1>Example: Arithmetic operations in GANs</h1>
+<p><img data-src="../data/09/radford_gan_ops.png" style="height:auto;width:1000px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="radford2015unsupervised">(Radford, Metz, and Chintala 2015)</span></p>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Attention as a Mechanism</h1>
+</section>
+<section class="slide level1 columns">
+<h1>Representation of Sequences</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Sequences in RNNs</h2>
+<p>Recurrent Neural Network can deal with sequences – but struggle with longer sequences and using information much later.</p>
+<p><img data-src="post--augmented-rnns-master/public/assets/rnn_basic_rnn.svg" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Long-Short Term Memory</h2>
+<p>LSTMs showed progress in this direction: adding (or suppressing) information to the cell state is learned in additional connections (through separate gates).</p>
+<p><img data-src="../data/10/LSTM3-chain.png" style="height:auto;width:540px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="olah2016attention colahsBlog_RNN">(Olah and Carter 2016; Olah 2015)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Selection of partial context</h1>
+<p>Many tasks require to focus on a particular subset of information.</p>
+<p>For example, in language comprehension or translation meaning of a word depends on some part of the context.</p>
+<p><img data-src="post--augmented-rnns-master/public/assets/rnn_attentional_ex1.svg" style="height:auto;width:1000px;"></p>
+<p><img data-src="../data/10/sentence-example-attention.png" style="height:auto;width:640px;"></p>
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="colahsBlog_RNN">(Olah 2015)</span>, following <span class="citation" data-cites="bahdanau2014neural">(Bahdanau, Cho, and Bengio 2014)</span>.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Attentional Interfaces in NN</h1>
+<div class="col40">
+<p>A goal is to learn this as well: Attend to which part of the context?</p>
+<p>For example, a RNN can attend over the output of another RNN. At every time step, it focuses on different positions in the other RNN.</p>
+<p>In order to learn to attend, attention has to be differentiable.</p>
+</div>
+<div class="col60">
+<p><img data-src="post--augmented-rnns-master/public/assets/rnn_attentional_01.svg" style="height:auto;width:800px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="colahsBlog_RNN">(Olah 2015)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Recurrent attention model</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>Given an input image and foveal location, the glimpse sensor extracts a multi-resolution ‘retinal’ representation.</p>
+<p>It produces a representation that is passed to the LSTM core, which defines the next location to attend to (and classification decision).</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/10/mnih_attention.svg" style="height:auto;width:600px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p><img data-src="../data/10/show-attend-tell.png" style="height:auto;width:1000px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="mnih2014attention">(Mnih et al. 2014)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Attentional Read from Neural Network</h1>
+<p>Instead of specifying a single location, the RNN outputs an “attention distribution” that describes which memory locations should be attended.</p>
+<p>As such, the result of the read operation is a weighted sum.</p>
+<p><iframe data-src="post--augmented-rnns-master/public/rnn_read.html" style="height:300px;width:100%;">Browser does not support iframe.</iframe></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Figure taken from <span class="citation" data-cites="olah2016attention">(Olah and Carter 2016)</span>, under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY 2.0</a>.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Attentional Interfaces in NN</h1>
+<p><img data-src="post--augmented-rnns-master/public/assets/rnn_attentional_02.svg" style="height:auto;width:800px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="colahsBlog_RNN">(Olah 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Current Developments in GANs: Attention</h1>
+<p>Attention mechanisms are used in many applications of DNNs in computer vision, e.g. depth estimation.</p>
+<p>These mechansims help to focus on a relevant portion of the input.</p>
+<div class="col50">
+<p><img data-src="../data/10/tang_GAN_problems.svg" style="height:400px;width:auto;"></p>
+</div>
+<div class="col50">
+<p><img data-src="../data/10/tang_GAN_comparison.svg" style="height:400px;width:auto;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="tang2019attentiongan">(Tang et al. 2019)</span></p>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Combining Different Representation Paradigms</h1>
+</section>
+<section class="slide level1">
+<h1>Different Memory Systems</h1>
+<p><img data-src="../data/10/tulving1972.jpg" style="height:auto;width:1000px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Following <span class="citation" data-cites="tulving1972">(Tulving 1972)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Different Memory Systems</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Episodic Memory</h2>
+<ul>
+<li>Memory that provides access to specific events located at specific places and particular points in time.</li>
+<li>“Mental time travel” = shared mental simulation of events.
+<ul>
+<li>Backward: Remember ealier episodes</li>
+<li>Forward directed: Anticipate and plan future events</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Semantic Memory</h2>
+<ul>
+<li>Generalized world knowledge</li>
+<li>May arise from the consolidation/integration of many episodic memory traces.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Integration of neural and symbolic approaches</h1>
+<div class="single-column-row">
+<div class="box top">
+<h2 class="top"></h2>
+<p><img data-src="../data/01/intelligence_spectrum.svg" style="height:auto;width:800px;"></p>
+<p><br />
+</p>
+<p>Goal: bring together complementary strengths</p>
+</div>
+</div>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>neural approaches provide adaptive learning processes that are robust and effective</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<ul>
+<li>logic is a fundamental tool in the modelling of reasoning, thought and behaviour</li>
+<li>it is easily interpretable</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p>Following <span class="citation" data-cites="cs221_2018">(Liang 2018)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: OpenEASE</h1>
+<div data-align="center">
+<iframe width="1120" height="630" src="https://www.youtube.com/embed/HzFpO0VVJ1E" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+</iframe>
+</div>
+</section>
+<section class="slide level1">
+<h1>Mechanisms of Computer Programs (von Neumann)</h1>
+<ul>
+<li>elementary operations (e.g., arithmetic operations)</li>
+<li>logical flow control (branching),</li>
+<li>external memory, which can be written to and read from in the course of computation</li>
+</ul>
+<p>Modern computers separate computation and memory:</p>
+<ul>
+<li>Computation is performed by a processor,</li>
+<li>which can use an addressable memory to bring operands in and out of play.</li>
+</ul>
+<p>Modern machine learning for a long time neglected this use of logical flow control and external memory.</p>
+</section>
+<section class="slide level1">
+<h1>Neural Turing Machine</h1>
+<p>Neural Turing Machines are Neural Networks that are capable of coupling to external memories.</p>
+<p>The combined system is analogous to a Turing Machine.</p>
+<p>Importantly, the whole system is differentiable which turns the neural networks into neural computers by giving them read-write access to external memory.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2014ntm">(Graves, Wayne, and Danihelka 2014)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Coupling to external memory</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Recurrent NN</h2>
+<p><img data-src="../data/10/graves_talk_1_rnn.svg" style="height:auto;width:540px;"></p>
+<p>Current state depends on previous internal state and external input.</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Neural Turing Machine</h2>
+<p><img data-src="../data/10/graves_talk_2_ntm.svg" style="height:auto;width:540px;"></p>
+<p>A NN coupled to an external memory.</p>
+<p>The controller learns how to couple to memory.</p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="graves2014ntm">(Graves, Wayne, and Danihelka 2014)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Accessing external memories</h1>
+<p><img data-src="../data/10/graves_talk_3_memoryaccess.svg" style="height:auto;width:800px;"></p>
+<ul>
+<li>different heads for reading and writing</li>
+<li>weights are defined and learned as parameters of the controller</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2014ntm">(Graves, Wayne, and Danihelka 2014)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Accessing Memory using Attentional Focus on Memory</h1>
+<div class="col50">
+<h2>Reading from Memory</h2>
+<p>Reading as an attentional distribution, in principle reading from everywhere in memory.</p>
+<p><br />
+</p>
+<h2>Writing to Memory</h2>
+<p>An attentional distribution weights how much we write at a location (often done as erasing and writing).</p>
+</div>
+<div class="col50">
+<p><iframe data-src="post--augmented-rnns-master/public/rnn_write.html" style="height:540px;width:600px;">Browser does not support iframe.</iframe></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Figure taken from <span class="citation" data-cites="olah2016attention">(Olah and Carter 2016)</span>, under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY 2.0</a>.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Two Mechanisms for Memory Access in NTM</h1>
+<div class="col30">
+<ul>
+<li>content-based attention: search content similar to an input</li>
+<li>location-based attention: relative movement through memory (allows for loops, similar to Turing machine)</li>
+</ul>
+</div>
+<div class="col70">
+<p><iframe data-src="post--augmented-rnns-master/public/rnn_access.html" style="height:600px;width:900px;">Browser does not support iframe.</iframe></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Figure taken from <span class="citation" data-cites="olah2016attention">(Olah and Carter 2016)</span>, under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY 2.0</a>.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Different Modes of Memory Access in NTM</h1>
+<ul>
+<li>weighting chosen directly by content system</li>
+<li>weighting used from the content system and shifted</li>
+<li>weighting from the previous time step is used (no input) and further advanced</li>
+</ul>
+<p>As a further last stage, the weighting is sharpened in Neural Turing Machines which leads to more focussed access to memory.</p>
+<p><img data-src="../data/10/rnn_memory.svg" style="height:300px;width:auto;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2014ntm olah2016attention">(Graves, Wayne, and Danihelka 2014; Olah and Carter 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Task: Learning a Copy Algorithm</h1>
+<h3>Copy task with sequence of length = 20.</h3>
+<p><img data-src="../data/10/copy_ntm_20_0.png" style="height:240px;width:auto;"></p>
+<h3>Copy task with length = 40 (network only trained on length <span class="math inline">\(\leq 20\)</span>).</h3>
+<p><img data-src="../data/10/copy_ntm_40_1.png" style="height:240px;width:auto;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="collierbeel2018ntms">(Collier and Beel 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Task: Using Memory in Copy Task</h1>
+<p><img data-src="../data/10/graves_copy_task.svg" style="height:auto;width:720px;"></p>
+<ul>
+<li>each weight has an attentional focus on a single location</li>
+<li>there is an exact match between read and write locations</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2014ntm">(Graves, Wayne, and Danihelka 2014)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Task 2: Repeated Copying Task</h1>
+<p><img data-src="../data/10/graves_repeatcopy_task.svg" style="height:auto;width:720px;"></p>
+<ul>
+<li>each weight has an attentional focus on a single location</li>
+<li>learning to repeat loop through read locations</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2014ntm">(Graves, Wayne, and Danihelka 2014)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Task 3: Associative Memory Task</h1>
+<p><img data-src="../data/10/graves_associative_task.svg" style="height:auto;width:480px;"></p>
+<ul>
+<li>Input list of items (sequence of length 3 and 6 bits).</li>
+<li>Target output: Return subsequent item of that list.</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2014ntm">(Graves, Wayne, and Danihelka 2014)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Task 3: Learning in Associative Memory</h1>
+<p><img data-src="../data/10/graves_associative_learning.svg" style="height:auto;width:840px;"></p>
+<p>Associative recall learning curves comparing NTM and LSTM.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2014ntm">(Graves, Wayne, and Danihelka 2014)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Summary Neural Turing Machine</h1>
+<div class="col60">
+<p>Neural Turing Machines are Neural Networks that are capable of coupling to external memories.</p>
+<p>A NTM is differentiable which turns it into a neural computer (read-write access to external memory).</p>
+<p>We see the capability of using external memories through the application of copy, repeat copy, associative recall …</p>
+</div>
+<div class="col40">
+<p><img data-src="../data/10/graves_talk_2_ntm.svg" style="height:auto;width:480px;"></p>
+</div>
+<div class="box fragment">
+<h2></h2>
+<ul>
+<li>But NTM were only able to retrieve memories in order of their index, not in order in which they were written.</li>
+<li>Preserving this temporal order is necessary for many complex/cognitive tasks, e.g. sequence of instructions.</li>
+</ul>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2014ntm olah2016attention">(Graves, Wayne, and Danihelka 2014; Olah and Carter 2016)</span></p>
+</div>
+</section>
+<section class="slide level1 unnumbered biblio">
+<h1>References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-bahdanau2014neural">
+<p>Bahdanau, Dzmitry, Kyunghyun Cho, and Yoshua Bengio. 2014. “Neural Machine Translation by Jointly Learning to Align and Translate.” <a href="http://arxiv.org/abs/1409.0473">http://arxiv.org/abs/1409.0473</a>.</p>
+</div>
+<div id="ref-federate_cartoon_2019">
+<p>Bellwood, Lucy, and Scott McCloud. 2019. “Federated Learning.” 2019. <a href="https://federated.withgoogle.com">https://federated.withgoogle.com</a>.</p>
+</div>
+<div id="ref-bishop2006">
+<p>Bishop, Christopher M. 2006. <em>Pattern Recognition and Machine Learning</em>. Springer.</p>
+</div>
+<div id="ref-bonatwitz2019">
+<p>Bonawitz, Keith, Hubert Eichner, Wolfgang Grieskamp, Dzmitry Huba, Alex Ingerman, Vladimir Ivanov, Chloé Kiddon, et al. 2019. “Towards Federated Learning at Scale: System Design.” <em>CoRR</em> abs/1902.01046. <a href="http://arxiv.org/abs/1902.01046">http://arxiv.org/abs/1902.01046</a>.</p>
+</div>
+<div id="ref-collierbeel2018ntms">
+<p>Collier, Mark, and Joeran Beel. 2018. “Implementing Neural Turing Machines.” <em>International Conference on Artificial Neural Networks, ICANN.</em></p>
+</div>
+<div id="ref-goodfellow2016">
+<p>Goodfellow, Ian, Yoshua Bengio, and Aaron Courville. 2016. <em>Deep Learning</em>. MIT Press.</p>
+</div>
+<div id="ref-graves2014ntm">
+<p>Graves, Alex, Greg Wayne, and Ivo Danihelka. 2014. “Neural Turing Machines.” <em>CoRR</em> abs/1410.5401.</p>
+</div>
+<div id="ref-cs221_2018">
+<p>Liang, Percy. 2018. “Artificial Intelligence: Principles and Techniques.” Course CS221, Stanford University, Lecture Notes.</p>
+</div>
+<div id="ref-federated_learning_google_2017">
+<p>McMahan, Brendan, and Daniel Ramage. 2017. “Federated Learning: Collaborative Machine Learning Without Centralized Training Data.” 2017. <a href="https://ai.googleblog.com/2017/04/federated-learning-collaborative.html">https://ai.googleblog.com/2017/04/federated-learning-collaborative.html</a>.</p>
+</div>
+<div id="ref-mnih2014attention">
+<p>Mnih, Volodymyr, Nicolas Heess, Alex Graves, and Koray Kavukcuoglu. 2014. “Recurrent Models of Visual Attention.” <em>CoRR</em> abs/1406.6247.</p>
+</div>
+<div id="ref-olah2016attention">
+<p>Olah, Chris, and Shan Carter. 2016. “Attention and Augmented Recurrent Neural Networks.” <em>Distill</em>. <a href="https://doi.org/10.23915/distill.00001">https://doi.org/10.23915/distill.00001</a>.</p>
+</div>
+<div id="ref-colahsBlog_RNN">
+<p>Olah, Christopher. 2015. “Understanding Lstm Networks.” 2015. <a href="http://colah.github.io/posts/2015-08-Understanding-LSTMs/">http://colah.github.io/posts/2015-08-Understanding-LSTMs/</a>.</p>
+</div>
+<div id="ref-radford2015unsupervised">
+<p>Radford, Alec, Luke Metz, and Soumith Chintala. 2015. “Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks.” <a href="http://arxiv.org/abs/1511.06434">http://arxiv.org/abs/1511.06434</a>.</p>
+</div>
+<div id="ref-srivastava14dropout">
+<p>Srivastava, Nitish, Geoffrey Hinton, Alex Krizhevsky, Ilya Sutskever, and Ruslan Salakhutdinov. 2014. “Dropout: A Simple Way to Prevent Neural Networks from Overfitting.” <em>Journal of Machine Learning Research</em> 15: 1929–58.</p>
+</div>
+<div id="ref-tang2019attentiongan">
+<p>Tang, Hao, Hong Liu, Dan Xu, Philip H. S. Torr, and Nicu Sebe. 2019. “AttentionGAN: Unpaired Image-to-Image Translation Using Attention-Guided Generative Adversarial Networks.” <a href="http://arxiv.org/abs/1911.11897">http://arxiv.org/abs/1911.11897</a>.</p>
+</div>
+<div id="ref-tulving1972">
+<p>Tulving, Endel. 1972. “Episodic and Semantic Memory.” In <em>Organization of Memory</em>, edited by Endel Tulving and W. Donaldson, 381–403. New York: Academic Press.</p>
+</div>
+<div id="ref-wolf2018progan">
+<p>Wolf, Sarah. 2018. “ProGAN: How Nvidia Generated Images of Unprecedented Quality.” 2018. <a href="https://towardsdatascience.com/progan-how-nvidia-generated-images-of-unprecedented-quality-51c98ec2cbd2">https://towardsdatascience.com/progan-how-nvidia-generated-images-of-unprecedented-quality-51c98ec2cbd2</a>.</p>
+</div>
+<div id="ref-Zhu09multi-classadaboost">
+<p>Zhu, Ji, Hui Zou, Saharon Rosset, and Trevor Hastie. 2009. “Multi-Class Adaboost.”</p>
+</div>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="../support/vendor/reveal/js/reveal.js"></script>
+  <script src="../support/vendor/jquery.js"></script>
+  <script src="../support/vendor/piklor.js"></script>
+
+ <!-- standard setting -->
+
+  <script>
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        pdfMaxPagesPerSlide: 1,
+        pdfSeparateFragments: false,
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Display the page number of the current slide
+        slideNumber: false,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: false,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Loop the presentation
+        loop: false,
+        // Change the presentation direction to be RTL
+        rtl: false,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: false,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: false,
+        mouseWheel: false,
+        hideAddressBar: false,
+        previewLinks: false,
+        // Transition style
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'none', // none/fade/slide/convex/concave/zoom
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+        height: 800,
+        thebelab: true,
+        math: {
+          mathjax: "../support/vendor/mathjax/MathJax.js",
+          TeX: {
+              Macros: {
+              R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+              laplace: "{\\Delta}",
+              grad: "{\\nabla}",
+              T: "^{\\mathsf{T}}",
+  
+              norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+              iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+              vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              set: ['\\mathcal{#1}', 1],
+              func: ['\\mathrm{#1}', 1],
+              trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+              matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+              vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+              of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+              diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+              pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+  
+              vc: ['\\mathbf{#1}', 1],
+              abs: ['\\lvert#1\\rvert', 1],
+              norm: ['\\lVert#1\\rVert', 1],
+              det: ['\\lvert#1\\rvert', 1],
+              qt: ['\\hat{\\vc {#1}}', 1],
+              mt: ['\\boldsymbol{#1}', 1],
+              pt: ['\\boldsymbol{#1}', 1],
+              textcolor: ['\\color{#1}', 1]
+              }
+          },
+        },
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '../support/vendor/reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: '../support/vendor/reveal/plugin/zoom-js/zoom.js', async: true },
+          { src: '../support/vendor/whiteboard/whiteboard.js'},
+          //{ src: '../support/vendor/reveal/plugin/math/math.js', async: true },
+          { src: '../support/vendor/math/math.js' },
+          { src: '../support/js/thebelab.js', async: true },
+          { src: '../support/vendor/reveal/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+
+
+    <script src="../support/js/quiz.js" type="text/javascript"></script>
+    <script src="../support/js/decker.js" type="text/javascript"></script>
+
+    <!-- Reload on change machinery -->
+    <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+      window.location.reload(true);
+      };
+    </script>
+
+    </body>
+</html>
