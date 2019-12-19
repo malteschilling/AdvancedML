@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<!-- This is the pandoc 2.7.3 template for reveal.js output modified for decker. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">
+  <title>11 Reinforcement Learning</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reset.css">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reveal.css">
+  <link rel="stylesheet" href="../support/css/thebelab.css">
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="../support/css/decker.css">
+  <link rel="stylesheet" href="../mschilling.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? '../support/vendor/reveal/css/print/pdf.css' : '../support/vendor/reveal/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script type="text/x-thebe-config">
+  {
+      bootstrap: false,
+      requestKernel: false,
+      predefinedOutput: false,
+      binderOptions: {
+          repo: "malteschilling/advml_binder",
+          ref: "master",
+          binderUrl: "https://mybinder.org",
+          repoProvider: "github",
+      },
+      kernelOptions: {
+          name: "python3"
+      },
+      selector: "[data-executable]",
+      mathjaxUrl: false,
+      codeMirrorConfig: {
+          mode: "python3"
+      }
+  }
+  </script>
+  <script src="https://unpkg.com/thebelab@0.4.0/lib/index.js"></script> 
+  <!-- <script src="../support/vendor/thebelab/index.js"></script> -->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+ <!-- standard settings -->
+  <h1 class="title">11 Reinforcement Learning</h1>
+  <p class="subtitle">Advanced Machine Learning</p>
+  <p class="author">Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
+
+</section>
+
+<section class="slide level1">
+<h1>Recap - Neural Turing Machine</h1>
+<p>Neural Turing Machines are Neural Networks that are capable of coupling to external memories.</p>
+<p>A NTM is differentiable which turns it into a neural computer (read-write access to external memory).</p>
+<p>We see the capability of using external memories through the application of copy, repeat copy, associative recall …</p>
+<p><img data-src="../data/10/rnn_memory.svg" style="height:300px;width:auto;"></p>
+</section>
+<section class="slide level1 columns">
+<h1>Limitations of Neural Turing Machines</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>But NTM were only able to retrieve memories in order of their index, not in order in which they were written.</li>
+<li>Preserving this temporal order is necessary for many complex/cognitive tasks, e.g. sequence of instructions.</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/10/graves_talk_2_ntm.svg" style="height:auto;width:600px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="graves2014ntm olah2016attention">(Graves, Wayne, and Danihelka 2014; Olah and Carter 2016)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Differentiable Neural Computers</h1>
+</section>
+<section class="slide level1">
+<h1>Differentiable Neural Computers</h1>
+<div class="col40">
+<ul>
+<li>are a successor to Neural Turing Machines.</li>
+<li>A controller learns to use an internal memory through multiple read and write heads.</li>
+<li>As one addition, a linkage matrix stores information about the order of writes.</li>
+<li>Differentiable end-to-end.</li>
+</ul>
+</div>
+<div class="col60">
+<p><img data-src="../data/10/graves_dnc_overview.svg" style="height:auto;width:800px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2016hybrid">(Graves et al. 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Selective Attention to Memory</h1>
+<div class="col70">
+<p>The controller outputs are used to parameterise a distribution (over the locations (rows) in a memory matrix.</p>
+<p>Weightings are defined by three main attention mechanisms:</p>
+<ul>
+<li>content allocation,</li>
+<li>memory allocation,</li>
+<li>and temporal order</li>
+</ul>
+<p>The controller interpolates among these mechanisms using scalar gates.</p>
+</div>
+<div class="col30">
+<p><img data-src="../data/10/franke_memory_unit.svg" style="height:auto;width:360px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2016hybrid franke2018dnc">(Graves et al. 2016; Franke, Niehues, and Waibel 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Memory Units in a DNC</h1>
+<div class="col30">
+<p><img data-src="../data/10/franke_memory_unit.svg" style="height:auto;width:360px;"></p>
+</div>
+<div class="col70">
+<p><img data-src="../data/10/franke_memory_unit_detail.svg" style="height:auto;width:840px;" class="fragment"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="franke2018dnc">(Franke, Niehues, and Waibel 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Memory Access: Searching by Content</h1>
+<p>The controller emitts a key vector <span class="math inline">\(\vec{k}\)</span> which is compared to the content of each memory location <span class="math inline">\(M[i]\)</span> using a similarity measure <span class="math inline">\(S(.,.)\)</span> (e.g. cosine distance).</p>
+<p><span class="math display">\[
+\vec{w}[i] = \frac{exp(\beta S(\vec{k}, M[i]) )}{\sum_j exp(\beta S(\vec{k}, M[j]) )}
+\]</span></p>
+<p>Afterwards, all these values are normalised with a softmax.</p>
+<p>This mechanism finds the memories that are ‘closest’ to the key.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2016hybrid">(Graves et al. 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Memory Access: Searching by Time</h1>
+<p>NTM was only able to retrieve memories in order of their index but not in order in which they were written.</p>
+<p>As temporal order is necessary for many tasks (e.g. sequence of instructions), DNC was extended through keeping track of sequences.</p>
+<p>This is realized through a precedence weighting which remembers which locations were most recently written to. And from this a temporal link matrix is defined.</p>
+<p>The controller can use this list to retrieve items depending on temporal order (forward and backward).</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2016hybrid">(Graves et al. 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Allocating Memory</h1>
+<p>NTM could only ‘allocate’ memory in contiguous blocks. This lead to memory management problems.</p>
+<p>The Differentiable Neural Computer keeps a differentiable list that tracks the usage of all the memory locations.</p>
+<p>This usage list is automatically updated after each write and freeing operation.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2016hybrid">(Graves et al. 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Overall Architecture</h1>
+<p><img data-src="../data/10/graves_dnc_architecture.svg" style="height:auto;width:1200px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2016hybrid">(Graves et al. 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Task: bAbI</h1>
+<ul>
+<li><p><em>John is in the playground. John picked up the football.</em><br />
+Where is the football? <em>playground</em></p></li>
+<li><p><em>Daniel went to the hallway. Sandra moved to the garden.</em><br />
+Where is Daniel? <em>hallway</em></p></li>
+<li><p><em>John moved to the office. Sandra journeyed to the bathroom.</em><br />
+Where is Daniel? <em>hallway</em></p></li>
+<li><p><em>Mary moved to the hallway. Daniel travelled to the office.</em><br />
+Where is Daniel? <em>office</em></p></li>
+</ul>
+<p>Input is encoded using one-hot encoding (example task in <span class="citation" data-cites="weston2016">(Weston et al. 2016)</span> is a vocabulary of 40 and 4000 sample sequences).</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weston2016">(Weston et al. 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Task: bAbI</h1>
+<p><img data-src="../data/10/franke_bAb_task.svg" style="height:auto;width:1000px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="franke2018dnc">(Franke, Niehues, and Waibel 2018)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Word Embeddings</h1>
+<div class="single-column-row">
+<div class="box top">
+<h2 class="top"></h2>
+<p>ML algorithms require a form of vector representation as an input instead of strings/words.</p>
+</div>
+</div>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">One-hot-encoding</h2>
+<ul>
+<li>each word gets its own dimension</li>
+<li>works well for very limited corpora, but doesn’t scale well</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Distributed Representation</h2>
+<ul>
+<li>each dimension represents a certain property</li>
+<li>learn a distributed representation</li>
+<li>distance between words reflects a form of semantic similarity</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>Can be realized through learning context/cooccurence of words. This is based on the distributional hypothesis: <em>words that are similar in meaning occur in similar contexts.</em></p>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>word2vec</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>Common approach that learns high dimensional embedding to representat words.</p>
+<p><br />
+</p>
+<p>Instead of capturing the cooccurrence of words directly, it is trained as a predictor of surrounding words.</p>
+<p><br />
+</p>
+<p>Goal is to maximize the log probability of any context word when a current center word is given as input (done for a specific window length = how large is the context?).</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/11/word2vec.png" style="height:auto;width:720px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="alammar2019word2vec">(Alammar 2019)</span></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: word2vec</h1>
+<p><img data-src="../data/11/alammar_queen-woman-girl-embeddings.png" style="height:auto;width:1000px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="alammar2019word2vec">(Alammar 2019)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: Analogies in word2vec</h1>
+<p><img data-src="../data/11/alammar_king-analogy-viz.png" style="height:540px;width:auto;"></p>
+<ul>
+<li>Scales nicely with corpus size.</li>
+<li>Captures complex patterns that go beyond word similarity.</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="alammar2019word2vec">(Alammar 2019)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Task: bAbI</h1>
+<p><img data-src="../data/10/graves_bAbI_results.svg" style="height:auto;width:1200px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2016hybrid">(Graves et al. 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>General Task Structure: Graphs</h1>
+<p>DNC performed very good on the simple language task (and a more extended version of the bAbI task).</p>
+<p>Importantly, there is an underlying structure of the used facts in this task:</p>
+<ul>
+<li>there is an actor,</li>
+<li>an action</li>
+<li>and a set of arguments.</li>
+</ul>
+<p>This can be expressed as well as a simple graph. Graph structure is (as we know) a general way of representation and can be applied for many domains: maps, parse-trees, knowledge graphs, …</p>
+<p>As a next step, the DNC was trained on more complex structures to analyze how this generalizes to complex graph structures.</p>
+</section>
+<section class="slide level1">
+<h1>Task: Family Tree</h1>
+<p>Inference question: (Freya, _, MaternalGreatUncle)</p>
+<p>Answer: (Freya, Fergus, MaternalGreatUncle)</p>
+<div class="col40">
+<h3>Training input</h3>
+<p>(Charlotte, Alan, Father) (Simon, Steve, Father) (Steve , Simon, Son1) (Nina, Alison, Mother) (Lindsey, Fergus, Son1) (Bob, Jane, Mother) (Natalie, Alice, Mother) (Mary, Ian, Father) (Jane, Alice, Daughter1) (Mat, Charlotte, Mother)</p>
+<p>54 edges in total</p>
+</div>
+<div class="col60">
+<h3>Family Tree (as a graph)</h3>
+<p><img data-src="../data/10/graves_family_tree.svg" style="height:auto;width:720px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2016hybrid">(Graves et al. 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Task: Family Tree</h1>
+<div data-align="center">
+<iframe width="1120" height="630" src="https://www.youtube.com/embed/B9U8sI7TcMY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+</iframe>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2016hybrid">(Graves et al. 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Video - Task: Family Tree</h1>
+<p><a href="https://www.youtube.com/embed/B9U8sI7TcMY">Video https://www.youtube.com/embed/B9U8sI7TcMY</a></p>
+</section>
+<section class="slide level1">
+<h1>Example: Traversing Graph</h1>
+<p><video data-src="../data/10/41586_2016_BFnature20101_MOESM120_ESM.mov" style="height:auto;width:1120px;" data-autoplay="true" controls="1">Browser does not support video.</video></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2016hybrid">(Graves et al. 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Task: Finding Subway Connection</h1>
+<p><img data-src="../data/10/graves_subway_data.svg" style="height:600px;width:auto;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2016hybrid">(Graves et al. 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Access to Memory in Subway Task</h1>
+<p><img data-src="../data/10/graves_subway_reading.svg" style="height:600px;width:auto;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="graves2016hybrid">(Graves et al. 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Summary Differentiable Neural Computer</h1>
+<ul>
+<li>Combines the advantages of neural and computational processing by providing a neural network with read–write access to an external memory.</li>
+<li>Access to memory is narrowly focused using attention which minimizes interference.</li>
+<li>The whole system is differentiable, and can therefore be trained end-to-end with gradient descent.</li>
+</ul>
+<p>This allows the network to learn how to operate and organize the memory in a goal-directed manner.</p>
+</section>
+<section class="slide level1">
+<h1>Summary</h1>
+<p>Modularisation is a useful concept in Computer Science. It can as well be applied to learning of these systems.</p>
+<div>
+<ul>
+<li class="fragment">AdaBoost uses error-weighted learning and combines the created weak classifiers into a “strong” classifier with proven convergence.</li>
+<li class="fragment">Adversarial Learning pits two networks, a generator and a discriminator, against each other to imitate patterns from a given domain.</li>
+<li class="fragment">The “Differentiable Neural Computer” combines a recurrent network – acting in the role of a “differentiable CPU” – with external memory in a format that allows to synthesize complex sequential tasks through gradient-based optimization.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Reinforcement Learning</h1>
+</section>
+<section class="slide level1">
+<h1>Reinforcement Learning</h1>
+<div class="col50">
+<p><img data-src="../data/01/google_ml_cartoon/panel_69.png" style="height:400px;width:auto;"></p>
+</div>
+<div class="col50">
+<p><img data-src="../data/01/google_ml_cartoon/panel_70.png" style="height:400px;width:auto;" class="fragment"></p>
+</div>
+<p>Reading for (Deep) Reinforcement Learning:</p>
+<ul>
+<li>Sutton and Barto, book <span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span>, <a href="http://incompleteideas.net/book/bookdraft2017nov5.pdf">also online available</a>.</li>
+<li>D. Silver <a href="http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching.html">online course</a> on Deep Reinforcement learning at UCL.</li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Forms of Learning</h1>
+<div class="col60">
+<p>What is special in Reinforcement Learning?</p>
+<ul>
+<li>There is no supervisor, only a reward signal.</li>
+<li>Feedback can be delayed, not instantaneous.</li>
+<li>Sequential: Time really matters (non i.i.d data).</li>
+<li>Agent’s actions affect the subsequent data it receives</li>
+</ul>
+</div>
+<div class="col40">
+<p><img data-src="../data/11/silver_formsOfLearning.svg" style="height:auto;width:480px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>What is Reinforcement Learning (RL)?</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Goal of RL</h2>
+<p>Actively learn a good strategy for an agent from interaction with the environment.</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/11/weng_RL_illustration.png" style="height:auto;width:600px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box definition bottom">
+<h2 class="definition bottom">Reinforcement Learning</h2>
+<p><em>Reinforcement learning is learning what to do—how to map situations to actions—so as to maximize a numerical reward signal. The learner is not told which actions to take, but instead must discover which actions yield the most reward by trying them</em> <span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span>.</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1><figure class="" style="controls:1;"><div style="position:relative;padding-top:25px;padding-bottom:56.25%;height:0;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" width="560" height="315" src="https://www.youtube.com/embed/0JL04JJjocc?iv_load_policy=3&amp;disablekb=1&amp;rel=0&amp;modestbranding=1&amp;autohide=1&amp;start=0" frameborder="0" allowfullscreen=""><p></p></iframe></div></figure></h1>
+</section>
+<section class="slide level1">
+<h1>Video - Learning Flying Stanford Helicopter</h1>
+<p><a href="https://www.youtube.com/embed/0JL04JJjocc">Video https://www.youtube.com/embed/0JL04JJjocc</a></p>
+</section>
+<section class="slide level1">
+<h1><figure class="" style="controls:1;"><div style="position:relative;padding-top:25px;padding-bottom:56.25%;height:0;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" width="560" height="315" src="https://www.youtube.com/embed/x4O8pojMF0w?iv_load_policy=3&amp;disablekb=1&amp;rel=0&amp;modestbranding=1&amp;autohide=1&amp;start=0" frameborder="0" allowfullscreen=""><p></p></iframe></div></figure></h1>
+</section>
+<section class="slide level1">
+<h1>Video, External Website - Solving Rubik’s Cube with a Robot Hand</h1>
+<p><a href="https://www.youtube.com/embed/x4O8pojMF0w">Video https://www.youtube.com/embed/x4O8pojMF0w</a></p>
+<p><br />
+</p>
+<p><a href="https://openai.com/blog/solving-rubiks-cube/">Blog entry: https://openai.com/blog/solving-rubiks-cube/</a></p>
+</section>
+<section class="slide level1">
+<h1>Example: Solving a Rubik’s Cube with a Robot Hand</h1>
+<div class="col40">
+<p>Application of Deep Reinforcement Learning (and many advanced tricks) to learn how to solve a Rubik’s Cube with a robotic hand.</p>
+<p>One important ingredient: training in simulation – but allow for enough variation to enforce adaptivity <em>(automatic domain randomization)</em>.</p>
+</div>
+<div class="col60">
+<p><img data-src="../data/11/rubik_dr_randomization.jpg" style="height:auto;width:720px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="openai2019solving">(OpenAI et al. 2019)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Applying different Perturbations</h1>
+<div data-align="center">
+<iframe width="1120" height="630" src="https://openai.com/blog/solving-rubiks-cube/#perturbations" frameborder="0">
+</iframe>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="openai2019solving">(OpenAI et al. 2019)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Remarks on State-of-the-Art for DRL in Robotics</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Caveats</h2>
+<ul>
+<li>in testing: robot dropped cube 8 out of 10 trials</li>
+<li>it required 10.000 years of simulated training</li>
+<li>dexterity is very specific to cube</li>
+<li>can adapt to very specific disturbances</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<div data-align="center">
+<iframe width="640" height="390" src="https://openai.com/blog/solving-rubiks-cube/#adrappliedtothesizeoftherubikscube" frameborder="0">
+</iframe>
+</div>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>None-the-less, this is a remarkable demonstration, but shows how much has to be done to reach human-like capabilities.</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="openai2019solving">(OpenAI et al. 2019)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 unnumbered biblio">
+<h1>References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-alammar2019word2vec">
+<p>Alammar, Jay. 2019. “The Illustrated Word2vec.” 2019. <a href="http://jalammar.github.io/illustrated-word2vec/">http://jalammar.github.io/illustrated-word2vec/</a>.</p>
+</div>
+<div id="ref-franke2018dnc">
+<p>Franke, Jörg, Jan Niehues, and Alex Waibel. 2018. “Robust and Scalable Differentiable Neural Computer for Question Answering.” <em>CoRR</em> abs/1807.02658. <a href="http://arxiv.org/abs/1807.02658">http://arxiv.org/abs/1807.02658</a>.</p>
+</div>
+<div id="ref-graves2014ntm">
+<p>Graves, Alex, Greg Wayne, and Ivo Danihelka. 2014. “Neural Turing Machines.” <em>CoRR</em> abs/1410.5401.</p>
+</div>
+<div id="ref-graves2016hybrid">
+<p>Graves, Alex, Greg Wayne, Malcolm Reynolds, Tim Harley, Ivo Danihelka, Agnieszka Grabska-Barwińska, Sergio Gómez Colmenarejo, et al. 2016. “Hybrid Computing Using a Neural Network with Dynamic External Memory.” <em>Nature</em> 538 (7626): 471–76.</p>
+</div>
+<div id="ref-olah2016attention">
+<p>Olah, Chris, and Shan Carter. 2016. “Attention and Augmented Recurrent Neural Networks.” <em>Distill</em>. <a href="https://doi.org/10.23915/distill.00001">https://doi.org/10.23915/distill.00001</a>.</p>
+</div>
+<div id="ref-openai2019solving">
+<p>OpenAI, Ilge Akkaya, Marcin Andrychowicz, Maciek Chociej, Mateusz Litwin, Bob McGrew, Arthur Petron, et al. 2019. “Solving Rubik’s Cube with a Robot Hand.” <a href="http://arxiv.org/abs/1910.07113">http://arxiv.org/abs/1910.07113</a>.</p>
+</div>
+<div id="ref-silver2015">
+<p>Silver, David. 2015. “UCL Course on Rl Ucl Course on Rl Ucl Course on Reinforcement Learning.” http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching.html.</p>
+</div>
+<div id="ref-sutton2018">
+<p>Sutton, Richard S., and Andrew G. Barto. 2018. <em>Reinforcement Learning: An Introduction</em>. Second. The MIT Press.</p>
+</div>
+<div id="ref-weng2018rl">
+<p>Weng, Lilian. 2018. “A (Long) Peek into Reinforcement Learning.” 2018. <a href="https://lilianweng.github.io/lil-log/2018/02/19/a-long-peek-into-reinforcement-learning.html">https://lilianweng.github.io/lil-log/2018/02/19/a-long-peek-into-reinforcement-learning.html</a>.</p>
+</div>
+<div id="ref-weston2016">
+<p>Weston, Jason, Antoine Bordes, Sumit Chopra, and Tomas Mikolov. 2016. “Towards Ai-Complete Question Answering: A Set of Prerequisite Toy Tasks.” In <em>4th International Conference on Learning Representations, ICLR 2016, San Juan, Puerto Rico, May 2-4, 2016, Conference Track Proceedings</em>. <a href="http://arxiv.org/abs/1502.05698">http://arxiv.org/abs/1502.05698</a>.</p>
+</div>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="../support/vendor/reveal/js/reveal.js"></script>
+  <script src="../support/vendor/jquery.js"></script>
+  <script src="../support/vendor/piklor.js"></script>
+
+ <!-- standard setting -->
+
+  <script>
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        pdfMaxPagesPerSlide: 1,
+        pdfSeparateFragments: false,
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Display the page number of the current slide
+        slideNumber: false,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: false,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Loop the presentation
+        loop: false,
+        // Change the presentation direction to be RTL
+        rtl: false,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: false,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: false,
+        mouseWheel: false,
+        hideAddressBar: false,
+        previewLinks: false,
+        // Transition style
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'none', // none/fade/slide/convex/concave/zoom
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+        height: 800,
+        thebelab: true,
+        math: {
+          mathjax: "../support/vendor/mathjax/MathJax.js",
+          TeX: {
+              Macros: {
+              R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+              laplace: "{\\Delta}",
+              grad: "{\\nabla}",
+              T: "^{\\mathsf{T}}",
+  
+              norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+              iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+              vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              set: ['\\mathcal{#1}', 1],
+              func: ['\\mathrm{#1}', 1],
+              trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+              matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+              vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+              of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+              diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+              pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+  
+              vc: ['\\mathbf{#1}', 1],
+              abs: ['\\lvert#1\\rvert', 1],
+              norm: ['\\lVert#1\\rVert', 1],
+              det: ['\\lvert#1\\rvert', 1],
+              qt: ['\\hat{\\vc {#1}}', 1],
+              mt: ['\\boldsymbol{#1}', 1],
+              pt: ['\\boldsymbol{#1}', 1],
+              textcolor: ['\\color{#1}', 1]
+              }
+          },
+        },
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '../support/vendor/reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: '../support/vendor/reveal/plugin/zoom-js/zoom.js', async: true },
+          { src: '../support/vendor/whiteboard/whiteboard.js'},
+          //{ src: '../support/vendor/reveal/plugin/math/math.js', async: true },
+          { src: '../support/vendor/math/math.js' },
+          { src: '../support/js/thebelab.js', async: true },
+          { src: '../support/vendor/reveal/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+
+
+    <script src="../support/js/quiz.js" type="text/javascript"></script>
+    <script src="../support/js/decker.js" type="text/javascript"></script>
+
+    <!-- Reload on change machinery -->
+    <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+      window.location.reload(true);
+      };
+    </script>
+
+    </body>
+</html>
