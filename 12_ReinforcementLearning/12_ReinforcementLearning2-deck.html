@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<!-- This is the pandoc 2.7.3 template for reveal.js output modified for decker. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">
+  <title>12 Reinforcement Learning 2</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reset.css">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reveal.css">
+  <link rel="stylesheet" href="../support/css/thebelab.css">
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="../support/css/decker.css">
+  <link rel="stylesheet" href="../mschilling.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? '../support/vendor/reveal/css/print/pdf.css' : '../support/vendor/reveal/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script type="text/x-thebe-config">
+  {
+      bootstrap: false,
+      requestKernel: false,
+      predefinedOutput: false,
+      binderOptions: {
+          repo: "malteschilling/advml_binder",
+          ref: "master",
+          binderUrl: "https://mybinder.org",
+          repoProvider: "github",
+      },
+      kernelOptions: {
+          name: "python3"
+      },
+      selector: "[data-executable]",
+      mathjaxUrl: false,
+      codeMirrorConfig: {
+          mode: "python3"
+      }
+  }
+  </script>
+  <script src="https://unpkg.com/thebelab@0.4.0/lib/index.js"></script> 
+  <!-- <script src="../support/vendor/thebelab/index.js"></script> -->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+ <!-- standard settings -->
+  <h1 class="title">12 Reinforcement Learning 2</h1>
+  <p class="subtitle">Advanced Machine Learning</p>
+  <p class="author">Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
+
+</section>
+
+<section class="slide level1 columns">
+<h1>Parts of a Reinforcement Learning Problem</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>An agent is acting in an <strong>environment</strong>.</p>
+<p><br />
+</p>
+<p>The agent can stay in one of many <strong>states</strong> <span class="math inline">\(s \in \mathcal{S}\)</span> of the environment, and choose to take one of many <strong>actions</strong> <span class="math inline">\(a \in \mathcal{A}\)</span> to switch from one state to another.</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/11/weng_RL_illustration.png" style="height:auto;width:600px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>Which state the agent will arrive in afterwards is decided by <strong>transition probabilities</strong> between states <span class="math inline">\(P\)</span>.</p>
+<p><br />
+</p>
+<p>Once an action is taken, the environment delivers a <strong>reward</strong> <span class="math inline">\(r \in \mathcal{R}\)</span> as feedback. The reward describes how good the agent is doing.</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018a)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Overview Lecture</h1>
+<ul>
+<li>General Question: Exploration-Exploitation Tradeoff</li>
+<li>Acting in an environment: Multi-Armed Bandit
+<ul>
+<li>Strategies (<span class="math inline">\(\varepsilon\)</span>-greedy, UCB, …)</li>
+</ul></li>
+<li>Obtaining Rewards: Markov Reward Process
+<ul>
+<li>Value Function</li>
+</ul></li>
+<li>Putting everything together: Sequential Decision Making
+<ul>
+<li>Q Function</li>
+<li>Policy</li>
+</ul></li>
+<li>Markov Decision Process</li>
+<li>Bellman Equation</li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Explore or Exploit Information for Decision Making</h1>
+<p><img data-src="../data/12/ucb_ai_exploration_vs_exploitation.png" style="height:auto;width:800px;"></p>
+<p>Decision Making: sticking to a good past experience might make you miss out on even better options, but at least you can be confident to get something good.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="kleinCS188">(Klein and Abbeel 2014)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Exploitation-Exploration Tradeoff</h1>
+<div class="single-column-row">
+<div class="box top">
+<h2 class="top"></h2>
+<p>As information of a novel environment is incomplete, we need to gather information for good decisions and want to keep the risk under control.</p>
+</div>
+</div>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Exploitation</h2>
+<p>Taking advantage of the best known option.</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Exploration</h2>
+<p>Take some risk to collect information about unknown options.</p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>An optimal long-term strategy may involve short-term sacrifices, e.g. learning from failure during exploration helps us avoid a certain action.</p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Examples for Exploitation-Exploration Tradeoff</h1>
+<div>
+<ul>
+<li class="fragment">Restaurant Selection
+<ul>
+<li class="fragment">Exploitation: Go to your favourite restaurant</li>
+<li class="fragment">Exploration: Try a new restaurant</li>
+</ul></li>
+<li class="fragment">Oil Drilling
+<ul>
+<li class="fragment">Exploitation: Drill at the best known location</li>
+<li class="fragment">Exploration: Drill at a new location</li>
+</ul></li>
+<li class="fragment">Game Playing
+<ul>
+<li class="fragment">Exploitation: Play the move you believe is best</li>
+<li class="fragment">Exploration: Play an experimental move</li>
+</ul></li>
+</ul>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Multi-Armed Bandit</h1>
+<p>Idea: in a casino with multiple slot machines of unknown probabilities.</p>
+<p>Which action (slot machine) should you choose for optimal reward?</p>
+<p><img data-src="../data/12/weng_bern_bandit.png" style="height:auto;width:800px;"></p>
+<p>Following a naive approach, one would gather information over a long time to get a true estimate of each of the probabilities. But as a consequence one will spend too much time on suboptimal actions.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018bandit">(Weng 2018b)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Multi-Armed Bandit</h1>
+<p>A Bernoulli multi-armed bandit can be described as a tuple of <span class="math inline">\(\langle \mathcal{A}, \mathcal{R} \rangle\)</span>, where:</p>
+<ul>
+<li><span class="math inline">\(K\)</span> machines with reward probabilities, <span class="math inline">\({\theta_1,...,\theta_K}\)</span></li>
+<li>for each time step <span class="math inline">\(t\)</span>, take an action <span class="math inline">\(a\)</span> on one slot machine and receive a reward <span class="math inline">\(r\)</span>:</li>
+<li><span class="math inline">\(\mathcal{A}\)</span> is a set of actions (one for each slot machine) – the value of action <span class="math inline">\(a\)</span> is the expected reward <span class="math inline">\(Q(a) = \mathbb{E} [r \vert a] = \theta\)</span> (when at time <span class="math inline">\(t\)</span> action <span class="math inline">\(a_t\)</span> is choosing the <span class="math inline">\(i\)</span>-th machine <span class="math inline">\(Q(a_t)=\theta_i\)</span>).</li>
+<li><span class="math inline">\(\mathcal{R}\)</span> is the reward function. For a Bernoulli bandit,we observe a reward in a stochastic fashion (<span class="math inline">\(r_t= \mathcal{R}(a_t)\)</span> may return 1 with probability <span class="math inline">\(Q(a_t)\)</span>).</li>
+</ul>
+<p>This is a simplified version of a Markov decision process (there is no state <span class="math inline">\(\mathcal{S}\)</span>).</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018bandit">(Weng 2018b)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Maximization of cumulative reward</h1>
+<p>Goal is to maximize <strong>cumulative reward</strong> <span class="math inline">\(\sum_{t=1}^T r_t\)</span> (the return <span class="math inline">\(G\)</span>).<br />
+</p>
+<p>The optimal action produces the maximal reward. Deviating from that action leads to a potential loss or <strong>regret</strong>.<br />
+</p>
+<p>The probability for the optimal reward <span class="math inline">\(\theta^*\)</span> of the optimal action <span class="math inline">\(a^*\)</span> is <span class="math display">\[\theta^{*}=Q(a^{*})=\max_{a \in \mathcal{A}} Q(a) = \max_{1 \leq i \leq K} \theta_i\]</span><br />
+</p>
+<p>The loss function is the total regret for not selecting the optimal action up to the time step <span class="math inline">\(T\)</span> <span class="math display">\[\mathcal{L}_T = \mathbb{E} \Big[ \sum_{t=1}^T \big( \theta^{*} - Q(a_t) \big) \Big]\]</span></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018bandit">(Weng 2018b)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>An example bandit problem</h1>
+<p><img data-src="../data/12/sutton_2_1_bandit.svg" style="height:auto;width:720px;"></p>
+<p>Random action values <span class="math inline">\(q_*(a), a=1,...,10\)</span> (selected from a normal distribution, zero mean, unit std. dev.).</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1><span class="math inline">\(\varepsilon\)</span>-Greedy Strategy</h1>
+<ul>
+<li>Take the best action most of the time: <span class="math inline">\(\hat{a}^{*}_t = \arg\max_{a \in \mathcal{A}} \hat{Q}_t(a)\)</span></li>
+<li>But with <span class="math inline">\(p=\varepsilon\)</span> do random exploration.</li>
+</ul>
+<p>Best action is estimated from the collected action values from past experience (averaging the rewards for that action): <span class="math display">\[
+\hat{Q}_t(a) = \frac{1}{N_t(a)} \sum_{\tau=1}^t r_\tau \mathbb{1}[a_\tau = a]
+\]</span></p>
+<p><span class="math inline">\(\mathbb{1}\)</span> – binary indicator function for selecting an action</p>
+<p><span class="math inline">\(N_t(a) = \sum_{\tau=1}^t \mathbb{1}[a_\tau = a]\)</span> – counting how many times an action was selected</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018bandit">(Weng 2018b)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Performance of <span class="math inline">\(\varepsilon\)</span>-Greedy Strategy</h1>
+<p><img data-src="../data/12/sutton_2_2_epsilongreedy.svg" style="height:auto;width:1000px;"></p>
+<p>Average performance of <span class="math inline">\(\varepsilon\)</span>-greedy method (averaged over 2000 runs) for 10-arm bandit problem.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Adaptation of <span class="math inline">\(\varepsilon\)</span>-Greedy Strategy</h1>
+<div class="box">
+<h2>Drawback of <span class="math inline">\(\varepsilon\)</span>-Greedy Strategy:</h2>
+<div>
+<ul>
+<li class="fragment">during exploration we are randomly selecting actions — even though we might already have established bad actions</li>
+</ul>
+</div>
+</div>
+<div class="box fragment">
+<h2>Possible Solutions</h2>
+<div>
+<ul>
+<li class="fragment">decrease <span class="math inline">\(\varepsilon\)</span> over time</li>
+<li class="fragment">keep track of actions – of an estimate of how uncertain we are about this action (addressing the exploitation-exploration tradeoff)</li>
+</ul>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Upper Confidence Bounds (UCB)</h1>
+<p>Idea: favor exploration of actions that still have a strong potential to have an optimal value.</p>
+<p>This potential is measured as an upper confidence bound of the reward value <span class="math inline">\(\hat{U}_t(a)\)</span>. It depends on how often we have tried an action (<span class="math inline">\(N_t(a)\)</span>).</p>
+<p>Therefore, the true reward value is bound to:</p>
+<p><span class="math display">\[Q(a) \leq \hat{Q}_t(a) + \hat{U}_t(a)\]</span></p>
+<p><br />
+</p>
+<p>In UCB algorithm, actions are selected greedily in order to maximize the upper confidence bound: <span class="math display">\[a^{UCB}_t = argmax_{a \in \mathcal{A}} \hat{Q}_t(a) + \hat{U}_t(a)
+= argmax_{a \in \mathcal{A}} \hat{Q}_t(a) + c \sqrt{\frac{\ln t}{N_t(a)}} \]</span></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018bandit">(Weng 2018b)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Average Performance of UCB</h1>
+<p><img data-src="../data/12/sutton_2_4_ucb.svg" style="height:auto;width:1000px;"></p>
+<p>Average performance of UCB (averaged over 2000 runs) for 10-arm bandit problem.</p>
+<p>UCB outperforms <span class="math inline">\(\varepsilon\)</span>-greedy.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Further variations for Solving Bandit Problems</h1>
+<ul>
+<li>employing an optimistic estimate of the action value instead of a default initialization</li>
+<li>Bayesian UCB: introduce a prior assumption for the reward distribution – as a Gaussian – and use confidence intervals</li>
+<li>Thompson Sampling – formulate action selection as a probabilistic process itself (selecting an action with a probability that estimates it is optimal)</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>For further explanation see <span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span> or <span class="citation" data-cites="weng2018bandit">(Weng 2018b)</span>.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Sequential Decision Making</h1>
+<p>The interaction between agent and environment is a sequence of actions and returned observations plus rewards.</p>
+<p><br />
+</p>
+<p>Goal of the agent: select actions to maximise total future reward</p>
+<div>
+<ul>
+<li class="fragment">But actions may have long term consequences and reward may be delayed.</li>
+<li class="fragment">It may be better to sacrifice immediate reward to gain more long-term reward</li>
+</ul>
+</div>
+<p>An agent’s <strong>policy</strong> <span class="math inline">\(\pi(s) = a\)</span> describes which action <span class="math inline">\(a\)</span> an agent selects depending on the current state.</p>
+<p>For the stochastic state, a policy is a probability distribution over actions: <span class="math inline">\(\pi(a \vert s) = \mathbb{P}_\pi [A=a \vert S=s]\)</span>.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Reinforcement Learning as Sequential Decision Making</h1>
+<p><img data-src="../data/11/sutton_2018_3_1_rlInteraction.svg" style="height:auto;width:1000px;"></p>
+<p>Agent-environment interaction in a Markov-Decision Process.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>A Markov Reward Process</h1>
+<p><img data-src="../data/12/silver_student_1.svg" style="height:540px;width:auto;"></p>
+<p>Before turning to action, we focus on a simpler class of Markov Chains: the Markov Reward Process. We could sample trajectories from it.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Markov Process</h1>
+<p>A Markov process is a memoryless random process – a sequence of random states <span class="math inline">\(S_1, S_2, ...\)</span> with the Markov property.</p>
+<div class="box definition">
+<h2 class="definition">Markov Property</h2>
+<p>A state <span class="math inline">\(S_t\)</span> is Markov iff <span class="math inline">\(P(S_{t+1} | S_t) = P(S_{t+1} | S_1,...,S_t)\)</span></p>
+<p>States captures all relevant information from the history (“The future is independent of the past given the present”).</p>
+</div>
+<div class="box">
+<h2>Markov Process (Markov Chain)</h2>
+<ul>
+<li><span class="math inline">\(\mathcal{S}\)</span> is a (finite) set of states</li>
+<li><span class="math inline">\(\mathcal{P}\)</span> is a state transition probability matrix: <span class="math inline">\(P_{ss&#39;} =P(S_{t+1}=s&#39;|S_t=s)\)</span></li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Markov Reward Process</h1>
+<p>A Markov reward process is a Markov Chain with associated reward values.</p>
+<ul>
+<li><span class="math inline">\(\mathcal{S}\)</span> is a (finite) set of states</li>
+<li><span class="math inline">\(\mathcal{P}\)</span> is a state transition probability matrix: <span class="math inline">\(P_{ss&#39;} =P(S_{t+1}=s&#39;|S_t=s)\)</span></li>
+<li><span class="math inline">\(\mathcal{R}\)</span> is a reward function, <span class="math inline">\(\mathcal{R}_s = \mathbb{E}[R_{t+1}|S_t=s]\)</span></li>
+<li><span class="math inline">\(\gamma\)</span> is a discount factor, <span class="math inline">\(\gamma \in [0,1]\)</span></li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Value Function</h1>
+<p>A <strong>Value Function</strong> measures the estimated goodness of a state, i.e. how rewarding a state is by a prediction of the cumulative future reward.</p>
+<div class="box definition">
+<h2 class="definition">Return</h2>
+<p>cumulative future reward is a total sum of discounted rewards going forward, starting from time <span class="math inline">\(t\)</span>:</p>
+<p><span class="math display">\[ G_t = R_{t+1} + \gamma R_{t+2} + \dots = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1} \]</span></p>
+<p>As future rewards are usually more uncertain, they are weighted less through the <strong>discount factor</strong> <span class="math inline">\(\gamma \in [0, 1]\)</span>.</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018a)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Discouting of reward</h1>
+<p>Most Markov reward and decision processes are discounted. Why?</p>
+<div>
+<ul>
+<li class="fragment">Mathematically convenient to discount rewards</li>
+<li class="fragment">Avoids infinite returns in cyclic Markov processes</li>
+<li class="fragment">Uncertainty about the future may not be fully represented</li>
+<li class="fragment">Animal/human behaviour shows preference for immediate reward</li>
+<li class="fragment">It can be possible to use undiscounted Markov reward processes for terminating sequences.</li>
+</ul>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>State-Value Function</h1>
+<p>The <strong>state-value function</strong> of a state <span class="math inline">\(s\)</span> is the expected return if we are in this state at time <span class="math inline">\(t, S_t=s\)</span>:</p>
+<p><span class="math display">\[V_{\pi}(s) = \mathbb{E}_{\pi}[G_t \vert S_t = s]\]</span></p>
+<ul>
+<li>Used to evaluate the goodness/badness of states,</li>
+<li>and therefore to select between actions.</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018a)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Sampling in the student example</h1>
+<p><img data-src="../data/12/silver_student_1.svg" style="height:320px;width:auto;"></p>
+<p><img data-src="../data/12/silver_student_samples.svg" style="height:320px;width:auto;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Convergence of the value function</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><img data-src="../data/12/silver_student_2.svg" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/12/silver_student_3.svg" style="height:auto;width:600px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Bellman Equation</h1>
+<p>The value function can be decomposed into two parts:</p>
+<ul>
+<li>immediate reward <span class="math inline">\(R_{t+1}\)</span></li>
+<li>discounted reward from this point forward for the next reached state – which is estimated by the state-value function: <span class="math inline">\( v(S_{t+1})\)</span></li>
+</ul>
+<p><span class="math display">\[\begin{align*} 
+V(s) &amp;= \mathbb{E}[G_t \vert S_t = s] \\
+&amp;= \mathbb{E} [R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \dots \vert S_t = s] \\
+&amp;= \mathbb{E} [R_{t+1} + \gamma (R_{t+2} + \gamma R_{t+3} + \dots) \vert S_t = s] \\
+&amp;= \mathbb{E} [R_{t+1} + \gamma G_{t+1} \vert S_t = s] \\
+&amp;= \mathbb{E} [R_{t+1} + \gamma V(S_{t+1}) \vert S_t = s]
+\end{align*}\]</span></p>
+</section>
+<section class="slide level1">
+<h1>Example of a Sequential Decision Problem</h1>
+<p><img data-src="../data/11/weng_RL_mdp_example.jpg" style="height:auto;width:960px;"></p>
+<p>This is a Markov Decision Process – in addition, actions are selected.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018a)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Markov Decision Process</h1>
+<p>Markov decision processes formally describe an environment for reinforcement learning.</p>
+<p><br />
+</p>
+<p>The environment is fully observable — a current state completely characterises the process.</p>
+<p>Almost all RL problems can be formalised as MDPs</p>
+<ul>
+<li>Optimal control primarily deals with continuous MDPs</li>
+<li>Partially observable problems can be converted into MDPs</li>
+<li>Bandits are MDPs with one state</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Markov Decision Process</h1>
+<p>… is given by five elements:</p>
+<ul>
+<li>a set of states <span class="math inline">\(\mathcal{S}\)</span></li>
+<li>a set of actions <span class="math inline">\(\mathcal{A}\)</span></li>
+<li>a transition probability function <span class="math inline">\(\mathcal{P}\)</span></li>
+<li>a reward function <span class="math inline">\(\mathcal{R}\)</span></li>
+<li>the discount factor <span class="math inline">\(\gamma\)</span></li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Maximizing of total Reward as a Goal</h1>
+<p>Goal is maximizing cummulative reward in the long run.</p>
+<div class="box definition">
+<h2 class="definition">Reward Hypothesis</h2>
+<p><em>That all of what we mean by goals and purposes can be well thought of as the maximization of the expected value of the cumulative sum of a received scalar signal (called reward). The use of a reward signal to formalize the idea of a goal is one of the most distinctive features of reinforcement learning.</em></p>
+</div>
+<div class="box">
+<h2></h2>
+<p>The reward signal tells an agent what you want it to achieve, not how you want it achieved.</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Q-Function</h1>
+<p>The <strong>action-value function</strong> (“Q-value”) of a state-action pair is defined as:</p>
+<p><span class="math display">\[Q_{\pi}(s, a) = \mathbb{E}_{\pi}[G_t \vert S_t = s, A_t = a]\]</span></p>
+<p>When following a target policy <span class="math inline">\(\pi\)</span>, we can integrate over the probility distribution of possible actions which again leads to the state-value function:</p>
+<p><span class="math display">\[V_{\pi}(s) = \sum_{a \in \mathcal{A}} Q_{\pi}(s, a) \pi(a \vert s)\]</span></p>
+<div class="box">
+<h2>Advantage Function</h2>
+<p>The difference between action-value and state-value is the <strong>action advantage function</strong></p>
+<p><span class="math display">\[A_{\pi}(s, a) = Q_{\pi}(s, a) - V_{\pi}(s)\]</span></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018a)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example Cartpole</h1>
+<p>Training data consists of sequences of situations, actions and an associated reward.</p>
+<ul>
+<li>The task is to learn an (optimal) control strategy that maximizes the reward.</li>
+<li>There is no teacher — only a reward measure.</li>
+<li>There is a tradeoff between exploration and exploitation.</li>
+</ul>
+<div>
+<figure><img data-src="../data/01/pole-balancing.png" alt="Classical example: A robot that learns to balance a pole." title="fig:"><figcaption>Classical example: A robot that learns to balance a pole.</figcaption></figure>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Maze Example: Policy</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Task</h2>
+<p><img data-src="../data/11/sutton_maze.svg" style="height:360px;width:auto;"></p>
+<ul>
+<li>Reward of <span class="math inline">\(-1\)</span> per time step in maze</li>
+<li>Actions are move N, S, W, E</li>
+<li>State is location</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Policy Representation</h2>
+<p><img data-src="../data/11/sutton_maze_policy.svg" style="height:360px;width:auto;"></p>
+<p>Arrows represent policy <span class="math inline">\(\pi(s)\)</span> for all the states.</p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Maze Example: Value Function</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Task</h2>
+<p><img data-src="../data/11/sutton_maze.svg" style="height:360px;width:auto;"></p>
+<ul>
+<li>Reward of <span class="math inline">\(-1\)</span> per time step in maze</li>
+<li>Actions are move N, S, W, E</li>
+<li>State is location</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">State Value</h2>
+<p><img data-src="../data/11/sutton_maze_value.svg" style="height:360px;width:auto;"></p>
+<p>Shown are values <span class="math inline">\(v_{\pi}(s)\)</span> for the different states.</p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>A Gridworld: Value-function for a Random Policy</h1>
+<p><img data-src="../data/12/sutton_3_2_gridworld.svg" style="height:auto;width:1000px;"></p>
+<p>Each location is a state.</p>
+<p>Actions: North, West, South, East</p>
+<p>Reward: <span class="math inline">\(-1\)</span> when trying to move out of the grid, <span class="math inline">\(0\)</span> otherwise</p>
+<p>For state <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>: all actions lead to <span class="math inline">\(A&#39;\)</span> and a reward of <span class="math inline">\(+10\)</span> (respectively <span class="math inline">\(B&#39;, +5\)</span>).</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Optimal Value Function and Policy</h1>
+<p>The goal in RL is to act optimally – this is possible through learning an optimal value function or directly an optimal policy.</p>
+<p>The optimal value function produces the maximum return:</p>
+<p><span class="math display">\[ V_{*}(s) = \max_{\pi} V_{\pi}(s),
+Q_{*}(s, a) = \max_{\pi} Q_{\pi}(s, a)\]</span></p>
+<p>The optimal policy achieves optimal value functions:</p>
+<p><span class="math display">\[ \pi_{*} = \arg\max_{\pi} V_{\pi}(s),
+\pi_{*} = \arg\max_{\pi} Q_{\pi}(s, a)\]</span></p>
+<p>These are directly related as <span class="math display">\[ V_{\pi_{*}}(s)=V_{*}(s), Q_{\pi_{*}}(s, a) = Q_{*}(s, a)\]</span></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018a)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Optimal Solution for the Gridworld Example</h1>
+<p><img data-src="../data/12/sutton_3_5_gridworld.svg" style="height:auto;width:1000px;"></p>
+<p>Each location is a state. Discount factor is <span class="math inline">\(0.9\)</span>.</p>
+<p>Actions: North, West, South, East</p>
+<p>Reward: <span class="math inline">\(-1\)</span> when trying to move out of the grid, <span class="math inline">\(0\)</span> otherwise</p>
+<p>For state <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>: all actions lead to <span class="math inline">\(A&#39;\)</span> and a reward of <span class="math inline">\(+10\)</span> (respectively <span class="math inline">\(B&#39;, +5\)</span>).</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span></p>
+</div>
+</section>
+<section class="slide level1 unnumbered biblio">
+<h1>References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-kleinCS188">
+<p>Klein, Dan, and Pieter Abbeel. 2014. “UC Berkeley Cs188 Intro to Ai.” http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching.html.</p>
+</div>
+<div id="ref-silver2015">
+<p>Silver, David. 2015. “UCL Course on Rl Ucl Course on Rl Ucl Course on Reinforcement Learning.” http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching.html.</p>
+</div>
+<div id="ref-sutton2018">
+<p>Sutton, Richard S., and Andrew G. Barto. 2018. <em>Reinforcement Learning: An Introduction</em>. Second. The MIT Press.</p>
+</div>
+<div id="ref-weng2018rl">
+<p>Weng, Lilian. 2018a. “A (Long) Peek into Reinforcement Learning.” 2018. <a href="https://lilianweng.github.io/lil-log/2018/02/19/a-long-peek-into-reinforcement-learning.html">https://lilianweng.github.io/lil-log/2018/02/19/a-long-peek-into-reinforcement-learning.html</a>.</p>
+</div>
+<div id="ref-weng2018bandit">
+<p>———. 2018b. “The Multi-Armed Bandit Problem and Its Solutions.” 2018. <a href="The%20Multi-Armed%20Bandit%20Problem%20and%20Its%20Solutions">The Multi-Armed Bandit Problem and Its Solutions</a>.</p>
+</div>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="../support/vendor/reveal/js/reveal.js"></script>
+  <script src="../support/vendor/jquery.js"></script>
+  <script src="../support/vendor/piklor.js"></script>
+
+ <!-- standard setting -->
+
+  <script>
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        pdfMaxPagesPerSlide: 1,
+        pdfSeparateFragments: false,
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Display the page number of the current slide
+        slideNumber: false,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: false,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Loop the presentation
+        loop: false,
+        // Change the presentation direction to be RTL
+        rtl: false,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: false,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: false,
+        mouseWheel: false,
+        hideAddressBar: false,
+        previewLinks: false,
+        // Transition style
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'none', // none/fade/slide/convex/concave/zoom
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+        height: 800,
+        thebelab: true,
+        math: {
+          mathjax: "../support/vendor/mathjax/MathJax.js",
+          TeX: {
+              Macros: {
+              R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+              laplace: "{\\Delta}",
+              grad: "{\\nabla}",
+              T: "^{\\mathsf{T}}",
+  
+              norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+              iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+              vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              set: ['\\mathcal{#1}', 1],
+              func: ['\\mathrm{#1}', 1],
+              trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+              matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+              vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+              of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+              diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+              pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+  
+              vc: ['\\mathbf{#1}', 1],
+              abs: ['\\lvert#1\\rvert', 1],
+              norm: ['\\lVert#1\\rVert', 1],
+              det: ['\\lvert#1\\rvert', 1],
+              qt: ['\\hat{\\vc {#1}}', 1],
+              mt: ['\\boldsymbol{#1}', 1],
+              pt: ['\\boldsymbol{#1}', 1],
+              textcolor: ['\\color{#1}', 1]
+              }
+          },
+        },
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '../support/vendor/reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: '../support/vendor/reveal/plugin/zoom-js/zoom.js', async: true },
+          { src: '../support/vendor/whiteboard/whiteboard.js'},
+          //{ src: '../support/vendor/reveal/plugin/math/math.js', async: true },
+          { src: '../support/vendor/math/math.js' },
+          { src: '../support/js/thebelab.js', async: true },
+          { src: '../support/vendor/reveal/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+
+
+    <script src="../support/js/quiz.js" type="text/javascript"></script>
+    <script src="../support/js/decker.js" type="text/javascript"></script>
+
+    <!-- Reload on change machinery -->
+    <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+      window.location.reload(true);
+      };
+    </script>
+
+    </body>
+</html>
