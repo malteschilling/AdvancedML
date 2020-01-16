@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<!-- This is the pandoc 2.7.3 template for reveal.js output modified for decker. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">
+  <title>13 Reinforcement Learning 3</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reset.css">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reveal.css">
+  <link rel="stylesheet" href="../support/css/thebelab.css">
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="../support/css/decker.css">
+  <link rel="stylesheet" href="../mschilling.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? '../support/vendor/reveal/css/print/pdf.css' : '../support/vendor/reveal/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script type="text/x-thebe-config">
+  {
+      bootstrap: false,
+      requestKernel: false,
+      predefinedOutput: false,
+      binderOptions: {
+          repo: "malteschilling/advml_binder",
+          ref: "master",
+          binderUrl: "https://mybinder.org",
+          repoProvider: "github",
+      },
+      kernelOptions: {
+          name: "python3"
+      },
+      selector: "[data-executable]",
+      mathjaxUrl: false,
+      codeMirrorConfig: {
+          mode: "python3"
+      }
+  }
+  </script>
+  <script src="https://unpkg.com/thebelab@0.4.0/lib/index.js"></script> 
+  <!-- <script src="../support/vendor/thebelab/index.js"></script> -->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+ <!-- standard settings -->
+  <h1 class="title">13 Reinforcement Learning 3</h1>
+  <p class="subtitle">Advanced Machine Learning</p>
+  <p class="author">Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
+
+</section>
+
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Reproducibility Challenge</h1>
+</section>
+<section class="slide level1">
+<h1>NeurIPs Reproducibility</h1>
+<ol type="1">
+<li><p>Reproducibility checklist: Reproducibility is hard — even in highly deterministic and open field such as computer science. The reproducibility checklist was designed to verify several components of a solid paper.</p></li>
+<li><p>Code submission policy: At NeurIPS 2019, authors of accepted papers are encouraged to provide code with the final paper version.</p></li>
+<li><p>Reproducibility Challenge @ NeurIPS 2019 : provides a great opportunity for members of the machine learning community to dive deep into cutting-edge research by aiming to re-implement parts of a paper</p></li>
+</ol>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="neurips2019reproducibility">(Pineau and Sinha 2019)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Reproducibility Checklist</h1>
+<div class="col40">
+<p>The reproducibility checklist was designed to verify several components of a solid paper.</p>
+<p>It places particular emphasis on good empirical methods.</p>
+<p>It can be used by researchers at any stage of their work. For NeurIPS 2019, authors of all submitted papers had to file the checklist along with their submission.</p>
+</div>
+<div class="col60">
+<p><img data-src="../data/12b/ReproducibilityChecklist.svg" style="height:640px;width:auto;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="neurips2019reproducibility">(Pineau and Sinha 2019)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Resources for Reproducibility</h1>
+<ul>
+<li><a href="https://codeocean.com/">Code Ocean</a> provides 10hrs/month of GPU accelerated platform free to academics. Code Ocean is a cloud-based research collaboration platform.</li>
+<li>Google Collaboratory or Cloud might be another option (when asked they often assign quite some credits)</li>
+</ul>
+<p><iframe data-src="https://reproducibility-challenge.github.io/neurips2019/resources/index.html" style="height:420px;width:100%;">Browser does not support iframe.</iframe></p>
+</section>
+<section class="slide level1">
+<h1>Reproducibility Report</h1>
+<ul>
+<li>Target question</li>
+<li>Experimental methodology</li>
+<li>Implementation details</li>
+<li>Analysis and discussion of findings</li>
+<li>conclusions on reproducibility of the paper.</li>
+</ul>
+<p>The result of the reproducibility study should NOT be a simple Pass / Fail outcome.</p>
+<p>The goal should be to identify which parts of the contribution can be reproduced, and at what cost in terms of resources (computation, time, people, development effort, communication with the authors).</p>
+</section>
+<section class="slide level1">
+<h1>Example Paper: Unsupervised State RL in Atari</h1>
+<p><iframe data-src="../data/12b/1906.08226.pdf" style="height:640px;width:100%;">Browser does not support iframe.</iframe></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="anand19">(Anand et al. 2019)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Reproducibility Report 1</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>Introduction
+<ul>
+<li>Motivation Original Paper</li>
+<li>Questions (Target Question), Claims of Authors</li>
+<li>Task</li>
+</ul></li>
+<li>Orig. Method, Implementation det.</li>
+<li>Experimental Methodology:
+<ul>
+<li>Which task did you pick?</li>
+<li>How did you measure the task?</li>
+</ul></li>
+<li>Results, Findings (analyse and discuss)</li>
+<li>Conclusions</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><iframe data-src="../data/12b/unsupervised_state_representation_learning_in_atari.pdf" style="height:640px;width:100%;">Browser does not support iframe.</iframe></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="ramaswamy2019reproduce">(Ramaswamy et al. 2019)</span></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Reproducibility Report 2</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>Introduction
+<ul>
+<li>Motivation Original Paper</li>
+<li>Questions (Target Question), Claims of Authors</li>
+<li>Task</li>
+</ul></li>
+<li>Orig. Method, Implementation det.</li>
+<li>Experimental Methodology:
+<ul>
+<li>Which task did you pick?</li>
+<li>How did you measure the task?</li>
+</ul></li>
+<li>Results, Findings (analyse and discuss)</li>
+<li>Conclusions</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><iframe data-src="../data/12b/_re_ablation_unsupervised_state_representation_learning_in_atari.pdf" style="height:640px;width:100%;">Browser does not support iframe.</iframe></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="alacchi2019reproduce">(Alacchi, Lam, and Perreault-Lafleur 2019)</span></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Feedback on Reproducibility Reports</h1>
+<p><a href="https://openreview.net/forum?id=H1x3LpqzaB">Researchers might be interested in your results!</a></p>
+</section>
+<section class="slide level1 columns">
+<h1>SHORT Reproducibility Report</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>Introduction
+<ul>
+<li>Motivation Original Paper</li>
+<li>Questions (Target Question), Claims of Authors</li>
+<li>Task</li>
+</ul></li>
+<li>Orig. Method, Impl. – <strong>missing</strong></li>
+<li>Experimental Methodology:
+<ul>
+<li>Which task did you pick?</li>
+<li>How did you measure the task?</li>
+</ul></li>
+<li>Results – <strong>too short &amp; compare</strong></li>
+<li>Conclusions</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><iframe data-src="../data/12b/fast_autoaugment.pdf" style="height:640px;width:100%;">Browser does not support iframe.</iframe></p>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Reinforcement Learning</h1>
+</section>
+<section class="slide level1 columns">
+<h1>Sequential Decision Making</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>But actions may have long term consequences and reward may be delayed.</li>
+<li>It may be better to sacrifice immediate reward to gain more long-term reward</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/11/sutton_2018_3_1_rlInteraction.svg" style="height:auto;width:540px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>An agent’s <strong>policy</strong> <span class="math inline">\(\pi(s) = a\)</span> describes which action <span class="math inline">\(a\)</span> an agent selects depending on the current state. x For the stochastic state, a policy is a probability distribution over actions: <span class="math inline">\(\pi(a \vert s) = \mathbb{P}_\pi [A=a \vert S=s]\)</span>.</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015 sutton2018">(Silver 2015; Sutton and Barto 2018)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Markov Decision Process</h1>
+<p>… is given by five elements:</p>
+<ul>
+<li>a set of states <span class="math inline">\(\mathcal{S}\)</span></li>
+<li>a set of actions <span class="math inline">\(\mathcal{A}\)</span></li>
+<li>a transition probability function <span class="math inline">\(\mathcal{P}\)</span></li>
+<li>a reward function <span class="math inline">\(\mathcal{R}\)</span></li>
+<li>the discount factor <span class="math inline">\(\gamma\)</span></li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>View on Reinforcement Learning Algorithm</h1>
+<div class="col60">
+<p><img data-src="../data/12/levine_rl_cycle_1.svg" style="height:auto;width:720px;"></p>
+</div>
+<div class="col40">
+<p><img data-src="../data/12/levine_rl_example.svg" style="height:auto;width:360px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="cs285_drl">(Levine 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Bellman Equations (Revisited)</h1>
+<p>Bellman equations refer to a set of equations that decompose the value function into the immediate reward plus the discounted future values.</p>
+<p><span class="math display">\[\begin{align*} 
+V(s) &amp;= \mathbb{E}[G_t \vert S_t = s] \\
+&amp;= \mathbb{E} [R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \dots \vert S_t = s] \\
+&amp;= \mathbb{E} [R_{t+1} + \gamma (R_{t+2} + \gamma R_{t+3} + \dots) \vert S_t = s] \\
+&amp;= \mathbb{E} [R_{t+1} + \gamma G_{t+1} \vert S_t = s] \\
+&amp;= \mathbb{E} [R_{t+1} + \gamma V(S_{t+1}) \vert S_t = s]
+\end{align*}\]</span></p>
+<p><br />
+</p>
+<p>For the Q-value:</p>
+<p><span class="math display">\[\begin{align*} 
+Q(s, a) 
+&amp;= \mathbb{E} [R_{t+1} + \gamma V(S_{t+1}) \mid S_t = s, A_t = a] \\
+&amp;= \mathbb{E} [R_{t+1} + \gamma \mathbb{E}_{a\sim\pi} Q(S_{t+1}, a) \mid S_t = s, A_t = a]
+\end{align*}\]</span></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Bellman Expectation Equations</h1>
+<p>Bellman expection equations recursively update state-value and action-value functions.</p>
+<div class="col40">
+<p><img data-src="../data/12/bellman_equation.png" style="height:auto;width:480px;"></p>
+</div>
+<div class="col60">
+<p><span class="math display">\[\begin{align*} 
+V_{\pi}(s) &amp;= \sum_{a \in \mathcal{A}} \pi(a \vert s) Q_{\pi}(s, a) \\
+Q_{\pi}(s, a) &amp;= R(s, a) + \gamma \sum_{s&#39; \in \mathcal{S}} P_{ss&#39;}^a V_{\pi} (s&#39;) \\
+V_{\pi}(s) &amp;= \sum_{a \in \mathcal{A}} \pi(a \vert s) \big( R(s, a) + \gamma \sum_{s&#39; \in \mathcal{S}} P_{ss&#39;}^a V_{\pi} (s&#39;) \big) \\
+Q_{\pi}(s, a) &amp;= R(s, a) + \gamma \sum_{s&#39; \in \mathcal{S}} P_{ss&#39;}^a \sum_{a&#39; \in \mathcal{A}} \pi(a&#39; \vert s&#39;) Q_{\pi} (s&#39;, a&#39;)
+\end{align*}\]</span></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Optimal Policy</h1>
+<p>There is a partial ordering over policies which means: <span class="math display">\[
+\pi \geq \pi&#39; \text{ if } V_{\pi}(s) \geq V_{\pi&#39;}(s), \forall s
+\]</span></p>
+<div class="box definition">
+<h2 class="definition">For any Markov Decision process …</h2>
+<ul>
+<li>There is an optimal policy <span class="math inline">\(\pi_*\)</span> which is better (or equal) than all other policies.</li>
+<li>Every optimal policy achieves the optimal value function and the optimal action-value function.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Optimal Value Function</h1>
+<p>The optimal state-value function <span class="math inline">\(V_*(s)\)</span> is the maximum value function over all policies:</p>
+<p><span class="math display">\[
+V_*(s) = \max_{\pi} V_{\pi}(s)
+\]</span></p>
+<p>The optimal action-value function <span class="math inline">\(q_*(s,a)\)</span> is the maximum action-value function over all policies <span class="math display">\[
+Q_*(s,a) = \max_{\pi} Q_{\pi}(s,a)
+\]</span></p>
+<ul>
+<li>The optimal value function specifies the best possible performance in the MDP.</li>
+<li>An MDP is “solved” when we know the optimal value function.</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: Optimal Value Function</h1>
+<p><img data-src="../data/13/silver_optimalVexample.svg" style="height:auto;width:800px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: Optimal Action-Value Function</h1>
+<p><img data-src="../data/13/silver_optimalQexample.svg" style="height:auto;width:800px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Bellman Optimality Equations</h1>
+<p>We can use these equations directly to compute optimal values for following an optimal policy.</p>
+<p><span class="math display">\[\begin{align*} 
+V_*(s) &amp;= \max_{a \in \mathcal{A}} Q_*(s,a)\\
+Q_*(s, a) &amp;= R(s, a) + \gamma \sum_{s&#39; \in \mathcal{S}} P_{ss&#39;}^a V_*(s&#39;) \\
+V_*(s) &amp;= \max_{a \in \mathcal{A}} \big( R(s, a) + \gamma \sum_{s&#39; \in \mathcal{S}} P_{ss&#39;}^a V_*(s&#39;) \big) \\
+Q_*(s, a) &amp;= R(s, a) + \gamma \sum_{s&#39; \in \mathcal{S}} P_{ss&#39;}^a \max_{a&#39; \in \mathcal{A}} Q_*(s&#39;, a&#39;)
+\end{align*}\]</span></p>
+</section>
+<section class="slide level1">
+<h1>Example: Optimal Policy</h1>
+<p><img data-src="../data/13/silver_optimalPolicyexample.svg" style="height:auto;width:800px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>View on Reinforcement Learning Algorithm</h1>
+<div class="col60">
+<p><img data-src="../data/12/levine_rl_cycle_1.svg" style="height:auto;width:720px;"></p>
+</div>
+<div class="col40">
+<p><img data-src="../data/12/levine_rl_example.svg" style="height:auto;width:360px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="cs285_drl">(Levine 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Model of the Environment</h1>
+<p>The reaction of the environment to certain actions can be represented by a <strong>model</strong> which the agent may or may not know.</p>
+<p>The model defines the reward function and transition probabilities.</p>
+<p><img data-src="../data/11/weng_RL_algorithm_categorization.png" style="height:auto;width:720px;"></p>
+<ul>
+<li>Model-based: Rely on the model of the environment; either the model is known or the algorithm learns it explicitly. Use planning on learned or given model.</li>
+<li>Model-free: No dependency on the model during learning. Learning with imperfect information.</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Two Approaches to Sequential Decision Making</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Reinforcement Learning</h2>
+<ul>
+<li>The environment is initially unknown.</li>
+<li>The agent interacts with the environment.</li>
+<li>The agent improves its policy (or value function).</li>
+</ul>
+<p>Learning from experience.</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Planning</h2>
+<ul>
+<li>A model of the environment is known.</li>
+<li>The agent performs computations with its model (without any external interaction).</li>
+<li>The agent improves its policy (or value function).</li>
+<li>This is also known as reasoning, introspection, thought, search.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Categorization of Reinforcement Learning Agents</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>Value Based
+<ul>
+<li>No Policy (Implicit)</li>
+<li>Value Function</li>
+</ul></li>
+<li>Policy Based
+<ul>
+<li>Policy</li>
+<li>No Value Function</li>
+</ul></li>
+<li>Actor Critic
+<ul>
+<li>Policy</li>
+<li>Value Function</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/11/silver_RL_categorization.svg" style="height:auto;width:640px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Reinforcement Learning Approaches</h1>
+</section>
+<section class="slide level1">
+<h1>Common Approaches</h1>
+<ul>
+<li>Dynamic Programming
+<ul>
+<li>Policy Evaluation</li>
+<li>Policy Improvement</li>
+<li>Policy Iteration</li>
+</ul></li>
+<li>Monte-Carlo Methods</li>
+<li>Temporal-Difference Learning
+<ul>
+<li>SARSA: On-Policy TD control</li>
+<li>Q-Learning: Off-Policy TD control</li>
+</ul></li>
+<li>Policy Gradient</li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Dynamic Programming</h1>
+<p>Assumes full knowledge of the underlying Markov Decision Process (model is known) – realizes a form of Planning.</p>
+<p>Dynamic Programming is a very general solution method for problems which have two properties:</p>
+<ul>
+<li>Optimal substructure
+<ul>
+<li>Principle of optimality applies</li>
+<li>Optimal solution can be decomposed into subproblems</li>
+</ul></li>
+<li>Overlapping subproblems
+<ul>
+<li>Subproblems recur many times</li>
+<li>Solutions can be cached and reused</li>
+</ul></li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>DP: Policy Evaluation</h1>
+<p>Policy Evaluation is to compute the state-value <span class="math inline">\(V_{\pi}\)</span> for a given policy <span class="math inline">\(\pi\)</span>:</p>
+<p><span class="math display">\[
+V_{t+1}(s) 
+= \mathbb{E}_\pi [r + \gamma V_t(s&#39;) | S_t = s]
+= \sum_a \pi(a \vert s) \sum_{s&#39;, r} P(s&#39;, r \vert s, a) (r + \gamma V_k(s&#39;))
+\]</span></p>
+<p>It iteratively applies the Bellman expectation backup and converges.</p>
+<p><img data-src="../data/13/silver_policyEvaluation.svg" style="height:auto;width:600px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>DP: Policy Improvement</h1>
+<p>Based on a value functions, Policy Improvement generates a better policy <span class="math inline">\(\pi&#39; \geq \pi\)</span> by acting greedily.</p>
+<p><span class="math display">\[
+Q_\pi(s, a) 
+= \mathbb{E} [R_{t+1} + \gamma V_\pi(S_{t+1}) \vert S_t=s, A_t=a]
+= \sum_{s&#39;, r} P(s&#39;, r \vert s, a) (r + \gamma V_\pi(s&#39;))
+\]</span></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>DP: Policy Iteration</h1>
+<p>Iterative procedure to improve the policy when combining policy evaluation and improvement:</p>
+<p><span class="math display">\[
+\pi_0 \xrightarrow[]{\text{evaluation}} V_{\pi_0} \xrightarrow[]{\text{improve}}
+\pi_1 \xrightarrow[]{\text{evaluation}} V_{\pi_1} \xrightarrow[]{\text{improve}}
+\pi_2 \xrightarrow[]{\text{evaluation}} \dots \xrightarrow[]{\text{improve}}
+\pi_* \xrightarrow[]{\text{evaluation}} V_*
+\]</span></p>
+<div class="box fragment">
+<h2></h2>
+<p><img data-src="../data/13/silver_policyIteration.svg" style="height:auto;width:1000px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl silver2015">(Weng 2018; Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>DP: Generalized Policy Iteration</h1>
+<p>The value function is approximated repeatedly to be closer to the true value of the current policy.</p>
+<p>And in the meantime, the policy is improved repeatedly to approach optimality.</p>
+<p>This policy iteration process works and always converges to the optimality.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018)</span></p>
+</div>
+</section>
+<section class="slide level1 unnumbered biblio">
+<h1>References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-alacchi2019reproduce">
+<p>Alacchi, Gabriel, Guillaume Lam, and Carl Perreault-Lafleur. 2019. “Reproducibility Report: Unsupervised Representation Learning in Atari.” McGill School of Computer Science.</p>
+</div>
+<div id="ref-anand19">
+<p>Anand, A., E. Racah, S. Ozair, Y. Bengio, M. A. Côté, and R. D. Hjelm. 2019. “Unsupervised State Representation Learning in Atari.” <em>arXiv:1906.08226</em>.</p>
+</div>
+<div id="ref-cs285_drl">
+<p>Levine, Sergey. 2018. “Deep Reinforcement Learning, Decision Making, and Control.” Course CS285, University of California, Berkeley, Lecture Notes.</p>
+</div>
+<div id="ref-neurips2019reproducibility">
+<p>Pineau, Joelle, and Koustuv Sinha. 2019. “Behind the Program for Reproducibility at Neurips 2019.” 2019. <a href="https://medium.com/@NeurIPSConf/behind-the-program-for-reproducibility-at-neurips-2019-8a020e57bfd9">https://medium.com/@NeurIPSConf/behind-the-program-for-reproducibility-at-neurips-2019-8a020e57bfd9</a>.</p>
+</div>
+<div id="ref-ramaswamy2019reproduce">
+<p>Ramaswamy, Shekar, Lawrence Huang, Kendrick Tan, and Tyler Jiang. 2019. “Reproducibility Report: Unsupervised Representation Learning in Atari.” Brown University.</p>
+</div>
+<div id="ref-silver2015">
+<p>Silver, David. 2015. “UCL Course on Rl Ucl Course on Rl Ucl Course on Reinforcement Learning.” http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching.html.</p>
+</div>
+<div id="ref-sutton2018">
+<p>Sutton, Richard S., and Andrew G. Barto. 2018. <em>Reinforcement Learning: An Introduction</em>. Second. The MIT Press.</p>
+</div>
+<div id="ref-weng2018rl">
+<p>Weng, Lilian. 2018. “A (Long) Peek into Reinforcement Learning.” 2018. <a href="https://lilianweng.github.io/lil-log/2018/02/19/a-long-peek-into-reinforcement-learning.html">https://lilianweng.github.io/lil-log/2018/02/19/a-long-peek-into-reinforcement-learning.html</a>.</p>
+</div>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="../support/vendor/reveal/js/reveal.js"></script>
+  <script src="../support/vendor/jquery.js"></script>
+  <script src="../support/vendor/piklor.js"></script>
+
+ <!-- standard setting -->
+
+  <script>
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        pdfMaxPagesPerSlide: 1,
+        pdfSeparateFragments: false,
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Display the page number of the current slide
+        slideNumber: false,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: false,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Loop the presentation
+        loop: false,
+        // Change the presentation direction to be RTL
+        rtl: false,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: false,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: false,
+        mouseWheel: false,
+        hideAddressBar: false,
+        previewLinks: false,
+        // Transition style
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'none', // none/fade/slide/convex/concave/zoom
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+        height: 800,
+        thebelab: true,
+        math: {
+          mathjax: "../support/vendor/mathjax/MathJax.js",
+          TeX: {
+              Macros: {
+              R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+              laplace: "{\\Delta}",
+              grad: "{\\nabla}",
+              T: "^{\\mathsf{T}}",
+  
+              norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+              iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+              vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              set: ['\\mathcal{#1}', 1],
+              func: ['\\mathrm{#1}', 1],
+              trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+              matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+              vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+              of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+              diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+              pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+  
+              vc: ['\\mathbf{#1}', 1],
+              abs: ['\\lvert#1\\rvert', 1],
+              norm: ['\\lVert#1\\rVert', 1],
+              det: ['\\lvert#1\\rvert', 1],
+              qt: ['\\hat{\\vc {#1}}', 1],
+              mt: ['\\boldsymbol{#1}', 1],
+              pt: ['\\boldsymbol{#1}', 1],
+              textcolor: ['\\color{#1}', 1]
+              }
+          },
+        },
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '../support/vendor/reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: '../support/vendor/reveal/plugin/zoom-js/zoom.js', async: true },
+          { src: '../support/vendor/whiteboard/whiteboard.js'},
+          //{ src: '../support/vendor/reveal/plugin/math/math.js', async: true },
+          { src: '../support/vendor/math/math.js' },
+          { src: '../support/js/thebelab.js', async: true },
+          { src: '../support/vendor/reveal/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+
+
+    <script src="../support/js/quiz.js" type="text/javascript"></script>
+    <script src="../support/js/decker.js" type="text/javascript"></script>
+
+    <!-- Reload on change machinery -->
+    <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+      window.location.reload(true);
+      };
+    </script>
+
+    </body>
+</html>
