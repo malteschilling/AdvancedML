@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<!-- This is the pandoc 2.7.3 template for reveal.js output modified for decker. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">
+  <title>14 Deep Reinforcement Learning</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reset.css">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reveal.css">
+  <link rel="stylesheet" href="../support/css/thebelab.css">
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="../support/css/decker.css">
+  <link rel="stylesheet" href="../mschilling.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? '../support/vendor/reveal/css/print/pdf.css' : '../support/vendor/reveal/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script type="text/x-thebe-config">
+  {
+      bootstrap: false,
+      requestKernel: false,
+      predefinedOutput: false,
+      binderOptions: {
+          repo: "malteschilling/advml_binder",
+          ref: "master",
+          binderUrl: "https://mybinder.org",
+          repoProvider: "github",
+      },
+      kernelOptions: {
+          name: "python3"
+      },
+      selector: "[data-executable]",
+      mathjaxUrl: false,
+      codeMirrorConfig: {
+          mode: "python3"
+      }
+  }
+  </script>
+  <script src="https://unpkg.com/thebelab@0.4.0/lib/index.js"></script> 
+  <!-- <script src="../support/vendor/thebelab/index.js"></script> -->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+ <!-- standard settings -->
+  <h1 class="title">14 Deep Reinforcement Learning</h1>
+  <p class="subtitle">Advanced Machine Learning</p>
+  <p class="author">Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
+
+</section>
+
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Recap</h1>
+</section>
+<section class="slide level1 columns">
+<h1>Markov Decision Process</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<ul>
+<li>a set of states <span class="math inline">\(\mathcal{S}\)</span>: Each location is a state.</li>
+<li>a set of actions <span class="math inline">\(\mathcal{A}\)</span>: North, West, South, East</li>
+<li>a transition probability function <span class="math inline">\(\mathcal{P}\)</span>: here deterministic</li>
+<li>a reward function <span class="math inline">\(\mathcal{R}\)</span>: <span class="math inline">\(-1\)</span> when trying to move out of the grid, <span class="math inline">\(0\)</span> otherwise, for state <span class="math inline">\(A: +10\)</span> and <span class="math inline">\(B: +5\)</span></li>
+<li>the discount factor <span class="math inline">\(\gamma\)</span> – influences long term return</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/12/sutton_3_2_gridworld_MDP.svg" style="height:600px;width:auto;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>From Return to Value Function</h1>
+<div class="box definition">
+<h2 class="definition">Return</h2>
+<p>cumulative future reward is a total sum of discounted rewards going forward, starting from time <span class="math inline">\(t\)</span>:</p>
+<p><span class="math display">\[ G_t = R_{t+1} + \gamma R_{t+2} + \dots = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1} \]</span></p>
+<p>As future rewards are usually more uncertain, they are weighted less through the <strong>discount factor</strong> <span class="math inline">\(\gamma \in [0, 1]\)</span>.</p>
+</div>
+<div class="box">
+<h2>Value Function</h2>
+<p>The value function measures the estimated goodness of a state, i.e. how rewarding a state is by a prediction of the cumulative future reward.</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>State-Value Function</h1>
+<p>The <strong>state-value function</strong> of a state <span class="math inline">\(s\)</span> is the expected return if we are in this state at time <span class="math inline">\(t, S_t=s\)</span>:</p>
+<p><span class="math display">\[V_{\pi}(s) = \mathbb{E}_{\pi}[G_t \vert S_t = s]\]</span></p>
+<ul>
+<li>Used to evaluate the goodness/badness of states,</li>
+<li>and therefore to select between actions.</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Action-Value Function (Q-Function)</h1>
+<p>The <strong>action-value function</strong> (“Q-value”) of a state-action pair is defined as:</p>
+<p><span class="math display">\[Q_{\pi}(s, a) = \mathbb{E}_{\pi}[G_t \vert S_t = s, A_t = a]\]</span></p>
+<p>When following a target policy <span class="math inline">\(\pi\)</span>, we can integrate over the probility distribution of possible actions which again leads to the state-value function:</p>
+<p><span class="math display">\[V_{\pi}(s) = \sum_{a \in \mathcal{A}} Q_{\pi}(s, a) \pi(a \vert s)\]</span></p>
+<div class="box">
+<h2>Advantage Function</h2>
+<p>The difference between action-value and state-value is the <strong>action advantage function</strong></p>
+<p><span class="math display">\[A_{\pi}(s, a) = Q_{\pi}(s, a) - V_{\pi}(s)\]</span></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Optimal Solution for the Gridworld Example</h1>
+<p><img data-src="../data/12/sutton_3_5_gridworld.svg" style="height:auto;width:1000px;"></p>
+<p>Each location is a state. Discount factor is <span class="math inline">\(0.9\)</span>.</p>
+<p>Actions: North, West, South, East</p>
+<p>Reward: <span class="math inline">\(-1\)</span> when trying to move out of the grid, <span class="math inline">\(0\)</span> otherwise</p>
+<p>For state <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>: all actions lead to <span class="math inline">\(A&#39;\)</span> and a reward of <span class="math inline">\(+10\)</span> (respectively <span class="math inline">\(B&#39;, +5\)</span>).</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span></p>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Reinforcement Learning Approaches</h1>
+</section>
+<section class="slide level1">
+<h1>Common Approaches</h1>
+<div class="col40">
+<ul>
+<li>Dynamic Programming
+<ul>
+<li>Policy Evaluation</li>
+<li>Policy Improvement</li>
+<li>Policy Iteration</li>
+</ul></li>
+<li>Monte-Carlo Methods</li>
+<li>Temporal-Difference Learning
+<ul>
+<li>SARSA: On-Policy TD control</li>
+<li>Q-Learning: Off-Policy TD control</li>
+</ul></li>
+<li>Policy Gradient</li>
+</ul>
+</div>
+<div class="col60">
+<p><iframe data-src="https://cs.stanford.edu/people/karpathy/reinforcejs/gridworld_dp.html" style="height:620px;width:1000px;">Browser does not support iframe.</iframe></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="karpathy_mdp">(Karpathy 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1></h1>
+<div class="col40">
+<h2>DP: Policy Iteration</h2>
+<p>Iterative procedure to improve the policy when combining policy evaluation and improvement.</p>
+<p><br />
+</p>
+<p><img data-src="../data/13/silver_policyIteration.svg" style="height:auto;width:600px;"></p>
+</div>
+<div class="col60">
+<p><iframe data-src="https://cs.stanford.edu/people/karpathy/reinforcejs/gridworld_dp.html" style="height:700px;width:100%;">Browser does not support iframe.</iframe></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015 karpathy_mdp">(Silver 2015; Karpathy 2015)</span></p>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Exploring Unknown State Space</h1>
+</section>
+<section class="slide level1">
+<h1>Monte-Carlo Methods</h1>
+<p>… learns from episodes of raw experience without modeling the environmental dynamics.</p>
+<p>MC methods computes the observed mean return as an approximation of the expected return.</p>
+<p>Computation of the empirical return <span class="math inline">\(G_t\)</span> requires complete episodes <span class="math inline">\(S_1, A_1, R_2, ... , S_T\)</span>:</p>
+<p><span class="math display">\[
+V(s) = \frac{\sum_{t=1}^T \mathbb{1}[S_t = s] G_t}{\sum_{t=1}^T \mathbb{1}[S_t = s]}, Q(s, a) = \frac{\sum_{t=1}^T \mathbb{1}[S_t = s, A_t = a] G_t}{\sum_{t=1}^T \mathbb{1}[S_t = s, A_t = a]}
+\]</span></p>
+<p>An optimal policy can be learned through an iteration of evaluation and improvement (similar to GPI).</p>
+</section>
+<section class="slide level1 columns">
+<h1>From Monte-Carlo to Temporal-Difference Learning</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Monte-Carlo Backup</h2>
+<p><img data-src="../data/13/silver_mc_backup.svg" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right fragment">
+<h2 class="right">TD Backup</h2>
+<p><img data-src="../data/13/silver_td_backup.svg" style="height:auto;width:600px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Temporal-Difference Learning</h1>
+<ul>
+<li>model-free method – no knowledge of MDP required</li>
+<li>learns from episodes of experience – but can learn from incomplete episodes (!)</li>
+</ul>
+<div class="box definition">
+<h2 class="definition">Bootstrapping</h2>
+<p>TD learning methods update targets with regard to existing estimates rather than exclusively relying on actual rewards and complete returns as in MC methods.</p>
+</div>
+<div class="box">
+<h2></h2>
+<p>The key idea in TD learning is to update the value function <span class="math inline">\(V(S_t)\)</span> towards an estimated return <span class="math inline">\(R_{t+1}+\gamma V(S_{t+1})\)</span> (known as “TD target”).</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>TD: Value Estimation</h1>
+<p>Update of the value function is regulated by the learning rate <span class="math inline">\(\alpha\)</span>.</p>
+<p>In brief: TD means update a guess (of the value function) towards a guess (experiencing a single step and a guess of what follows):</p>
+<p><span class="math display">\[\begin{align*}
+V(S_t) &amp;\leftarrow (1- \alpha) V(S_t) + \alpha G_t \\
+V(S_t) &amp;\leftarrow V(S_t) + \alpha (G_t - V(S_t)) \\
+V(S_t) &amp;\leftarrow V(S_t) + \alpha (R_{t+1} + \gamma V(S_{t+1}) - V(S_t))
+\end{align*}\]</span></p>
+<p>Similarly for the Q-function: <span class="math display">\[
+Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha (R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t))
+\]</span></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Comparison of Monte-Carlo and TD Control</h1>
+<p>Temporal-difference (TD) learning has several advantages over Monte-Carlo methods (MC):</p>
+<ul>
+<li>Lower variance</li>
+<li>Online</li>
+<li>Can use incomplete sequences</li>
+</ul>
+<div class="box fragment">
+<h2>Natural idea:</h2>
+<p>Use TD instead of MC in our iterative control approach:</p>
+<ul>
+<li>Apply TD to <span class="math inline">\(Q(S, A)\)</span></li>
+<li>Use <span class="math inline">\(\varepsilon\)</span>-greedy policy improvement</li>
+<li>But now: update every time-step</li>
+</ul>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Comparison of Monte-Carlo and TD</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Monte-Carlo Backup</h2>
+<p><img data-src="../data/13/silver_mc_backup.svg" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">TD Backup</h2>
+<p><img data-src="../data/13/silver_td_backup.svg" style="height:auto;width:600px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>Apply TD to <span class="math inline">\(Q(S, A)\)</span>, use <span class="math inline">\(\varepsilon\)</span>-greedy policy improvement updating every time-step.</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>SARSA as On-Policy TD control</h1>
+<div class="col80">
+<p>SARSA realizes such an update procedure on a sequence <span class="math inline">\(S_t, A_t, R_{t+1}, S_{t+1}, A_{t+1}, \dots\)</span></p>
+<ol type="1">
+<li>At time step <span class="math inline">\(t\)</span>, we start from state <span class="math inline">\(S_t\)</span> and pick action according to <span class="math inline">\(Q\)</span> values, <span class="math inline">\(A_t = \arg\max_{a \in \mathcal{A}} Q(S_t, a)\)</span>; <span class="math inline">\(\varepsilon\)</span>-greedy is commonly applied.</li>
+<li>With action <span class="math inline">\(A_t\)</span>, we observe reward <span class="math inline">\(R_{t+1}\)</span> and get into the next state <span class="math inline">\(S_{t+1}\)</span>.</li>
+<li>Then pick the next action in the same way as in step 1.</li>
+<li>Update the action-value function: <span class="math inline">\(Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha (R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t))\)</span></li>
+<li><span class="math inline">\(t = t+1\)</span> and repeat from step 1.</li>
+</ol>
+</div>
+<div class="col20">
+<p><img data-src="../data/13/sutton_sarsa.svg" style="height:480px;width:auto;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="sutton2018">(Sutton and Barto 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>On-Policy Control with SARSA</h1>
+<p>At every timestep:</p>
+<ul>
+<li>Policy Evaluation following SARSA, <span class="math inline">\(Q \approx q_{\pi}\)</span></li>
+<li>Policy improvement: <span class="math inline">\(\varepsilon\)</span>-greedy policy improvement</li>
+</ul>
+<p><img data-src="../data/13/silver_sarsa_improvement.svg" style="height:auto;width:640px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1></h1>
+<div class="col40">
+<h2>TD Learning Example</h2>
+<p><span class="math display">\[\begin{align*}
+
+Q(S_t, A_t) \leftarrow &amp; Q(S_t, A_t) + \\ &amp; \alpha (R_{t+1} + \\ &amp; \gamma Q(S_{t+1}, A_{t+1}) \\ &amp;- Q(S_t, A_t))
+
+\end{align*}\]</span></p>
+<p>Two stochastic sources:</p>
+<ol type="1">
+<li>the environment</li>
+<li>the agent policy</li>
+</ol>
+<p>Difference to DP: TD Learning estimates the value functions of an agent, collecting experience online.</p>
+</div>
+<div class="col60">
+<p><iframe data-src="https://cs.stanford.edu/people/karpathy/reinforcejs/gridworld_td.html" style="height:700px;width:100%;">Browser does not support iframe.</iframe></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="karpathy_mdp">(Karpathy 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Off-Policy Learning</h1>
+<p>Evaluate target policy <span class="math inline">\(\pi(a|s)\)</span> to compute <span class="math inline">\(V_{\pi}(s)\)</span> or <span class="math inline">\(Q_{\pi}(s,a)\)</span></p>
+<p>… while following different behavior policy <span class="math inline">\(\mu(a|s)\)</span> <span class="math display">\[
+{S_1,A_1,R_2,...,S_T} \sim \mu
+\]</span></p>
+<p>Why is this important?</p>
+<div class="box fragment">
+<h2></h2>
+<ul>
+<li>Learn from observing humans or other agents.</li>
+<li>Re-use experience generated from old policies <span class="math inline">\(\pi_1, \pi_2, ...\)</span></li>
+<li>Learn about optimal policy while following exploratory policy.</li>
+<li>Learn about multiple policies while following one policy.</li>
+</ul>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Q-Learning</h1>
+<p>We now consider off-policy learning of action-values <span class="math inline">\(Q(s,a)\)</span>:</p>
+<ul>
+<li>Next action is chosen using behaviour policy <span class="math inline">\(A_{t+1} \sim \mu(·|S_t)\)</span></li>
+<li>But we consider alternative successor action <span class="math inline">\(A&#39; \sim \pi(·|S_t)\)</span></li>
+<li>And update <span class="math inline">\(Q(S_t, A_t)\)</span> towards value of alternative action</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Q-Learning – Off-Policy TD control</h1>
+<div class="col20">
+<p><img data-src="../data/13/sutton_q_backup.svg" style="height:360px;width:auto;"></p>
+</div>
+<div class="col70">
+<ol type="1">
+<li>At time step <span class="math inline">\(t\)</span>, we start from state <span class="math inline">\(S_t\)</span> and pick action according to <span class="math inline">\(Q\)</span> values, <span class="math inline">\(A_t = \arg\max_{a \in \mathcal{A}} Q(S_t, a)\)</span>; <span class="math inline">\(\varepsilon\)</span>-greedy is commonly applied.</li>
+<li>With action <span class="math inline">\(A_t\)</span>, we observe reward <span class="math inline">\(R_{t+1}\)</span> and get into the next state <span class="math inline">\(S_{t+1}\)</span>.</li>
+<li>Update the action-value function: <span class="math inline">\(Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha (R_{t+1} + \gamma \max_{a \in \mathcal{A}} Q(S_{t+1}, a) - Q(S_t, A_t))\)</span></li>
+<li><span class="math inline">\(t = t+1\)</span> and repeat from step 1.</li>
+</ol>
+</div>
+<p>Difference to SARSA: Q-learning does not follow the current policy to pick the second action, but rather estimate <span class="math inline">\(Q_∗\)</span> out of the best <span class="math inline">\(Q\)</span> values independently.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl sutton2018">(Weng 2018; Sutton and Barto 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Convergence of Q-Learning</h1>
+<p>Q-learning converges towards an optimal policy. Even if you’re acting suboptimally, this process converges.</p>
+<p>Caveats:</p>
+<ul>
+<li>Needs exhaustive exploration to guarantee convergence for suboptimal exploration.</li>
+<li>eventually learning rate must be quite small, but can not be reduced too quickly</li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Relationship Between DP and TD</h1>
+<p><img data-src="../data/13/silver_dp_td.svg" style="height:auto;width:1000px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Relationship Between DP and TD 2</h1>
+<p><img data-src="../data/13/silver_dp_td_equations.svg" style="height:auto;width:1000px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Reinforcement Learning Algorithms Overview</h1>
+<p><img data-src="../data/13/arulkumaran_drl.svg" style="height:auto;width:640px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="arulkumaran2017brief">(Arulkumaran et al. 2017)</span></p>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Deep Reinforcement Learning</h1>
+</section>
+<section class="slide level1">
+<h1>Drawbacks of Tabular methods</h1>
+<p>For tabular methods like basic Q-Learning: we keep a table of all <span class="math inline">\(Q\)</span>-values.</p>
+<div class="box fragment">
+<h2></h2>
+<p>In real world application: not possible to learn about every single state:</p>
+<ul>
+<li>too many states (or even continuous input spaces) to visit in training</li>
+<li>table would be too large for so many states</li>
+</ul>
+<p><img data-src="../data/14/klein_pacman.svg" style="height:auto;width:1000px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="kleinCS188">(Klein and Abbeel 2014)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Generalization over States</h1>
+<p>In order to deal with continuous or large state spaces, we want to generalize. For this, we use <em>Function Approximation</em>:</p>
+<ul>
+<li>Learn about a small number of training states from experiences.</li>
+<li>Generalize these experiences to new, similar situations.</li>
+</ul>
+<p>As a basic idea for <em>Deep Reinforcement Learning</em>: use Neural Networks for function approximation.</p>
+</section>
+<section class="slide level1">
+<h1>Possible Problems for Function Approximation</h1>
+<p>Goal: apply efficiency and flexibility of TD methods to realistic problems</p>
+<div class="box">
+<h2>Problem: Deadly Triad</h2>
+<p>Approach is …</p>
+<ul>
+<li>off-policy,</li>
+<li>employs non-linear function approximation,</li>
+<li>and uses bootstrapping.</li>
+</ul>
+<p>Combined: can become unstable or does not converge!</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Deep Q-Networks</h1>
+<p>… improved and stabilized training of Q-learning when using a Deep Neural Network for function approximation.</p>
+<p>Two innovative mechanisms:</p>
+<div>
+<ul>
+<li class="fragment"><em>Experience Replay:</em> use a replay buffer for storing experiences.</li>
+<li class="fragment">Periodically Update <em>Target network</em> that are employed for bootstrapping.</li>
+</ul>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>DQN Architecture Overview</h1>
+<p><img data-src="../data/14/mnih_dqn_architecture.png"></p>
+<p>“we developed a novel agent, a deep Q-network (DQN), which is able to combine reinforcement learning with a class of artificial neural network known as deep neural networks.”</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="mnih-dqn-2015">(Mnih et al. 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Goal of DQN: Approximation of Q-Function</h1>
+<div>
+<ul>
+<li class="fragment">Q-learning can be used to find an optimal action-selection policy for any given (finite) Markov decision process (MDP).</li>
+<li class="fragment">It works by learning an action-value function that ultimately gives the expected utility of taking a given action in a given state and following the optimal policy thereafter.</li>
+<li class="fragment">One of the strengths of Q-learning is that it is able to compare the expected utility of the available actions without requiring a model of the environment.</li>
+<li class="fragment">Q-learning learns estimates of the optimal Q-values of an MDP, which means that behavior can be dictated by taking actions greedily with respect to the learned Q-values.</li>
+</ul>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="mnih-dqn-2015">(Mnih et al. 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Problems for RL and Deep Neural Networks</h1>
+<p>Reinforcement learning is known to be unstable when a nonlinear function approximator such as a neural network is used to represent the action-value function.</p>
+<p><br />
+</p>
+<p>This instability has several causes:</p>
+<ul>
+<li>the correlations present in the sequence of observations,</li>
+<li>the fact that small updates to <span class="math inline">\(Q\)</span> may significantly change the policy and therefore change the data distribution,</li>
+<li>and the correlations between the action-values and the target values</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="mnih-dqn-2015">(Mnih et al. 2015)</span></p>
+</div>
+</section>
+<section class="slide level1 unnumbered biblio">
+<h1>References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-arulkumaran2017brief">
+<p>Arulkumaran, Kai, Marc Peter Deisenroth, Miles Brundage, and Anil Anthony Bharath. 2017. “Deep Reinforcement Learning: A Brief Survey.” <em>IEEE Signal Processing Magazine</em> 34 (6).</p>
+</div>
+<div id="ref-karpathy_mdp">
+<p>Karpathy, Andrej. 2015. “REINFORCEjs.” 2015. <a href="https://github.com/karpathy/reinforcejs">https://github.com/karpathy/reinforcejs</a>.</p>
+</div>
+<div id="ref-kleinCS188">
+<p>Klein, Dan, and Pieter Abbeel. 2014. “UC Berkeley Cs188 Intro to Ai.” http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching.html.</p>
+</div>
+<div id="ref-mnih-dqn-2015">
+<p>Mnih, Volodymyr, Koray Kavukcuoglu, David Silver, Andrei A. Rusu, Joel Veness, Marc G. Bellemare, Alex Graves, et al. 2015. “Human-Level Control Through Deep Reinforcement Learning.” <em>Nature</em> 518 (7540): 529–33. <a href="http://dx.doi.org/10.1038/nature14236">http://dx.doi.org/10.1038/nature14236</a>.</p>
+</div>
+<div id="ref-silver2015">
+<p>Silver, David. 2015. “UCL Course on Rl Ucl Course on Rl Ucl Course on Reinforcement Learning.” http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching.html.</p>
+</div>
+<div id="ref-sutton2018">
+<p>Sutton, Richard S., and Andrew G. Barto. 2018. <em>Reinforcement Learning: An Introduction</em>. Second. The MIT Press.</p>
+</div>
+<div id="ref-weng2018rl">
+<p>Weng, Lilian. 2018. “A (Long) Peek into Reinforcement Learning.” 2018. <a href="https://lilianweng.github.io/lil-log/2018/02/19/a-long-peek-into-reinforcement-learning.html">https://lilianweng.github.io/lil-log/2018/02/19/a-long-peek-into-reinforcement-learning.html</a>.</p>
+</div>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="../support/vendor/reveal/js/reveal.js"></script>
+  <script src="../support/vendor/jquery.js"></script>
+  <script src="../support/vendor/piklor.js"></script>
+
+ <!-- standard setting -->
+
+  <script>
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        pdfMaxPagesPerSlide: 1,
+        pdfSeparateFragments: false,
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Display the page number of the current slide
+        slideNumber: false,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: false,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Loop the presentation
+        loop: false,
+        // Change the presentation direction to be RTL
+        rtl: false,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: false,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: false,
+        mouseWheel: false,
+        hideAddressBar: false,
+        previewLinks: false,
+        // Transition style
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'none', // none/fade/slide/convex/concave/zoom
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+        height: 800,
+        thebelab: true,
+        math: {
+          mathjax: "../support/vendor/mathjax/MathJax.js",
+          TeX: {
+              Macros: {
+              R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+              laplace: "{\\Delta}",
+              grad: "{\\nabla}",
+              T: "^{\\mathsf{T}}",
+  
+              norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+              iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+              vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              set: ['\\mathcal{#1}', 1],
+              func: ['\\mathrm{#1}', 1],
+              trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+              matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+              vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+              of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+              diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+              pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+  
+              vc: ['\\mathbf{#1}', 1],
+              abs: ['\\lvert#1\\rvert', 1],
+              norm: ['\\lVert#1\\rVert', 1],
+              det: ['\\lvert#1\\rvert', 1],
+              qt: ['\\hat{\\vc {#1}}', 1],
+              mt: ['\\boldsymbol{#1}', 1],
+              pt: ['\\boldsymbol{#1}', 1],
+              textcolor: ['\\color{#1}', 1]
+              }
+          },
+        },
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '../support/vendor/reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: '../support/vendor/reveal/plugin/zoom-js/zoom.js', async: true },
+          { src: '../support/vendor/whiteboard/whiteboard.js'},
+          //{ src: '../support/vendor/reveal/plugin/math/math.js', async: true },
+          { src: '../support/vendor/math/math.js' },
+          { src: '../support/js/thebelab.js', async: true },
+          { src: '../support/vendor/reveal/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+
+
+    <script src="../support/js/quiz.js" type="text/javascript"></script>
+    <script src="../support/js/decker.js" type="text/javascript"></script>
+
+    <!-- Reload on change machinery -->
+    <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+      window.location.reload(true);
+      };
+    </script>
+
+    </body>
+</html>
