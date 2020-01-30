@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<!-- This is the pandoc 2.7.3 template for reveal.js output modified for decker. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Malte Schilling, Neuroinformatics Group, Bielefeld University">
+  <title>15 Summary DRL</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reset.css">
+  <link rel="stylesheet" href="../support/vendor/reveal/css/reveal.css">
+  <link rel="stylesheet" href="../support/css/thebelab.css">
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="../support/css/decker.css">
+  <link rel="stylesheet" href="../mschilling.css"/>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? '../support/vendor/reveal/css/print/pdf.css' : '../support/vendor/reveal/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <script type="text/x-thebe-config">
+  {
+      bootstrap: false,
+      requestKernel: false,
+      predefinedOutput: false,
+      binderOptions: {
+          repo: "malteschilling/advml_binder",
+          ref: "master",
+          binderUrl: "https://mybinder.org",
+          repoProvider: "github",
+      },
+      kernelOptions: {
+          name: "python3"
+      },
+      selector: "[data-executable]",
+      mathjaxUrl: false,
+      codeMirrorConfig: {
+          mode: "python3"
+      }
+  }
+  </script>
+  <script src="https://unpkg.com/thebelab@0.4.0/lib/index.js"></script> 
+  <!-- <script src="../support/vendor/thebelab/index.js"></script> -->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+ <!-- standard settings -->
+  <h1 class="title">15 Summary DRL</h1>
+  <p class="subtitle">Advanced Machine Learning</p>
+  <p class="author">Malte Schilling, Neuroinformatics Group, Bielefeld University</p>
+
+</section>
+
+<section class="slide level1">
+<h1>Overview</h1>
+<ul>
+<li>Deep Q-Networks</li>
+<li>Policy Gradient</li>
+<li>Limitations of current DRL approaches
+<ul>
+<li>Delayed and Sparse Rewards</li>
+<li>Overfitting and Generalization</li>
+<li>Non-Stationary Problems</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1 columns">
+<h1>Recap - Comparison of Monte-Carlo and TD</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Monte-Carlo Backup</h2>
+<p><img data-src="../data/13/silver_mc_backup.svg" style="height:auto;width:600px;"></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">TD Backup</h2>
+<p><img data-src="../data/13/silver_td_backup.svg" style="height:auto;width:600px;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom">
+<h2 class="bottom"></h2>
+<p>Apply TD to <span class="math inline">\(Q(S, A)\)</span>, use <span class="math inline">\(\varepsilon\)</span>-greedy policy improvement updating every time-step.</p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015">(Silver 2015)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Recap - Reinforcement Learning Algorithms Overview</h1>
+<p><img data-src="../data/13/arulkumaran_drl.svg" style="height:auto;width:640px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="arulkumaran2017brief">(Arulkumaran et al. 2017)</span></p>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Deep Reinforcement Learning</h1>
+</section>
+<section class="slide level1">
+<h1>DQN Architecture Overview</h1>
+<p><img data-src="../data/14/mnih_dqn_architecture.png"></p>
+<p><em>“we developed a novel agent, a deep Q-network (DQN), which is able to combine reinforcement learning with a class of artificial neural network known as deep neural networks.”</em></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="mnih-dqn-2015">(Mnih et al. 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Problems for RL and Deep Neural Networks</h1>
+<p>Reinforcement learning is known to be unstable when a nonlinear function approximator such as a neural network is used to represent the action-value function.</p>
+<p><br />
+</p>
+<p>This instability has several causes:</p>
+<ul>
+<li>the correlations present in the sequence of observations,</li>
+<li>the fact that small updates to <span class="math inline">\(Q\)</span> may significantly change the policy and therefore change the data distribution,</li>
+<li>and the correlations between the action-values and the target values</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="mnih-dqn-2015">(Mnih et al. 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Key Ideas for DQN: 1. Experience Replay</h1>
+<p><em>“First, we used a biologically inspired mechanism termed experience replay that randomizes over the data, thereby removing correlations in the observation sequence and smoothing over changes in the data distribution.”</em></p>
+<ul>
+<li>All episode steps <span class="math inline">\(e_t = (S_t, A_t, R_t, S_{t+1})\)</span> are collected in one replay memory.</li>
+<li>During Q-learning updates: sample steps are drawn randomly from the replay memory.</li>
+</ul>
+<p>Experience replay</p>
+<ul>
+<li>improves data efficiency,</li>
+<li>removes correlations in the observation sequences,</li>
+<li>and smooths over changes in the data distribution</li>
+</ul>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="mnih-dqn-2015 weng2018rl">(Mnih et al. 2015; Weng 2018a)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Key Ideas for DQN: 2. Stabilize Bootstrapping</h1>
+<p><em>“Second, we used an iterative update that adjusts the action-values (Q) towards target values that are only periodically updated, thereby reducing correlations with the target.”</em></p>
+<p><br />
+</p>
+<p>Periodically Updated Target:</p>
+<ul>
+<li>Q is optimized towards target values that are only periodically updated.</li>
+<li>The Q network is cloned and kept frozen as the optimization target every <span class="math inline">\(C\)</span> steps (<span class="math inline">\(C\)</span> is a hyperparameter).</li>
+</ul>
+<p>This modification makes the training more stable as it overcomes the short-term oscillations.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="weng2018rl">(Weng 2018a)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Deep Q Network Overview</h1>
+<p><img data-src="../data/14/karpathy_qsa.jpg"></p>
+<p>3-dimensional state space (blue) and 2 actions (red); green nodes represent a NN.</p>
+<p>Left: naive approach that takes multiple forward passes to find the argmax action. Right: more efficient approach, <span class="math inline">\(Q(s,a)\)</span> computation is effectively shared among the neurons in the network.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="karpathy_mdp">(Karpathy 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>DQN Example: Puckworld</h1>
+<p><iframe data-src="https://cs.stanford.edu/people/karpathy/reinforcejs/puckworld.html" style="height:700px;width:100%;">Browser does not support iframe.</iframe></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="silver2015 karpathy_mdp">(Silver 2015; Karpathy 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example Game: Space Invaders</h1>
+<p><video data-src="../data/14/41586_2015_BFnature14236_MOESM123_ESM.mov#t=1" style="height:auto;width:800px;" data-autoplay="true" controls="1">Browser does not support video.</video></p>
+</section>
+<section class="slide level1">
+<h1>Learning over Time</h1>
+<p><img data-src="../data/14/41586_2015_Article_BFnature14236_Fig2_HTML.jpg" style="height:auto;width:800px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p>Average score achieved per episode. a) Space Invaders. b) Seaquest. c) Average predicted action-value on a held-out set of states on Space Invaders. d) Average predicted action-value on Seaquest.</p>
+<p><span class="citation" data-cites="mnih-dqn-2015">(Mnih et al. 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Example: Learning in Breakout</h1>
+<p><video data-src="../data/14/41586_2015_BFnature14236_MOESM124_ESM.mov#t=1" style="height:auto;width:800px;" data-autoplay="true" controls="1">Browser does not support video.</video></p>
+</section>
+<section class="slide level1">
+<h1>Example: Learning in Breakout 2</h1>
+<p><img data-src="../data/15/mnih_breakoutresults.svg" style="height:auto;width:1000px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="mnih-dqn-2015">(Mnih et al. 2015)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Results - “Superhuman” Performance</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Summary</h2>
+<p><em>“Our DQN method outperforms the best existing reinforcement learning methods on 43 [out of 49] of the games without incorporating any of the additional prior knowledge about Atari 2600 games used by other approaches.”</em></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/14/mnih_dqn_results.png"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="mnih-dqn-2015">(Mnih et al. 2015)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Policy Gradient</h1>
+<div class="col30">
+<p>Don’t approximate a value-based function.</p>
+<p><br />
+</p>
+<p><strong>Goal:</strong> Instead, directly learn the policy with a parametrized function <span class="math inline">\(\pi(a \vert s; \theta)\)</span>.</p>
+</div>
+<div class="col70">
+<p><img data-src="../data/15/karpathy_policy.png" style="height:auto;width:100%;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="kaparthyblogPG">(Karpathy 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Policy Gradient Theorem</h1>
+<p>Problem: we want to estimate a (reward) function <span class="math inline">\(f\)</span> and optimize over this using gradient ascent. How can we estimate the gradient?</p>
+<p><span class="math display">\[\begin{align*}
+\nabla_{\theta} E_x[f(x)] &amp;= \nabla_{\theta} \sum_x p(x) f(x) &amp; \text{definition of expectation} \\
+&amp; = \sum_x \nabla_{\theta} p(x) f(x) &amp; \text{swap sum and gradient} \\
+&amp; = \sum_x p(x) \frac{\nabla_{\theta} p(x)}{p(x)} f(x) &amp; \text{both multiply and divide by } p(x) \\
+&amp; = \sum_x p(x) \nabla_{\theta} \log p(x) f(x) &amp; \text{use the fact that } \nabla_{\theta} \log(z) = \frac{1}{z} \nabla_{\theta} z \\
+&amp; = E_x[f(x) \nabla_{\theta} \log p(x) ] &amp; \text{definition of expectation}
+\end{align*}\]</span></p>
+<p><span class="math inline">\(p(x) = p(a \mid \text{Image})\)</span> will be our policy - note: gradient comes from policy.</p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="kaparthyblogPG">(Karpathy 2016)</span>, for more information and overview of PG algorithms see <span class="citation" data-cites="weng2018PG">(Weng 2018b)</span>.</p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Backpropagation of Gradient Information</h1>
+<p>Problem: stochastic sampling (select an action) is non-differentiable</p>
+<p><img data-src="../data/15/karpathy_nondiff1.png" style="height:auto;width:80%;"></p>
+<div class="box fragment">
+<h2></h2>
+<p>Solution for ‘red’ parameters: update independently using policy gradients</p>
+<p>= encouraging samples that led to low loss.</p>
+<p><img data-src="../data/15/karpathy_nondiff2.png" style="height:auto;width:80%;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="kaparthyblogPG">(Karpathy 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Recap - Attention Mechanisms in NN</h1>
+<div class="col40">
+<p>A goal is to learn this as well: Attend to which part of the context?</p>
+<p>For example, a RNN can attend over the output of another RNN. At every time step, it focuses on different positions in the other RNN.</p>
+<p>In order to learn to attend, attention has to be differentiable.</p>
+</div>
+<div class="col60">
+<p><img data-src="../data/15/rnn_attentional_01.svg" style="height:auto;width:800px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="colahsBlog_RNN">(Olah 2015)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Policy Gradient Training</h1>
+<p>For comparison: Training of a NN using supervised learning:</p>
+<p><img data-src="../data/15/karpathy_sl.png" style="height:auto;width:80%;"></p>
+<div class="box fragment">
+<h2></h2>
+<p>Training a policy network in reinforcement learning:</p>
+<p><img data-src="../data/15/karpathy_rl.png" style="height:auto;width:80%;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="kaparthyblogPG">(Karpathy 2016)</span>, for more information and overview of PG algorithms see <span class="citation" data-cites="weng2018PG">(Weng 2018b)</span>.</p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Comparison: Advantages of Methods</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Value-based Methods</h2>
+<ul>
+<li>Simple – can be realized as tables, still convergence guarantees.</li>
+<li>Efficiency and Speed – bootstraping speeds up learning</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right fragment">
+<h2 class="right">Policy Gradient Methods</h2>
+<ul>
+<li>Applicable in large and continuous action spaces</li>
+<li>Employ stochastic policies</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom fragment">
+<h2 class="bottom">Further considerations:</h2>
+<ul>
+<li>Do you want to access directly a value, e.g. for other methods?</li>
+<li>The state representation of the problem might lends itself more easily to either a value function or a policy function.</li>
+</ul>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Actor-Critic Method</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p>Combination of both methods is widely used in <strong>Actor-Critic</strong> approaches – learning both:</p>
+<p><br />
+</p>
+<ul>
+<li>an actor policy allowing to use Policy Gradients and</li>
+<li>a value-based function that allows to do the updates during each timestep using bootstrapping.</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/15/aralkumaran_actorCritic.svg" style="height:auto;width:100%;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="arulkumaran2017brief">(Arulkumaran et al. 2017)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 section" data-background-color="#2CA02C">
+<h1>Problems for Deep Reinforcement Learning</h1>
+</section>
+<section class="slide level1 columns">
+<h1>Drawbacks of DQN (and other DRL methods)</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<div>
+<ul>
+<li class="fragment">Delayed Rewards (makes Credit Assignment even more difficult)</li>
+<li class="fragment">Overfitting towards a specific niche and showing no generalization</li>
+<li class="fragment">many real world scenarios are non-Markovian or non-stationary (e.g. when other agents are co-adapting)</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/14/mnih_dqn_results.png"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="mnih-dqn-2015">(Mnih et al. 2015)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Delayed Rewards</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left"></h2>
+<p><em>“games demanding more temporally extended planning strategies still constitute a major challenge for all existing agents including DQN (for example, Montezuma’s Revenge)”</em></p>
+<p><br />
+</p>
+<ul>
+<li>It’s difficult to explore large state spaces with sparse and delayed rewards.</li>
+<li>An Objective Function might not provide good guidance where to continue exploration.</li>
+</ul>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right"></h2>
+<p><img data-src="../data/15/montezumas_revenge.jpg" style="height:600px;width:auto;"></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="mnih-dqn-2015 kulkarni2016">(Mnih et al. 2015; Kulkarni et al. 2016)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Evolutionary Robotics Perspective</h1>
+<p>Landscapes induced by objective functions are often deceptive – the objective function is misleading</p>
+<p>Often, stepping stones are required — initially, objective might get worse.</p>
+<p><br />
+</p>
+<p><img data-src="../data/15/lehman2011deceptive.svg" style="height:auto;width:1000px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="lehman2011">(Lehman and Stanley 2011)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Dealing with Delayed Rewards</h1>
+<div class="col60">
+<p><em>“When the environment provides delayed rewards, we adopt a strategy to first learn ways to achieve intrinsically generated goals, and subsequently learn an optimal policy to chain them together.”</em></p>
+<h2>Approach</h2>
+<ul>
+<li>Use a hierarchical representation.</li>
+<li>Exploration: Driven by a search for novelty (<strong>Intrinsic Motivation</strong>). This tries to cover all possible behaviors during exploration, find stepping stones.</li>
+</ul>
+</div>
+<div class="col40">
+<p><img data-src="../data/15/kulkarni_hierarchical.svg" style="height:auto;width:400px;"></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="kulkarni2016">(Kulkarni et al. 2016)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Intrinsic Motivation - Constructing a Representation</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Early Learning Phase</h2>
+<p><img data-src="../data/15/montezuma_im_early.jpg" style="height:480px;width:auto;"></p>
+<p>Select key as (sub)goal – but fails.</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Intermediate Phase</h2>
+<p><img data-src="../data/15/montezuma_im_ladder.jpg" style="height:480px;width:auto;"></p>
+<p>Select ladder successful as goal.</p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="kulkarni2016">(Kulkarni et al. 2016)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Intrinsic Motivation - Constructing an Abstraction</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Intermediate Phase</h2>
+<p><img data-src="../data/15/montezuma_im_ladder.jpg" style="height:480px;width:auto;"></p>
+<p>Select ladder successful as goal.</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">Intermediate Phase</h2>
+<p><img data-src="../data/15/montezuma_im_key.jpg" style="height:480px;width:auto;"></p>
+<p>Select key successful as goal.</p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="kulkarni2016">(Kulkarni et al. 2016)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Learning with Intrinsic Motivation</h1>
+<p><img data-src="../data/15/montezuma_learning.svg" style="height:auto;width:1000px;"></p>
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="kulkarni2016">(Kulkarni et al. 2016)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Problematic: Markov Assumption</h1>
+<p>In many real world scenarios the Markov Property does not hold.</p>
+<p><br />
+</p>
+<p>In ATARI games: many require information on direction of movement.</p>
+<p><br />
+</p>
+<p>Simple Solution: add information from different time steps – as an input 4 frames were used.</p>
+<div class="box fragment">
+<h2>But difficult in non-stationary environments</h2>
+<ul>
+<li>in game like scenarios, opponents can use different strategies (rock-paper-scissor),</li>
+<li>or other agents co-adapt and learn over time as well.</li>
+</ul>
+</div>
+</section>
+<section class="slide level1">
+<h1>Dealing with Non-Stationarity</h1>
+<p>Goal: allow that the response of the environment is changing over time (learning or switching to a different strategy).</p>
+<p><img data-src="https://lh3.googleusercontent.com/ZghLIu0NyAg5FMYhDEtDfHc5d6aG3Fp9Hq3BviWvsGIaTNOfEsHttntE4_WbHF3ou5B-cpSqYrZ52IcBSIGi_PqPsdt-ZwkJWBcd7tU=w2048-rw-v1"></p>
+<p>Approach: Maintain multiple strategies and avoid catastrophic forgetting (either through hierarchical approach or evolving strategies).</p>
+</section>
+<section class="slide level1">
+<h1>Evolve multiple strategies</h1>
+<p><img data-src="../data/15/jaderberg_ftw.svg" style="height:auto;width:1200px;"></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="jaederberg2019">(Jaderberg et al. 2019)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1><figure class="sub" style="controls:1;data-autoplay:true;"><div style="position:relative;padding-top:25px;padding-bottom:56.25%;height:0;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" width="560" height="315" src="https://www.youtube.com/embed/D6o1K7VjkLc?iv_load_policy=3&amp;disablekb=1&amp;rel=0&amp;modestbranding=1&amp;autohide=1&amp;start=0" frameborder="0" data-autoplay="" allowfullscreen=""><p></p></iframe></div></figure></h1>
+</section>
+<section class="slide level1">
+<h1>Problem of Overfitting</h1>
+<div class="col40">
+<p>Reinforcement Learning only considers what is captured in the reward function.</p>
+<p>It wants to exploit uncovered rewards – this can lead to unwanted results.</p>
+</div>
+<div class="col60">
+<p><figure class="sub" style="controls:1;data-autoplay:true;start:1;"><div style="position:relative;padding-top:25px;padding-bottom:56.25%;height:0;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" width="560" height="315" src="https://www.youtube.com/embed/tlOIHko8ySg?iv_load_policy=3&amp;disablekb=1&amp;rel=0&amp;modestbranding=1&amp;autohide=1&amp;start=1" frameborder="0" data-autoplay="" allowfullscreen=""><p></p></iframe></div></figure></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="clark2016openai">(Clark and Amodei 2016)</span></p>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Dependency on Reward Functions</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">A sparse reward</h2>
+<p>… only gives reward at the goal state.</p>
+<p>But this is difficult to find through exploration.</p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">A Shaped Reward</h2>
+<p>… gives increasing reward in states that are closer to the end goal.</p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom fragment">
+<h2 class="bottom"></h2>
+<ul>
+<li>Shaped rewards are often easier to learn, because they provide continuously positive feedback.</li>
+<li>Unfortunately, shaped rewards can bias learning. For example, exploiting rewarding states.</li>
+</ul>
+</div>
+</div>
+</section>
+<section class="slide level1 columns">
+<h1>Construction of a Reward Function</h1>
+<div class="multi-column-row multi-column-row-3">
+<div class="grow-1 column column-1">
+<div class="box left">
+<h2 class="left">Learns steadily …</h2>
+<p><video data-src="../data/15/upright_half_cheetah.mp4#t=0.1" controls="1" class="sub">Browser does not support video.</video></p>
+</div>
+</div>
+<div class="grow-1 column column-3">
+<div class="box right">
+<h2 class="right">… but can end up in minimia</h2>
+<p><video data-src="../data/15/upsidedown_half_cheetah.mp4#t=0.11" controls="1" class="sub">Browser does not support video.</video></p>
+</div>
+</div>
+</div>
+<div class="single-column-row">
+<div class="box bottom footer">
+<h2 class="bottom footer"></h2>
+<p><span class="citation" data-cites="irpan2018">(Irpan 2018)</span></p>
+</div>
+</div>
+</section>
+<section class="slide level1">
+<h1>Setting up Rewards in DRL</h1>
+<p>Reward Shaping puts the burden on the human designer and can lead to unwanted results.</p>
+<p><br />
+</p>
+<p>Possible Approaches:</p>
+<ul>
+<li>Learning from demonstrations (e.g. a reward function).</li>
+<li>Incorporate human feedback by evaluating the quality of episodes or through shared control.</li>
+<li>Use transfer learning: train on similar games in order to infer a “common sense” reward function for this game.</li>
+</ul>
+</section>
+<section class="slide level1">
+<h1>Vision of Transfer Learning</h1>
+<p><figure class="sub" style="controls:1;start:1;"><div style="position:relative;padding-top:25px;padding-bottom:56.25%;height:0;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" width="560" height="315" src="https://www.youtube.com/embed/QHcAlAprFxA?iv_load_policy=3&amp;disablekb=1&amp;rel=0&amp;modestbranding=1&amp;autohide=1&amp;start=1" frameborder="0" allowfullscreen=""><p></p></iframe></div></figure></p>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="kansky2017">(Kansky et al. 2017)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Curriculum Learning</h1>
+<div class="col40">
+<p><em>“Humans and animals learn much better when the examples are not randomly presented but organized in a meaningful order which illustrates gradually more concepts, and gradually more complex ones. Here, we formalize such training strategies in the context of machine learning, and call them ‘curriculum learning’.”</em></p>
+</div>
+<div class="col60">
+<p><figure class="sub" style="controls:1;data-autoplay:true;start:2;"><div style="position:relative;padding-top:25px;padding-bottom:56.25%;height:0;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" width="560" height="315" src="https://www.youtube.com/embed/hx_bgoTF7bs?iv_load_policy=3&amp;disablekb=1&amp;rel=0&amp;modestbranding=1&amp;autohide=1&amp;start=2" frameborder="0" data-autoplay="" allowfullscreen=""><p></p></iframe></div></figure></p>
+</div>
+<div class="box footer">
+<h2 class="footer"></h2>
+<p><span class="citation" data-cites="bengio2009 heess2017">(Bengio et al. 2009; Heess et al. 2017)</span></p>
+</div>
+</section>
+<section class="slide level1">
+<h1>Deep Reinforcement Learning and Robotics</h1>
+<p>Many of the mentioned problems are even more severe when dealing with real robots instead of simulation.</p>
+<p>There are many (additional) sources for noise and disturbances:</p>
+<ul>
+<li>stemming from sensors, for example drift</li>
+<li>or motors, for example wearing of</li>
+<li>and there are many more factores changing over time.</li>
+</ul>
+<p>One particular problem: this spans different time scales which is hard to learn.</p>
+<p><strong>Sim2Real</strong> is therefore one important field in DRL – trying to initially train in simulation and only later refine on a real robot.</p>
+</section>
+<section class="slide level1 unnumbered biblio">
+<h1>References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-arulkumaran2017brief">
+<p>Arulkumaran, Kai, Marc P. Deisenroth, Miles Brundage, and Anil A. Bharath. 2017. “Deep Reinforcement Learning: A Brief Survey.” <em>IEEE Signal Processing Magazine</em> 34 (6).</p>
+</div>
+<div id="ref-bengio2009">
+<p>Bengio, Yoshua, Jérôme Louradour, Ronan Collobert, and Jason Weston. 2009. “Curriculum Learning.” In <em>Proceedings of the 26th Annual International Conference on Machine Learning</em>, 41–48. ICML ’09. New York, NY, USA: Association for Computing Machinery. <a href="https://doi.org/10.1145/1553374.1553380">https://doi.org/10.1145/1553374.1553380</a>.</p>
+</div>
+<div id="ref-clark2016openai">
+<p>Clark, Jack, and Dario Amodei. 2016. “Faulty Reward Functions in the Wild.” 2016. <a href="https://openai.com/blog/faulty-reward-functions/">https://openai.com/blog/faulty-reward-functions/</a>.</p>
+</div>
+<div id="ref-heess2017">
+<p>Heess, Nicolas, Dhruva TB, Srinivasan Sriram, Jay Lemmon, Josh Merel, Greg Wayne, Yuval Tassa, et al. 2017. “Emergence of Locomotion Behaviours in Rich Environments.” <em>CoRR</em> abs/1707.02286. <a href="http://arxiv.org/abs/1707.02286">http://arxiv.org/abs/1707.02286</a>.</p>
+</div>
+<div id="ref-irpan2018">
+<p>Irpan, Alex. 2018. “Deep Reinforcement Learning Doesn’t Work yet.” <a href="https://www.alexirpan.com/2018/02/14/rl-hard.html">https://www.alexirpan.com/2018/02/14/rl-hard.html</a>.</p>
+</div>
+<div id="ref-jaederberg2019">
+<p>Jaderberg, Max, Wojciech M. Czarnecki, Iain Dunning, Luke Marris, Guy Lever, Antonio Garcia Castañeda, Charles Beattie, et al. 2019. “Human-Level Performance in 3D Multiplayer Games with Population-Based Reinforcement Learning.” <em>Science</em> 364 (6443): 859–65. <a href="https://doi.org/10.1126/science.aau6249">https://doi.org/10.1126/science.aau6249</a>.</p>
+</div>
+<div id="ref-kansky2017">
+<p>Kansky, Ken, Tom Silver, David A. Mély, Mohamed Eldawy, Miguel Lázaro-Gredilla, Xinghua Lou, Nimrod Dorfman, Szymon Sidor, Scott Phoenix, and Dileep George. 2017. “Schema Networks: Zero-Shot Transfer with a Generative Causal Model of Intuitive Physics.” In <em>Proc. 34th Icml</em>, 1809–18. ICML’17. Sydney, NSW, Australia.</p>
+</div>
+<div id="ref-karpathy_mdp">
+<p>Karpathy, Andrej. 2015. “REINFORCEjs.” 2015. <a href="https://github.com/karpathy/reinforcejs">https://github.com/karpathy/reinforcejs</a>.</p>
+</div>
+<div id="ref-kaparthyblogPG">
+<p>———. 2016. “Deep Reinforcement Learning: Pong from Pixels.” 2016. <a href="http://karpathy.github.io/2016/05/31/rl/">http://karpathy.github.io/2016/05/31/rl/</a>.</p>
+</div>
+<div id="ref-kulkarni2016">
+<p>Kulkarni, Tejas D., Karthik Narasimhan, Ardavan Saeedi, and Joshua B. Tenenbaum. 2016. “Hierarchical Deep Reinforcement Learning: Integrating Temporal Abstraction and Intrinsic Motivation.” <em>CoRR</em> abs/1604.06057. <a href="http://arxiv.org/abs/1604.06057">http://arxiv.org/abs/1604.06057</a>.</p>
+</div>
+<div id="ref-lehman2011">
+<p>Lehman, J., and K. O. Stanley. 2011. “Abandoning Objectives: Evolution Through the Search for Novelty Alone.” <em>Evolutionary Computation</em> 19 (2): 189–223. <a href="https://doi.org/10.1162/EVCO_a_00025">https://doi.org/10.1162/EVCO_a_00025</a>.</p>
+</div>
+<div id="ref-mnih-dqn-2015">
+<p>Mnih, Volodymyr, Koray Kavukcuoglu, David Silver, Andrei A. Rusu, Joel Veness, Marc G. Bellemare, Alex Graves, et al. 2015. “Human-Level Control Through Deep Reinforcement Learning.” <em>Nature</em> 518 (7540): 529–33. <a href="http://dx.doi.org/10.1038/nature14236">http://dx.doi.org/10.1038/nature14236</a>.</p>
+</div>
+<div id="ref-colahsBlog_RNN">
+<p>Olah, Christopher. 2015. “Understanding Lstm Networks.” 2015. <a href="http://colah.github.io/posts/2015-08-Understanding-LSTMs/">http://colah.github.io/posts/2015-08-Understanding-LSTMs/</a>.</p>
+</div>
+<div id="ref-silver2015">
+<p>Silver, David. 2015. “UCL Course on Rl Ucl Course on Rl Ucl Course on Reinforcement Learning.” http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching.html.</p>
+</div>
+<div id="ref-weng2018rl">
+<p>Weng, Lilian. 2018a. “A (Long) Peek into Reinforcement Learning.” 2018. <a href="https://lilianweng.github.io/lil-log/2018/02/19/a-long-peek-into-reinforcement-learning.html">https://lilianweng.github.io/lil-log/2018/02/19/a-long-peek-into-reinforcement-learning.html</a>.</p>
+</div>
+<div id="ref-weng2018PG">
+<p>———. 2018b. “Policy Gradient Algorithms.” 2018. <a href="https://lilianweng.github.io/lil-log/2018/04/08/policy-gradient-algorithms.html">https://lilianweng.github.io/lil-log/2018/04/08/policy-gradient-algorithms.html</a>.</p>
+</div>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="../support/vendor/reveal/js/reveal.js"></script>
+  <script src="../support/vendor/jquery.js"></script>
+  <script src="../support/vendor/piklor.js"></script>
+
+ <!-- standard setting -->
+
+  <script>
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        pdfMaxPagesPerSlide: 1,
+        pdfSeparateFragments: false,
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Display the page number of the current slide
+        slideNumber: false,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: false,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Loop the presentation
+        loop: false,
+        // Change the presentation direction to be RTL
+        rtl: false,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: false,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: false,
+        mouseWheel: false,
+        hideAddressBar: false,
+        previewLinks: false,
+        // Transition style
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'none', // none/fade/slide/convex/concave/zoom
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+        height: 800,
+        thebelab: true,
+        math: {
+          mathjax: "../support/vendor/mathjax/MathJax.js",
+          TeX: {
+              Macros: {
+              R: "{\\mathrm{{I}\\kern-.15em{R}}}",
+              laplace: "{\\Delta}",
+              grad: "{\\nabla}",
+              T: "^{\\mathsf{T}}",
+  
+              norm: ['\\left\\Vert #1 \\right\\Vert', 1],
+              iprod: ['\\left\\langle #1 \\right\\rangle', 1],
+              vec: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              mat: ['\\boldsymbol{\\mathbf{#1}}', 1],
+              set: ['\\mathcal{#1}', 1],
+              func: ['\\mathrm{#1}', 1],
+              trans: ['{#1}\\mkern-1mu^{\\mathsf{T}}', 1],
+              matrix: ['\\begin{bmatrix} #1 \\end{bmatrix}', 1],
+              vector: ['\\begin{pmatrix} #1 \\end{pmatrix}', 1],
+              of: ['\\mkern{-2mu}\\left( #1 \\right\)', 1],
+              diff: ['\\frac{\\mathrm{d}{#1}}{\\mathrm{d}{#2}}', 2],
+              pdiff: ['\\frac{\\partial {#1}}{\\partial {#2}}', 2],
+  
+              vc: ['\\mathbf{#1}', 1],
+              abs: ['\\lvert#1\\rvert', 1],
+              norm: ['\\lVert#1\\rVert', 1],
+              det: ['\\lvert#1\\rvert', 1],
+              qt: ['\\hat{\\vc {#1}}', 1],
+              mt: ['\\boldsymbol{#1}', 1],
+              pt: ['\\boldsymbol{#1}', 1],
+              textcolor: ['\\color{#1}', 1]
+              }
+          },
+        },
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '../support/vendor/reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: '../support/vendor/reveal/plugin/zoom-js/zoom.js', async: true },
+          { src: '../support/vendor/whiteboard/whiteboard.js'},
+          //{ src: '../support/vendor/reveal/plugin/math/math.js', async: true },
+          { src: '../support/vendor/math/math.js' },
+          { src: '../support/js/thebelab.js', async: true },
+          { src: '../support/vendor/reveal/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+
+
+    <script src="../support/js/quiz.js" type="text/javascript"></script>
+    <script src="../support/js/decker.js" type="text/javascript"></script>
+
+    <!-- Reload on change machinery -->
+    <script>
+      var socket = new WebSocket("ws://" + location.host + "/reload");
+      socket.onmessage = function () {
+      window.location.reload(true);
+      };
+    </script>
+
+    </body>
+</html>
